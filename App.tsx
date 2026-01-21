@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Quote } from './types';
 import { fetchInitialQuotes, fetchRecommendedQuotes } from './services/geminiService';
 import { QuoteCard } from './components/QuoteCard';
 
-const RECO_TIME_THRESHOLD = 3000; // 3 seconds viewing counts as "interested"
+const RECO_TIME_THRESHOLD = 3000;
+const VERSION_TAG = "v1.4.0-production-fix";
 
 const App: React.FC = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -12,20 +12,36 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [fetchingMore, setFetchingMore] = useState(false);
   const [interests, setInterests] = useState<Record<string, number>>({});
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState<string | null>(null);
   
+  const containerRef = useRef<HTMLDivElement>(null);
   const historyRef = useRef<Set<string>>(new Set());
   const viewStartTimes = useRef<Record<string, number>>({});
 
   useEffect(() => {
+    console.log(`%c[DharmaScroll] System: Deployment Verified (${VERSION_TAG})`, "color: #06b6d4; font-weight: bold; font-size: 14px;");
+    
+    // Check if API key exists in the environment
+    const apiKey = process.env.API_KEY;
+    if (!apiKey || apiKey === "") {
+      setError("API Key missing. Please ensure API_KEY is set in your environment variables and redeploy.");
+      setLoading(false);
+      return;
+    }
+
     async function init() {
       try {
         const initial = await fetchInitialQuotes();
-        setQuotes(initial);
-        initial.forEach(q => historyRef.current.add(q.id));
-        if (initial.length > 0) setActiveId(initial[0].id);
-      } catch (error) {
-        console.error("Failed to load quotes", error);
+        if (initial && initial.length > 0) {
+          setQuotes(initial);
+          initial.forEach(q => historyRef.current.add(q.id));
+          setActiveId(initial[0].id);
+        } else {
+          setError("The wisdom engine returned an empty response. Please check your network or API settings.");
+        }
+      } catch (err: any) {
+        console.error("DharmaScroll: Init Error", err);
+        setError(`Initialization Failed: ${err.message || "Unknown Error"}.`);
       } finally {
         setLoading(false);
       }
@@ -57,13 +73,11 @@ const App: React.FC = () => {
   }, [quotes]);
 
   const fetchMore = useCallback(async () => {
-    if (fetchingMore) return;
+    if (fetchingMore || error) return;
     setFetchingMore(true);
 
-    // Sort themes by interest weight
-    // Fix: Cast the entries to ensure the sort values are treated as numbers
     const topThemes = (Object.entries(interests) as [string, number][])
-      .sort((a, b) => (b[1] as number) - (a[1] as number))
+      .sort((a, b) => b[1] - a[1])
       .map(([theme]) => theme)
       .slice(0, 3);
 
@@ -75,23 +89,21 @@ const App: React.FC = () => {
         return [...prev, ...unique];
       });
     } catch (e) {
-      console.error("Error fetching recommendations", e);
+      console.error("DharmaScroll: Error fetching more", e);
     } finally {
       setFetchingMore(false);
     }
-  }, [interests, fetchingMore]);
+  }, [interests, fetchingMore, error]);
 
   const handleScroll = () => {
     if (!containerRef.current) return;
     const { scrollTop, clientHeight, scrollHeight } = containerRef.current;
     
-    // Determine active index based on scroll position
     const index = Math.round(scrollTop / clientHeight);
     if (quotes[index] && quotes[index].id !== activeId) {
       setActiveId(quotes[index].id);
     }
 
-    // Infinite scroll check (buffer 2 items before end)
     if (scrollTop + clientHeight > scrollHeight - clientHeight * 2) {
       fetchMore();
     }
@@ -99,9 +111,25 @@ const App: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="h-screen w-full bg-slate-900 flex flex-col items-center justify-center space-y-4">
+      <div className="h-screen w-full bg-slate-950 flex flex-col items-center justify-center space-y-4">
         <div className="w-12 h-12 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin"></div>
-        <p className="text-cyan-200 font-serif italic tracking-widest animate-pulse">Seeking Wisdom...</p>
+        <p className="text-cyan-200 font-serif italic tracking-widest animate-pulse">Unlocking Ancient Wisdom...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="h-screen w-full bg-slate-950 flex flex-col items-center justify-center p-8 text-center space-y-6">
+        <div className="text-amber-500 text-6xl drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]">ॐ</div>
+        <h2 className="text-white font-serif text-2xl">A small hurdle on the path</h2>
+        <p className="text-slate-400 max-w-sm leading-relaxed">{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="px-8 py-3 bg-cyan-900/40 hover:bg-cyan-800/60 text-white rounded-full font-medium transition-all border border-cyan-500/30"
+        >
+          Try Again
+        </button>
       </div>
     );
   }
@@ -123,20 +151,21 @@ const App: React.FC = () => {
           />
         ))}
         {fetchingMore && (
-           <div className="snap-item flex items-center justify-center bg-slate-900">
+           <div className="snap-item flex items-center justify-center bg-slate-950">
              <div className="w-8 h-8 border-2 border-white/10 border-t-white rounded-full animate-spin"></div>
            </div>
         )}
       </div>
 
-      {/* Persistent Navigation/Overlay */}
       <div className="fixed top-0 left-0 right-0 p-6 flex justify-between items-center pointer-events-none z-50">
-        <h2 className="text-white/40 font-serif italic text-xl tracking-tighter">DharmaScroll</h2>
-        <div className="pointer-events-auto">
-           <button className="p-2 bg-white/5 rounded-full backdrop-blur-md">
-             <svg className="w-6 h-6 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
-           </button>
-        </div>
+        <h2 className="text-white/20 font-serif italic text-xl tracking-tighter select-none">DharmaScroll</h2>
+      </div>
+
+      {/* Deployment Verification Tag */}
+      <div className="fixed bottom-2 right-4 pointer-events-none z-50">
+        <span className="text-[10px] text-white/20 font-mono tracking-widest uppercase">
+          {VERSION_TAG}
+        </span>
       </div>
     </div>
   );
