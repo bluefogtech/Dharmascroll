@@ -3,8 +3,7 @@ import { Quote } from './types';
 import { fetchInitialQuotes, fetchRecommendedQuotes } from './services/geminiService';
 import { QuoteCard } from './components/QuoteCard';
 
-const RECO_TIME_THRESHOLD = 3000;
-const VERSION_TAG = "v1.5.0-native-css-fix";
+const VERSION_TAG = "v1.6.0-dwell-reco";
 
 const App: React.FC = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -16,14 +15,14 @@ const App: React.FC = () => {
   
   const containerRef = useRef<HTMLDivElement>(null);
   const historyRef = useRef<Set<string>>(new Set());
-  const viewStartTimes = useRef<Record<string, number>>({});
+  const activeStartTimeRef = useRef<number | null>(null);
+  const activeIdRef = useRef<string | null>(null);
 
+  // Initialize
   useEffect(() => {
-    console.log(`%c[DharmaScroll] System: Deployment Verified (${VERSION_TAG})`, "color: #06b6d4; font-weight: bold; font-size: 14px;");
-    
     const apiKey = process.env.API_KEY;
-    if (!apiKey || apiKey === "") {
-      setError("API Key missing. Please ensure API_KEY is set in your environment variables and redeploy.");
+    if (!apiKey) {
+      setError("API Key missing. Please check your environment variables.");
       setLoading(false);
       return;
     }
@@ -32,15 +31,18 @@ const App: React.FC = () => {
       try {
         const initial = await fetchInitialQuotes();
         if (initial && initial.length > 0) {
-          setQuotes(initial);
-          initial.forEach(q => historyRef.current.add(q.id));
-          setActiveId(initial[0].id);
+          // Shuffle the initial batch locally just in case
+          const shuffled = [...initial].sort(() => Math.random() - 0.5);
+          setQuotes(shuffled);
+          shuffled.forEach(q => historyRef.current.add(q.id));
+          setActiveId(shuffled[0].id);
+          activeIdRef.current = shuffled[0].id;
+          activeStartTimeRef.current = Date.now();
         } else {
-          setError("The wisdom engine returned an empty response. Please check your network or API settings.");
+          setError("Failed to load initial wisdom. Please try again.");
         }
       } catch (err: any) {
-        console.error("DharmaScroll: Init Error", err);
-        setError(`Initialization Failed: ${err.message || "Unknown Error"}.`);
+        setError(`Connection failed: ${err.message}`);
       } finally {
         setLoading(false);
       }
@@ -48,47 +50,43 @@ const App: React.FC = () => {
     init();
   }, []);
 
-  const handleViewStart = useCallback((id: string) => {
-    viewStartTimes.current[id] = Date.now();
-  }, []);
-
-  const handleViewEnd = useCallback(async (id: string) => {
-    const start = viewStartTimes.current[id];
-    if (!start) return;
-
-    const duration = Date.now() - start;
-    if (duration > RECO_TIME_THRESHOLD) {
-      const quote = quotes.find(q => q.id === id);
-      if (quote) {
-        setInterests(prev => {
-          const next = { ...prev };
-          quote.themes.forEach(t => {
-            next[t] = (next[t] || 0) + 1;
-          });
-          return next;
+  // Update interest weights when activeId changes
+  const updateInterests = useCallback((prevId: string | null) => {
+    if (!prevId || !activeStartTimeRef.current) return;
+    
+    const durationMs = Date.now() - activeStartTimeRef.current;
+    const durationSec = durationMs / 1000;
+    
+    const prevQuote = quotes.find(q => q.id === prevId);
+    if (prevQuote && durationSec > 0.5) { // Minimum threshold to count as interest
+      setInterests(prev => {
+        const next = { ...prev };
+        prevQuote.themes.forEach(t => {
+          // We add the actual time spent to the theme weight
+          next[t] = (next[t] || 0) + durationSec;
         });
-      }
+        console.log(`[Interest Updated] Spent ${durationSec.toFixed(2)}s on "${prevId}". New Weights:`, next);
+        return next;
+      });
     }
+    
+    activeStartTimeRef.current = Date.now();
   }, [quotes]);
 
   const fetchMore = useCallback(async () => {
     if (fetchingMore || error) return;
     setFetchingMore(true);
 
-    const topThemes = (Object.entries(interests) as [string, number][])
-      .sort((a, b) => b[1] - a[1])
-      .map(([theme]) => theme)
-      .slice(0, 3);
-
     try {
-      const more = await fetchRecommendedQuotes(topThemes, Array.from(historyRef.current));
+      // Pass the actual weighted interests to the engine
+      const more = await fetchRecommendedQuotes(interests, Array.from(historyRef.current));
       setQuotes(prev => {
         const unique = more.filter(q => !historyRef.current.has(q.id));
         unique.forEach(q => historyRef.current.add(q.id));
         return [...prev, ...unique];
       });
     } catch (e) {
-      console.error("DharmaScroll: Error fetching more", e);
+      console.error("DharmaScroll: Fetch More Error", e);
     } finally {
       setFetchingMore(false);
     }
@@ -99,11 +97,17 @@ const App: React.FC = () => {
     const { scrollTop, clientHeight, scrollHeight } = containerRef.current;
     
     const index = Math.round(scrollTop / clientHeight);
-    if (quotes[index] && quotes[index].id !== activeId) {
-      setActiveId(quotes[index].id);
+    const currentQuote = quotes[index];
+    
+    if (currentQuote && currentQuote.id !== activeIdRef.current) {
+      const prevId = activeIdRef.current;
+      activeIdRef.current = currentQuote.id;
+      setActiveId(currentQuote.id);
+      updateInterests(prevId);
     }
 
-    if (scrollTop + clientHeight > scrollHeight - clientHeight * 2) {
+    // Pre-fetch more when reaching near the end
+    if (scrollTop + clientHeight > scrollHeight - clientHeight * 1.5) {
       fetchMore();
     }
   };
@@ -144,8 +148,8 @@ const App: React.FC = () => {
             key={quote.id} 
             quote={quote} 
             isActive={activeId === quote.id}
-            onViewStart={handleViewStart}
-            onViewEnd={handleViewEnd}
+            onViewStart={() => {}} // Handled by App scroll logic for better precision
+            onViewEnd={() => {}}   // Handled by App scroll logic for better precision
           />
         ))}
         {fetchingMore && (
@@ -159,7 +163,6 @@ const App: React.FC = () => {
         <span>DharmaScroll</span>
       </div>
 
-      {/* Deployment Verification Tag */}
       <div className="version-tag">
         {VERSION_TAG}
       </div>

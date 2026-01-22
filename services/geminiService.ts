@@ -23,16 +23,18 @@ const QUOTE_SCHEMA = {
 function getAIClient() {
   const apiKey = process.env.API_KEY;
   if (!apiKey) {
-    throw new Error("API_KEY is not defined. Please add it to your environment variables.");
+    throw new Error("API_KEY is not defined.");
   }
   return new GoogleGenAI({ apiKey });
 }
 
 export async function fetchInitialQuotes(): Promise<Quote[]> {
   const ai = getAIClient();
+  // Adding a timestamp or random number to the prompt to break deterministic responses
+  const seed = Math.floor(Math.random() * 10000);
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: "Provide 5 profound and authentic quotes from Indian scriptures (Vedas, Upanishads, Bhagavad Gita, Puranas). Include the Sanskrit original if possible and identifying themes. Return unique IDs.",
+    contents: `Seed: ${seed}. Provide 5 RANDOM, profound, and highly diverse quotes from different Indian scriptures (Vedas, Upanishads, Bhagavad Gita, Yoga Vasistha, Puranas). Ensure they cover different aspects of life (Action, Knowledge, Peace, Devotion, Meditation). Return in JSON format with unique IDs. Include the original Sanskrit.`,
     config: {
       responseMimeType: "application/json",
       responseSchema: QUOTE_SCHEMA
@@ -44,21 +46,32 @@ export async function fetchInitialQuotes(): Promise<Quote[]> {
   try {
     return JSON.parse(text.trim());
   } catch (e) {
-    console.error("Failed to parse AI response as JSON", text);
+    console.error("Failed to parse initial quotes", e);
     return [];
   }
 }
 
 export async function fetchRecommendedQuotes(
-  viewedThemes: string[],
+  weightedThemes: Record<string, number>,
   historyIds: string[]
 ): Promise<Quote[]> {
   const ai = getAIClient();
-  const themesStr = viewedThemes.length > 0 ? viewedThemes.join(", ") : "Universal wisdom";
+  
+  // Sort themes by weight and take top 5
+  const topThemes = Object.entries(weightedThemes)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 5)
+    .map(([theme]) => theme);
+
+  const themesContext = topThemes.length > 0 
+    ? `The user has shown significant interest (dwell time) in these themes: ${topThemes.join(", ")}.` 
+    : "Provide a diverse mix of profound spiritual wisdom.";
+
   const prompt = `Provide 3 profound quotes from Indian scriptures. 
-  The user is particularly interested in these themes: ${themesStr}. 
-  Avoid these IDs already seen: ${historyIds.join(", ")}.
-  Include the source and verse info. Sanskrit is preferred too.`;
+  ${themesContext}
+  Randomness factor: ${Date.now()}.
+  Avoid duplicate content. Do not use these IDs: ${historyIds.slice(-20).join(", ")}.
+  Include original Sanskrit and identifying themes. Return JSON.`;
 
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
@@ -74,7 +87,7 @@ export async function fetchRecommendedQuotes(
   try {
     return JSON.parse(text.trim());
   } catch (e) {
-    console.error("Failed to parse recommendation AI response as JSON", text);
+    console.error("Failed to parse recommendations", e);
     return [];
   }
 }
