@@ -4,7 +4,7 @@ import { fetchInitialQuotes, fetchRecommendedQuotes } from './services/geminiSer
 import { QuoteCard } from './components/QuoteCard';
 
 const RECO_TIME_THRESHOLD = 3000;
-const VERSION_TAG = "v1.4.0-production-fix";
+const VERSION_TAG = "v1.5.0-native-css-fix";
 
 const App: React.FC = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -21,7 +21,6 @@ const App: React.FC = () => {
   useEffect(() => {
     console.log(`%c[DharmaScroll] System: Deployment Verified (${VERSION_TAG})`, "color: #06b6d4; font-weight: bold; font-size: 14px;");
     
-    // Check if API key exists in the environment
     const apiKey = process.env.API_KEY;
     if (!apiKey || apiKey === "") {
       setError("API Key missing. Please ensure API_KEY is set in your environment variables and redeploy.");
@@ -111,23 +110,22 @@ const App: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="h-screen w-full bg-slate-950 flex flex-col items-center justify-center space-y-4">
-        <div className="w-12 h-12 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin"></div>
-        <p className="text-cyan-200 font-serif italic tracking-widest animate-pulse">Unlocking Ancient Wisdom...</p>
+      <div className="fullscreen-center">
+        <div className="spinner"></div>
+        <p style={{ color: '#22d3ee', fontStyle: 'italic', letterSpacing: '0.1em', animation: 'pulse 2s infinite' }}>
+          Unlocking Ancient Wisdom...
+        </p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="h-screen w-full bg-slate-950 flex flex-col items-center justify-center p-8 text-center space-y-6">
-        <div className="text-amber-500 text-6xl drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]">ॐ</div>
-        <h2 className="text-white font-serif text-2xl">A small hurdle on the path</h2>
-        <p className="text-slate-400 max-w-sm leading-relaxed">{error}</p>
-        <button 
-          onClick={() => window.location.reload()}
-          className="px-8 py-3 bg-cyan-900/40 hover:bg-cyan-800/60 text-white rounded-full font-medium transition-all border border-cyan-500/30"
-        >
+      <div className="fullscreen-center">
+        <div className="error-symbol">ॐ</div>
+        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>A small hurdle on the path</h2>
+        <p style={{ color: '#94a3b8', maxWidth: '20rem', marginBottom: '2rem', lineHeight: '1.6' }}>{error}</p>
+        <button onClick={() => window.location.reload()} className="btn-primary">
           Try Again
         </button>
       </div>
@@ -135,10 +133,10 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="bg-black relative">
+    <div style={{ backgroundColor: 'black', position: 'relative' }}>
       <div 
         ref={containerRef}
-        className="snap-container h-screen"
+        className="snap-container"
         onScroll={handleScroll}
       >
         {quotes.map((quote) => (
@@ -151,21 +149,19 @@ const App: React.FC = () => {
           />
         ))}
         {fetchingMore && (
-           <div className="snap-item flex items-center justify-center bg-slate-950">
-             <div className="w-8 h-8 border-2 border-white/10 border-t-white rounded-full animate-spin"></div>
+           <div className="snap-item" style={{ backgroundColor: '#020617', justifyContent: 'center' }}>
+             <div className="spinner" style={{ width: '2rem', height: '2rem' }}></div>
            </div>
         )}
       </div>
 
-      <div className="fixed top-0 left-0 right-0 p-6 flex justify-between items-center pointer-events-none z-50">
-        <h2 className="text-white/20 font-serif italic text-xl tracking-tighter select-none">DharmaScroll</h2>
+      <div className="header-logo">
+        <span>DharmaScroll</span>
       </div>
 
       {/* Deployment Verification Tag */}
-      <div className="fixed bottom-2 right-4 pointer-events-none z-50">
-        <span className="text-[10px] text-white/20 font-mono tracking-widest uppercase">
-          {VERSION_TAG}
-        </span>
+      <div className="version-tag">
+        {VERSION_TAG}
       </div>
     </div>
   );
