@@ -32,12 +32,15 @@ function getAIClient() {
 export async function fetchInitialQuotes(): Promise<Quote[]> {
   const ai = getAIClient();
   const seed = Math.floor(Math.random() * 10000);
+  // Fetching 3 instead of 5 for much faster initial response
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Seed: ${seed}. Provide 5 RANDOM, profound, and highly diverse quotes from different Indian scriptures (Vedas, Upanishads, Bhagavad Gita, Yoga Vasistha, Puranas). Ensure they cover different aspects of life (Action, Knowledge, Peace, Devotion, Meditation). Return in JSON format with unique IDs. Include the original Sanskrit, a high-quality English translation, and a high-quality Hindi translation.`,
+    contents: `Seed: ${seed}. Return 3 RANDOM, profound quotes from Indian scriptures (Gita, Upanishads, etc). JSON only. Sanskrit, English, Hindi translations. ID must be unique.`,
     config: {
       responseMimeType: "application/json",
-      responseSchema: QUOTE_SCHEMA
+      responseSchema: QUOTE_SCHEMA,
+      // Disable thinking for lowest latency on simple text tasks
+      thinkingConfig: { thinkingBudget: 0 }
     }
   });
 
@@ -59,25 +62,23 @@ export async function fetchRecommendedQuotes(
   
   const topThemes = Object.entries(weightedThemes)
     .sort(([, a], [, b]) => b - a)
-    .slice(0, 5)
+    .slice(0, 3)
     .map(([theme]) => theme);
 
   const themesContext = topThemes.length > 0 
-    ? `The user has shown significant interest (dwell time) in these themes: ${topThemes.join(", ")}.` 
-    : "Provide a diverse mix of profound spiritual wisdom.";
+    ? `User interests: ${topThemes.join(", ")}.` 
+    : "Diverse spiritual wisdom.";
 
-  const prompt = `Provide 3 profound quotes from Indian scriptures. 
-  ${themesContext}
-  Randomness factor: ${Date.now()}.
-  Avoid duplicate content. Do not use these IDs: ${historyIds.slice(-20).join(", ")}.
-  Include original Sanskrit, English translation, Hindi translation, and identifying themes. Return JSON.`;
+  // Fetching 6 quotes in the background to build a larger buffer
+  const prompt = `Return 6 quotes. ${themesContext} Unique IDs. No duplicates from: ${historyIds.slice(-30).join(",")}. Sanskrit, English, Hindi translations. JSON only.`;
 
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: prompt,
     config: {
       responseMimeType: "application/json",
-      responseSchema: QUOTE_SCHEMA
+      responseSchema: QUOTE_SCHEMA,
+      thinkingConfig: { thinkingBudget: 0 }
     }
   });
 

@@ -3,7 +3,7 @@ import { Quote } from './types';
 import { fetchInitialQuotes, fetchRecommendedQuotes } from './services/geminiService';
 import { QuoteCard } from './components/QuoteCard';
 
-const VERSION_TAG = "v2.0.0-dharma-theme";
+const VERSION_TAG = "v2.1.0-speed-boost";
 
 const App: React.FC = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -18,60 +18,7 @@ const App: React.FC = () => {
   const historyRef = useRef<Set<string>>(new Set());
   const activeStartTimeRef = useRef<number | null>(null);
   const activeIdRef = useRef<string | null>(null);
-  
-  // Guard to prevent concurrent fetches causing rate limits and loop issues
   const isFetchingRef = useRef(false);
-
-  // Initialize Data
-  useEffect(() => {
-    const apiKey = process.env.API_KEY;
-    if (!apiKey) {
-      setError("API Key missing. Accessing divine knowledge requires a key.");
-      setLoading(false);
-      return;
-    }
-
-    async function init() {
-      try {
-        const initial = await fetchInitialQuotes();
-        if (initial && initial.length > 0) {
-          const shuffled = [...initial].sort(() => Math.random() - 0.5);
-          setQuotes(shuffled);
-          shuffled.forEach(q => historyRef.current.add(q.id));
-          setActiveId(shuffled[0].id);
-          activeIdRef.current = shuffled[0].id;
-          activeStartTimeRef.current = Date.now();
-        } else {
-          setError("The ancient scrolls are temporarily unreachable.");
-        }
-      } catch (err: any) {
-        setError(`A hurdle on the path: ${err.message}`);
-      } finally {
-        setLoading(false);
-      }
-    }
-    init();
-  }, []);
-
-  const updateInterests = useCallback((prevId: string | null) => {
-    if (!prevId || !activeStartTimeRef.current) return;
-    
-    const durationMs = Date.now() - activeStartTimeRef.current;
-    const durationSec = durationMs / 1000;
-    
-    const prevQuote = quotes.find(q => q.id === prevId);
-    if (prevQuote && durationSec > 0.5) {
-      setInterests(prev => {
-        const next = { ...prev };
-        prevQuote.themes.forEach(t => {
-          next[t] = (next[t] || 0) + durationSec;
-        });
-        return next;
-      });
-    }
-    
-    activeStartTimeRef.current = Date.now();
-  }, [quotes]);
 
   const fetchMore = useCallback(async () => {
     if (isFetchingRef.current || error) return;
@@ -96,6 +43,61 @@ const App: React.FC = () => {
     }
   }, [interests, error]);
 
+  // Initial Data: Split into two phases for speed
+  useEffect(() => {
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+      setError("API Key missing. Accessing divine knowledge requires a key.");
+      setLoading(false);
+      return;
+    }
+
+    async function init() {
+      try {
+        // Phase 1: Small batch for fast first paint
+        const initial = await fetchInitialQuotes();
+        if (initial && initial.length > 0) {
+          setQuotes(initial);
+          initial.forEach(q => historyRef.current.add(q.id));
+          setActiveId(initial[0].id);
+          activeIdRef.current = initial[0].id;
+          activeStartTimeRef.current = Date.now();
+          setLoading(false);
+
+          // Phase 2: Immediate background buffer expansion
+          fetchMore();
+        } else {
+          setError("The ancient scrolls are temporarily unreachable.");
+          setLoading(false);
+        }
+      } catch (err: any) {
+        setError(`A hurdle on the path: ${err.message}`);
+        setLoading(false);
+      }
+    }
+    init();
+  }, []); // Only once on mount
+
+  const updateInterests = useCallback((prevId: string | null) => {
+    if (!prevId || !activeStartTimeRef.current) return;
+    
+    const durationMs = Date.now() - activeStartTimeRef.current;
+    const durationSec = durationMs / 1000;
+    
+    const prevQuote = quotes.find(q => q.id === prevId);
+    if (prevQuote && durationSec > 0.5) {
+      setInterests(prev => {
+        const next = { ...prev };
+        prevQuote.themes.forEach(t => {
+          next[t] = (next[t] || 0) + durationSec;
+        });
+        return next;
+      });
+    }
+    
+    activeStartTimeRef.current = Date.now();
+  }, [quotes]);
+
   const handleScroll = () => {
     if (!containerRef.current) return;
     const { scrollTop, clientHeight, scrollHeight } = containerRef.current;
@@ -110,7 +112,8 @@ const App: React.FC = () => {
       updateInterests(prevId);
     }
 
-    if (scrollTop + clientHeight > scrollHeight - clientHeight * 1.5) {
+    // Trigger pre-fetch earlier (3 screens away) to ensure no scrolling pause
+    if (scrollTop + clientHeight > scrollHeight - clientHeight * 3) {
       fetchMore();
     }
   };
