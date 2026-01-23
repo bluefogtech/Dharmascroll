@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Quote } from './types';
 import { fetchInitialQuotes, fetchRecommendedQuotes } from './services/geminiService';
@@ -58,7 +57,7 @@ const App: React.FC = () => {
         // Phase 1: Small batch for fast first paint
         const initial = await fetchInitialQuotes();
         if (initial && initial.length > 0) {
-          // Local shuffle to guarantee randomness on the very first card
+          // Local shuffle to guarantee randomness on the very first card seen
           const shuffledInitial = [...initial].sort(() => Math.random() - 0.5);
           
           setQuotes(shuffledInitial);
@@ -69,7 +68,15 @@ const App: React.FC = () => {
           setLoading(false);
 
           // Phase 2: Immediate background buffer expansion
-          fetchMore();
+          // Trigger the first recommendation fetch immediately
+          const more = await fetchRecommendedQuotes({}, Array.from(historyRef.current));
+          if (more && more.length > 0) {
+            setQuotes(prev => {
+              const unique = more.filter(q => !historyRef.current.has(q.id));
+              unique.forEach(q => historyRef.current.add(q.id));
+              return [...prev, ...unique];
+            });
+          }
         } else {
           setError("The ancient scrolls are temporarily unreachable.");
           setLoading(false);
@@ -80,7 +87,7 @@ const App: React.FC = () => {
       }
     }
     init();
-  }, [fetchMore]); // Added fetchMore as dependency for completeness
+  }, []); // Run only once on mount
 
   const updateInterests = useCallback((prevId: string | null) => {
     if (!prevId || !activeStartTimeRef.current) return;

@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { Quote } from "../types";
 
@@ -32,17 +31,17 @@ function getAIClient() {
 
 export async function fetchInitialQuotes(): Promise<Quote[]> {
   const ai = getAIClient();
-  // Using a combination of random and timestamp for maximum entropy
+  // Using a larger entropy pool for the seed
   const randomSeed = Math.floor(Math.random() * 2147483647);
   
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Pick 3 RANDOM and high-diversity profound quotes from different Indian scriptures (Vedas, Upanishads, Puranas, Gita, or Buddhist/Jain texts). Ensure they are not always from the same book. Provide unique IDs, original Sanskrit, English translation, and Hindi translation. Output JSON only.`,
+    contents: `Pick 3 RANDOM and highly diverse profound quotes from different Indian scriptures (Vedas, Upanishads, Puranas, Gita, or Yoga Vasistha). Ensure they are not always from the same book. Today's unique entropy: ${randomSeed}. Provide unique IDs, original Sanskrit, English translation, and Hindi translation. Output JSON only.`,
     config: {
       responseMimeType: "application/json",
       responseSchema: QUOTE_SCHEMA,
-      temperature: 1.0, // Increased temperature for better variety
-      seed: randomSeed, // Explicitly pass the seed to the model config
+      temperature: 1.0, // Maximum creativity/randomness for selection
+      seed: randomSeed,
       thinkingConfig: { thinkingBudget: 0 }
     }
   });
@@ -74,7 +73,8 @@ export async function fetchRecommendedQuotes(
 
   const randomSeed = Math.floor(Math.random() * 2147483647);
 
-  const prompt = `Return 6 quotes. ${themesContext} Use unique IDs. Strictly avoid these specific IDs: ${historyIds.slice(-40).join(",")}. Include Sanskrit, English, Hindi translations. Output JSON only.`;
+  // Fetching 6 quotes in the background to build a larger buffer
+  const prompt = `Return 6 quotes. ${themesContext} Unique IDs. Strictly avoid these specific IDs: ${historyIds.slice(-40).join(",")}. Include Sanskrit, English, Hindi translations. JSON only. Entropy: ${randomSeed}`;
 
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
