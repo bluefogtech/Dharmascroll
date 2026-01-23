@@ -1,14 +1,16 @@
+
 import React, { useEffect, useRef } from 'react';
 import { Quote } from '../types';
 
 interface QuoteCardProps {
   quote: Quote;
   isActive: boolean;
+  language: 'en' | 'hi';
   onViewStart: (id: string) => void;
   onViewEnd: (id: string) => void;
 }
 
-export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, onViewStart, onViewEnd }) => {
+export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language, onViewStart, onViewEnd }) => {
   const startTimeRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -36,6 +38,8 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, onViewSta
     return themeColors[primaryTheme] || 'linear-gradient(to bottom, #0f172a, #1e3a8a)';
   };
 
+  const displayText = language === 'hi' ? quote.hindi : quote.text;
+
   return (
     <div className="snap-item" style={{ background: getBackgroundGradient() }}>
       {/* Decorative Background Elements */}
@@ -44,13 +48,13 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, onViewSta
 
       <div style={{ maxWidth: '32rem', width: '100%', zIndex: 10, textAlign: 'center' }}>
         {quote.sanskrit && (
-          <div className="quote-sanskrit">
+          <div className="quote-sanskrit" style={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.85)' }}>
              {quote.sanskrit}
           </div>
         )}
         
         <h1 className="quote-main">
-          &ldquo;{quote.text}&rdquo;
+          &ldquo;{displayText}&rdquo;
         </h1>
         
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

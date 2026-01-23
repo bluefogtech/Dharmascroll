@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { Quote } from "../types";
 
@@ -8,6 +9,7 @@ const QUOTE_SCHEMA = {
     properties: {
       id: { type: Type.STRING },
       text: { type: Type.STRING },
+      hindi: { type: Type.STRING },
       source: { type: Type.STRING },
       context: { type: Type.STRING },
       sanskrit: { type: Type.STRING },
@@ -16,7 +18,7 @@ const QUOTE_SCHEMA = {
         items: { type: Type.STRING }
       }
     },
-    required: ["id", "text", "source", "themes"]
+    required: ["id", "text", "hindi", "source", "themes"]
   }
 };
 
@@ -30,11 +32,10 @@ function getAIClient() {
 
 export async function fetchInitialQuotes(): Promise<Quote[]> {
   const ai = getAIClient();
-  // Adding a timestamp or random number to the prompt to break deterministic responses
   const seed = Math.floor(Math.random() * 10000);
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Seed: ${seed}. Provide 5 RANDOM, profound, and highly diverse quotes from different Indian scriptures (Vedas, Upanishads, Bhagavad Gita, Yoga Vasistha, Puranas). Ensure they cover different aspects of life (Action, Knowledge, Peace, Devotion, Meditation). Return in JSON format with unique IDs. Include the original Sanskrit.`,
+    contents: `Seed: ${seed}. Provide 5 RANDOM, profound, and highly diverse quotes from different Indian scriptures (Vedas, Upanishads, Bhagavad Gita, Yoga Vasistha, Puranas). Ensure they cover different aspects of life (Action, Knowledge, Peace, Devotion, Meditation). Return in JSON format with unique IDs. Include the original Sanskrit, a high-quality English translation, and a high-quality Hindi translation.`,
     config: {
       responseMimeType: "application/json",
       responseSchema: QUOTE_SCHEMA
@@ -57,7 +58,6 @@ export async function fetchRecommendedQuotes(
 ): Promise<Quote[]> {
   const ai = getAIClient();
   
-  // Sort themes by weight and take top 5
   const topThemes = Object.entries(weightedThemes)
     .sort(([, a], [, b]) => b - a)
     .slice(0, 5)
@@ -71,7 +71,7 @@ export async function fetchRecommendedQuotes(
   ${themesContext}
   Randomness factor: ${Date.now()}.
   Avoid duplicate content. Do not use these IDs: ${historyIds.slice(-20).join(", ")}.
-  Include original Sanskrit and identifying themes. Return JSON.`;
+  Include original Sanskrit, English translation, Hindi translation, and identifying themes. Return JSON.`;
 
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",

@@ -1,14 +1,10 @@
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Quote } from './types';
 import { fetchInitialQuotes, fetchRecommendedQuotes } from './services/geminiService';
 import { QuoteCard } from './components/QuoteCard';
 
-const VERSION_TAG = "v1.7.1-audio-fix";
-
-// Primary source: A direct link to a Gayatri Mantra recording
-const MANTRA_URL = "https://ia800305.us.archive.org/15/items/GayatriMantra_201601/Gayatri%20Mantra.mp3";
-// Fallback source: A highly reliable meditative pad from Google's sound library
-const FALLBACK_URL = "https://actions.google.com/sounds/v1/meditation/meditation_pad.ogg";
+const VERSION_TAG = "v1.9.0-bilingual-wisdom";
 
 const App: React.FC = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -17,63 +13,12 @@ const App: React.FC = () => {
   const [fetchingMore, setFetchingMore] = useState(false);
   const [interests, setInterests] = useState<Record<string, number>>({});
   const [error, setError] = useState<string | null>(null);
-  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [language, setLanguage] = useState<'en' | 'hi'>('en');
   
   const containerRef = useRef<HTMLDivElement>(null);
   const historyRef = useRef<Set<string>>(new Set());
   const activeStartTimeRef = useRef<number | null>(null);
   const activeIdRef = useRef<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  // Initialize Audio with Error Handling
-  useEffect(() => {
-    const audio = new Audio(MANTRA_URL);
-    audio.loop = true;
-    audio.preload = "auto";
-    audioRef.current = audio;
-
-    const handleAudioError = () => {
-      console.warn("DharmaScroll: Primary audio failed. Switching to meditative fallback.");
-      if (audioRef.current && audioRef.current.src !== FALLBACK_URL) {
-        audioRef.current.src = FALLBACK_URL;
-        audioRef.current.load();
-        // If it was supposed to be playing, resume with fallback
-        if (isAudioPlaying) {
-          audioRef.current.play().catch(err => console.error("Fallback audio failed:", err));
-        }
-      }
-    };
-
-    audio.addEventListener('error', handleAudioError);
-
-    return () => {
-      audio.removeEventListener('error', handleAudioError);
-      audio.pause();
-      audioRef.current = null;
-    };
-  }, []);
-
-  const toggleAudio = () => {
-    if (!audioRef.current) return;
-    
-    if (isAudioPlaying) {
-      audioRef.current.pause();
-      setIsAudioPlaying(false);
-    } else {
-      audioRef.current.play()
-        .then(() => setIsAudioPlaying(true))
-        .catch(e => {
-          console.error("Audio playback failed:", e);
-          // Trigger fallback manually if play fails immediately
-          if (audioRef.current && audioRef.current.src !== FALLBACK_URL) {
-            audioRef.current.src = FALLBACK_URL;
-            audioRef.current.play()
-              .then(() => setIsAudioPlaying(true))
-              .catch(err => console.error("Final audio failure:", err));
-          }
-        });
-    }
-  };
 
   // Initialize Data
   useEffect(() => {
@@ -163,6 +108,10 @@ const App: React.FC = () => {
     }
   };
 
+  const toggleLanguage = () => {
+    setLanguage(prev => prev === 'en' ? 'hi' : 'en');
+  };
+
   if (loading) {
     return (
       <div className="fullscreen-center">
@@ -199,6 +148,7 @@ const App: React.FC = () => {
             key={quote.id} 
             quote={quote} 
             isActive={activeId === quote.id}
+            language={language}
             onViewStart={() => {}}
             onViewEnd={() => {}}
           />
@@ -212,37 +162,26 @@ const App: React.FC = () => {
 
       <div className="header-logo">
         <span style={{ fontWeight: 600 }}>DharmaScroll</span>
-        <button 
-          onClick={toggleAudio}
+        <div 
+          onClick={toggleLanguage}
           style={{ 
             pointerEvents: 'auto',
-            background: 'none',
-            border: 'none',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
-            color: isAudioPlaying ? '#22d3ee' : 'rgba(255,255,255,0.4)',
-            transition: 'all 0.3s ease'
+            gap: '0.5rem',
+            background: 'rgba(255, 255, 255, 0.1)',
+            padding: '4px 12px',
+            borderRadius: '20px',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            transition: 'all 0.3s'
           }}
         >
-          <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            {isAudioPlaying ? 'Chanting' : 'Muted'}
-          </span>
-          <div style={{ 
-            width: '32px', 
-            height: '32px', 
-            borderRadius: '50%', 
-            background: isAudioPlaying ? 'rgba(34, 211, 238, 0.1)' : 'rgba(255,255,255,0.05)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            border: isAudioPlaying ? '1px solid rgba(34, 211, 238, 0.3)' : '1px solid rgba(255,255,255,0.1)',
-            boxShadow: isAudioPlaying ? '0 0 10px rgba(34, 211, 238, 0.2)' : 'none'
-          }}>
-            <span style={{ fontSize: '1.2rem', marginTop: '-2px' }}>ॐ</span>
-          </div>
-        </button>
+          <span style={{ fontSize: '0.75rem', fontWeight: language === 'en' ? 'bold' : 'normal', color: language === 'en' ? '#22d3ee' : 'white' }}>EN</span>
+          <div style={{ width: '1px', height: '12px', background: 'rgba(255,255,255,0.3)' }}></div>
+          <span style={{ fontSize: '0.75rem', fontWeight: language === 'hi' ? 'bold' : 'normal', color: language === 'hi' ? '#22d3ee' : 'white' }}>हिं</span>
+        </div>
       </div>
 
       <div className="version-tag">
