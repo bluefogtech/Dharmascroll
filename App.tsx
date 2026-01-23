@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Quote } from './types';
 import { fetchInitialQuotes, fetchRecommendedQuotes } from './services/geminiService';
 import { QuoteCard } from './components/QuoteCard';
 
-const VERSION_TAG = "v2.1.0-speed-boost";
+const VERSION_TAG = "v2.2.0-entropy-sync";
 
 const App: React.FC = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -43,7 +44,7 @@ const App: React.FC = () => {
     }
   }, [interests, error]);
 
-  // Initial Data: Split into two phases for speed
+  // Initial Data: Split into two phases for speed and randomness
   useEffect(() => {
     const apiKey = process.env.API_KEY;
     if (!apiKey) {
@@ -57,10 +58,13 @@ const App: React.FC = () => {
         // Phase 1: Small batch for fast first paint
         const initial = await fetchInitialQuotes();
         if (initial && initial.length > 0) {
-          setQuotes(initial);
-          initial.forEach(q => historyRef.current.add(q.id));
-          setActiveId(initial[0].id);
-          activeIdRef.current = initial[0].id;
+          // Local shuffle to guarantee randomness on the very first card
+          const shuffledInitial = [...initial].sort(() => Math.random() - 0.5);
+          
+          setQuotes(shuffledInitial);
+          shuffledInitial.forEach(q => historyRef.current.add(q.id));
+          setActiveId(shuffledInitial[0].id);
+          activeIdRef.current = shuffledInitial[0].id;
           activeStartTimeRef.current = Date.now();
           setLoading(false);
 
@@ -76,7 +80,7 @@ const App: React.FC = () => {
       }
     }
     init();
-  }, []); // Only once on mount
+  }, [fetchMore]); // Added fetchMore as dependency for completeness
 
   const updateInterests = useCallback((prevId: string | null) => {
     if (!prevId || !activeStartTimeRef.current) return;

@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { Quote } from "../types";
 
@@ -31,15 +32,17 @@ function getAIClient() {
 
 export async function fetchInitialQuotes(): Promise<Quote[]> {
   const ai = getAIClient();
-  const seed = Math.floor(Math.random() * 10000);
-  // Fetching 3 instead of 5 for much faster initial response
+  // Using a combination of random and timestamp for maximum entropy
+  const randomSeed = Math.floor(Math.random() * 2147483647);
+  
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Seed: ${seed}. Return 3 RANDOM, profound quotes from Indian scriptures (Gita, Upanishads, etc). JSON only. Sanskrit, English, Hindi translations. ID must be unique.`,
+    contents: `Pick 3 RANDOM and high-diversity profound quotes from different Indian scriptures (Vedas, Upanishads, Puranas, Gita, or Buddhist/Jain texts). Ensure they are not always from the same book. Provide unique IDs, original Sanskrit, English translation, and Hindi translation. Output JSON only.`,
     config: {
       responseMimeType: "application/json",
       responseSchema: QUOTE_SCHEMA,
-      // Disable thinking for lowest latency on simple text tasks
+      temperature: 1.0, // Increased temperature for better variety
+      seed: randomSeed, // Explicitly pass the seed to the model config
       thinkingConfig: { thinkingBudget: 0 }
     }
   });
@@ -69,8 +72,9 @@ export async function fetchRecommendedQuotes(
     ? `User interests: ${topThemes.join(", ")}.` 
     : "Diverse spiritual wisdom.";
 
-  // Fetching 6 quotes in the background to build a larger buffer
-  const prompt = `Return 6 quotes. ${themesContext} Unique IDs. No duplicates from: ${historyIds.slice(-30).join(",")}. Sanskrit, English, Hindi translations. JSON only.`;
+  const randomSeed = Math.floor(Math.random() * 2147483647);
+
+  const prompt = `Return 6 quotes. ${themesContext} Use unique IDs. Strictly avoid these specific IDs: ${historyIds.slice(-40).join(",")}. Include Sanskrit, English, Hindi translations. Output JSON only.`;
 
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
@@ -78,6 +82,8 @@ export async function fetchRecommendedQuotes(
     config: {
       responseMimeType: "application/json",
       responseSchema: QUOTE_SCHEMA,
+      temperature: 0.9,
+      seed: randomSeed,
       thinkingConfig: { thinkingBudget: 0 }
     }
   });
