@@ -3,7 +3,7 @@ import { Quote } from './types';
 import { fetchInitialQuotes, fetchRecommendedQuotes } from './services/geminiService';
 import { QuoteCard } from './components/QuoteCard';
 
-const VERSION_TAG = "v2.2.0-dharma-theme";
+const VERSION_TAG = "v1.9.0-reverted-stable";
 
 const App: React.FC = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -18,61 +18,40 @@ const App: React.FC = () => {
   const historyRef = useRef<Set<string>>(new Set());
   const activeStartTimeRef = useRef<number | null>(null);
   const activeIdRef = useRef<string | null>(null);
+  
+  // Guard to prevent concurrent fetches causing rate limits and loop issues
+  const isFetchingRef = useRef(false);
 
-  // Background fetcher - refined for parallelism
-  const hydrateBuffer = useCallback(async (count = 5) => {
-    if (fetchingMore) return;
-    setFetchingMore(true);
-
-    try {
-      const more = await fetchRecommendedQuotes(interests, Array.from(historyRef.current), count);
-      if (more && more.length > 0) {
-        setQuotes(prev => {
-          const unique = more.filter(q => !historyRef.current.has(q.id));
-          unique.forEach(q => historyRef.current.add(q.id));
-          return [...prev, ...unique];
-        });
-      }
-    } catch (e) {
-      console.error("Background Hydration Error", e);
-    } finally {
-      setFetchingMore(false);
-    }
-  }, [interests, fetchingMore]);
-
-  // Initial Data
+  // Initialize Data
   useEffect(() => {
     const apiKey = process.env.API_KEY;
     if (!apiKey) {
-      setError("API Key missing.");
+      setError("API Key missing. Please check your environment variables.");
       setLoading(false);
       return;
     }
 
-    async function fastInit() {
+    async function init() {
       try {
         const initial = await fetchInitialQuotes();
         if (initial && initial.length > 0) {
-          setQuotes(initial);
-          initial.forEach(q => historyRef.current.add(q.id));
-          setActiveId(initial[0].id);
-          activeIdRef.current = initial[0].id;
+          const shuffled = [...initial].sort(() => Math.random() - 0.5);
+          setQuotes(shuffled);
+          shuffled.forEach(q => historyRef.current.add(q.id));
+          setActiveId(shuffled[0].id);
+          activeIdRef.current = shuffled[0].id;
           activeStartTimeRef.current = Date.now();
-          setLoading(false);
-
-          // Background parallel hydration
-          hydrateBuffer(6);
         } else {
-          setError("The ancient scrolls are temporarily unreachable.");
+          setError("Failed to load initial wisdom. Please try again.");
         }
       } catch (err: any) {
-        setError(`A hurdle on the path: ${err.message}`);
+        setError(`Connection failed: ${err.message}`);
       } finally {
         setLoading(false);
       }
     }
-    fastInit();
-  }, [hydrateBuffer]);
+    init();
+  }, []);
 
   const updateInterests = useCallback((prevId: string | null) => {
     if (!prevId || !activeStartTimeRef.current) return;
@@ -94,9 +73,32 @@ const App: React.FC = () => {
     activeStartTimeRef.current = Date.now();
   }, [quotes]);
 
+  const fetchMore = useCallback(async () => {
+    if (isFetchingRef.current || error) return;
+    
+    isFetchingRef.current = true;
+    setFetchingMore(true);
+
+    try {
+      const more = await fetchRecommendedQuotes(interests, Array.from(historyRef.current));
+      if (more && more.length > 0) {
+        setQuotes(prev => {
+          const unique = more.filter(q => !historyRef.current.has(q.id));
+          unique.forEach(q => historyRef.current.add(q.id));
+          return [...prev, ...unique];
+        });
+      }
+    } catch (e) {
+      console.error("DharmaScroll: Fetch More Error", e);
+    } finally {
+      setFetchingMore(false);
+      isFetchingRef.current = false;
+    }
+  }, [interests, error]);
+
   const handleScroll = () => {
     if (!containerRef.current) return;
-    const { scrollTop, clientHeight } = containerRef.current;
+    const { scrollTop, clientHeight, scrollHeight } = containerRef.current;
     
     const index = Math.round(scrollTop / clientHeight);
     const currentQuote = quotes[index];
@@ -108,9 +110,8 @@ const App: React.FC = () => {
       updateInterests(prevId);
     }
 
-    // PRE-FETCH TRIGGER
-    if (quotes.length > 0 && index >= quotes.length - 2) {
-      hydrateBuffer(5);
+    if (scrollTop + clientHeight > scrollHeight - clientHeight * 1.5) {
+      fetchMore();
     }
   };
 
@@ -122,8 +123,8 @@ const App: React.FC = () => {
     return (
       <div className="fullscreen-center">
         <div className="spinner"></div>
-        <p style={{ color: 'var(--accent-gold)', fontStyle: 'italic', fontSize: '1rem', letterSpacing: '0.1em', animation: 'pulse 1.5s infinite' }}>
-          Opening the Sacred Scrolls...
+        <p style={{ color: 'var(--accent-cyan-light)', fontStyle: 'italic', letterSpacing: '0.1em', animation: 'pulse 2s infinite' }}>
+          Unlocking Ancient Wisdom...
         </p>
       </div>
     );
@@ -133,17 +134,17 @@ const App: React.FC = () => {
     return (
       <div className="fullscreen-center">
         <div className="error-symbol">ॐ</div>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--accent-gold)' }}>Path Interrupted</h2>
-        <p style={{ color: 'var(--text-slate)', maxWidth: '18rem', marginBottom: '2rem', lineHeight: '1.6' }}>{error}</p>
+        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>A small hurdle on the path</h2>
+        <p style={{ color: 'var(--text-slate)', maxWidth: '20rem', marginBottom: '2rem', lineHeight: '1.6' }}>{error}</p>
         <button onClick={() => window.location.reload()} className="btn-primary">
-          Restore Connection
+          Try Again
         </button>
       </div>
     );
   }
 
   return (
-    <div style={{ backgroundColor: 'var(--bg-dark)', position: 'relative' }}>
+    <div style={{ backgroundColor: 'black', position: 'relative' }}>
       <div 
         ref={containerRef}
         className="snap-container"
@@ -160,18 +161,14 @@ const App: React.FC = () => {
           />
         ))}
         {fetchingMore && (
-           <div className="snap-item" style={{ height: '100vh', justifyContent: 'center', opacity: 0.15 }}>
-             <div className="spinner" style={{ width: '1.25rem', height: '1.25rem' }}></div>
+           <div className="snap-item" style={{ backgroundColor: 'var(--bg-dark)', justifyContent: 'center' }}>
+             <div className="spinner" style={{ width: '2rem', height: '2rem' }}></div>
            </div>
         )}
       </div>
 
       <div className="header-logo">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>ॐ</span>
-          <span style={{ fontWeight: 800, fontSize: '0.8rem', letterSpacing: '3px' }}>DHARMA SCROLL</span>
-        </div>
-        
+        <span style={{ fontWeight: 600 }}>DharmaScroll</span>
         <div 
           onClick={toggleLanguage}
           style={{ 
@@ -179,19 +176,18 @@ const App: React.FC = () => {
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.6rem',
-            background: 'rgba(0, 0, 0, 0.5)',
-            padding: '6px 16px',
-            borderRadius: '24px',
-            border: '1px solid rgba(255, 153, 51, 0.4)',
-            backdropFilter: 'blur(15px)',
-            boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
+            gap: '0.5rem',
+            background: 'rgba(255, 255, 255, 0.1)',
+            padding: '4px 12px',
+            borderRadius: '20px',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
             transition: 'all 0.3s'
           }}
         >
-          <span style={{ fontSize: '0.75rem', fontWeight: language === 'en' ? '800' : '400', color: language === 'en' ? 'var(--accent-gold)' : 'rgba(255,255,255,0.4)' }}>EN</span>
-          <div style={{ width: '1px', height: '10px', background: 'rgba(255,153,51,0.3)' }}></div>
-          <span style={{ fontSize: '0.8rem', fontWeight: language === 'hi' ? '800' : '400', color: language === 'hi' ? 'var(--accent-gold)' : 'rgba(255,255,255,0.4)' }}>हिं</span>
+          <span style={{ fontSize: '0.75rem', fontWeight: language === 'en' ? 'bold' : 'normal', color: language === 'en' ? 'var(--accent-cyan-light)' : 'white' }}>EN</span>
+          <div style={{ width: '1px', height: '12px', background: 'rgba(255,255,255,0.3)' }}></div>
+          <span style={{ fontSize: '0.75rem', fontWeight: language === 'hi' ? 'bold' : 'normal', color: language === 'hi' ? 'var(--accent-cyan-light)' : 'white' }}>हिं</span>
         </div>
       </div>
 
