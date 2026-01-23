@@ -3,9 +3,12 @@ import { Quote } from './types';
 import { fetchInitialQuotes, fetchRecommendedQuotes } from './services/geminiService';
 import { QuoteCard } from './components/QuoteCard';
 
-const VERSION_TAG = "v1.7.0-mantra-loop";
-// A high-quality, meditative Gayatri Mantra loop URL
-const MANTRA_URL = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"; // Placeholder for demonstration, in a real app use a specific mantra .mp3
+const VERSION_TAG = "v1.7.1-audio-fix";
+
+// Primary source: A direct link to a Gayatri Mantra recording
+const MANTRA_URL = "https://ia800305.us.archive.org/15/items/GayatriMantra_201601/Gayatri%20Mantra.mp3";
+// Fallback source: A highly reliable meditative pad from Google's sound library
+const FALLBACK_URL = "https://actions.google.com/sounds/v1/meditation/meditation_pad.ogg";
 
 const App: React.FC = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -22,17 +25,29 @@ const App: React.FC = () => {
   const activeIdRef = useRef<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Initialize Audio
+  // Initialize Audio with Error Handling
   useEffect(() => {
-    // Note: We use a specific Gayatri Mantra chant URL for the actual experience
-    const audio = new Audio("https://actions.google.com/sounds/v1/ambiences/temple_bell.ogg"); 
-    // Since temple bells are short, we'll try to find a longer meditative loop or use a synthesized one.
-    // For this specific request, let's assume a reliable mantra stream.
-    audio.src = "https://archive.org/download/GayatriMantra_201601/Gayatri%20Mantra.mp3";
+    const audio = new Audio(MANTRA_URL);
     audio.loop = true;
+    audio.preload = "auto";
     audioRef.current = audio;
 
+    const handleAudioError = () => {
+      console.warn("DharmaScroll: Primary audio failed. Switching to meditative fallback.");
+      if (audioRef.current && audioRef.current.src !== FALLBACK_URL) {
+        audioRef.current.src = FALLBACK_URL;
+        audioRef.current.load();
+        // If it was supposed to be playing, resume with fallback
+        if (isAudioPlaying) {
+          audioRef.current.play().catch(err => console.error("Fallback audio failed:", err));
+        }
+      }
+    };
+
+    audio.addEventListener('error', handleAudioError);
+
     return () => {
+      audio.removeEventListener('error', handleAudioError);
       audio.pause();
       audioRef.current = null;
     };
@@ -40,12 +55,24 @@ const App: React.FC = () => {
 
   const toggleAudio = () => {
     if (!audioRef.current) return;
+    
     if (isAudioPlaying) {
       audioRef.current.pause();
+      setIsAudioPlaying(false);
     } else {
-      audioRef.current.play().catch(e => console.error("Audio playback failed:", e));
+      audioRef.current.play()
+        .then(() => setIsAudioPlaying(true))
+        .catch(e => {
+          console.error("Audio playback failed:", e);
+          // Trigger fallback manually if play fails immediately
+          if (audioRef.current && audioRef.current.src !== FALLBACK_URL) {
+            audioRef.current.src = FALLBACK_URL;
+            audioRef.current.play()
+              .then(() => setIsAudioPlaying(true))
+              .catch(err => console.error("Final audio failure:", err));
+          }
+        });
     }
-    setIsAudioPlaying(!isAudioPlaying);
   };
 
   // Initialize Data
