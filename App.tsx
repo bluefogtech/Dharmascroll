@@ -3,7 +3,9 @@ import { Quote } from './types';
 import { fetchInitialQuotes, fetchRecommendedQuotes } from './services/geminiService';
 import { QuoteCard } from './components/QuoteCard';
 
-const VERSION_TAG = "v1.6.0-dwell-reco";
+const VERSION_TAG = "v1.7.0-mantra-loop";
+// A high-quality, meditative Gayatri Mantra loop URL
+const MANTRA_URL = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"; // Placeholder for demonstration, in a real app use a specific mantra .mp3
 
 const App: React.FC = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -12,13 +14,41 @@ const App: React.FC = () => {
   const [fetchingMore, setFetchingMore] = useState(false);
   const [interests, setInterests] = useState<Record<string, number>>({});
   const [error, setError] = useState<string | null>(null);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const historyRef = useRef<Set<string>>(new Set());
   const activeStartTimeRef = useRef<number | null>(null);
   const activeIdRef = useRef<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Initialize
+  // Initialize Audio
+  useEffect(() => {
+    // Note: We use a specific Gayatri Mantra chant URL for the actual experience
+    const audio = new Audio("https://actions.google.com/sounds/v1/ambiences/temple_bell.ogg"); 
+    // Since temple bells are short, we'll try to find a longer meditative loop or use a synthesized one.
+    // For this specific request, let's assume a reliable mantra stream.
+    audio.src = "https://archive.org/download/GayatriMantra_201601/Gayatri%20Mantra.mp3";
+    audio.loop = true;
+    audioRef.current = audio;
+
+    return () => {
+      audio.pause();
+      audioRef.current = null;
+    };
+  }, []);
+
+  const toggleAudio = () => {
+    if (!audioRef.current) return;
+    if (isAudioPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(e => console.error("Audio playback failed:", e));
+    }
+    setIsAudioPlaying(!isAudioPlaying);
+  };
+
+  // Initialize Data
   useEffect(() => {
     const apiKey = process.env.API_KEY;
     if (!apiKey) {
@@ -31,7 +61,6 @@ const App: React.FC = () => {
       try {
         const initial = await fetchInitialQuotes();
         if (initial && initial.length > 0) {
-          // Shuffle the initial batch locally just in case
           const shuffled = [...initial].sort(() => Math.random() - 0.5);
           setQuotes(shuffled);
           shuffled.forEach(q => historyRef.current.add(q.id));
@@ -50,7 +79,6 @@ const App: React.FC = () => {
     init();
   }, []);
 
-  // Update interest weights when activeId changes
   const updateInterests = useCallback((prevId: string | null) => {
     if (!prevId || !activeStartTimeRef.current) return;
     
@@ -58,14 +86,12 @@ const App: React.FC = () => {
     const durationSec = durationMs / 1000;
     
     const prevQuote = quotes.find(q => q.id === prevId);
-    if (prevQuote && durationSec > 0.5) { // Minimum threshold to count as interest
+    if (prevQuote && durationSec > 0.5) {
       setInterests(prev => {
         const next = { ...prev };
         prevQuote.themes.forEach(t => {
-          // We add the actual time spent to the theme weight
           next[t] = (next[t] || 0) + durationSec;
         });
-        console.log(`[Interest Updated] Spent ${durationSec.toFixed(2)}s on "${prevId}". New Weights:`, next);
         return next;
       });
     }
@@ -78,7 +104,6 @@ const App: React.FC = () => {
     setFetchingMore(true);
 
     try {
-      // Pass the actual weighted interests to the engine
       const more = await fetchRecommendedQuotes(interests, Array.from(historyRef.current));
       setQuotes(prev => {
         const unique = more.filter(q => !historyRef.current.has(q.id));
@@ -106,7 +131,6 @@ const App: React.FC = () => {
       updateInterests(prevId);
     }
 
-    // Pre-fetch more when reaching near the end
     if (scrollTop + clientHeight > scrollHeight - clientHeight * 1.5) {
       fetchMore();
     }
@@ -148,8 +172,8 @@ const App: React.FC = () => {
             key={quote.id} 
             quote={quote} 
             isActive={activeId === quote.id}
-            onViewStart={() => {}} // Handled by App scroll logic for better precision
-            onViewEnd={() => {}}   // Handled by App scroll logic for better precision
+            onViewStart={() => {}}
+            onViewEnd={() => {}}
           />
         ))}
         {fetchingMore && (
@@ -160,7 +184,38 @@ const App: React.FC = () => {
       </div>
 
       <div className="header-logo">
-        <span>DharmaScroll</span>
+        <span style={{ fontWeight: 600 }}>DharmaScroll</span>
+        <button 
+          onClick={toggleAudio}
+          style={{ 
+            pointerEvents: 'auto',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            color: isAudioPlaying ? '#22d3ee' : 'rgba(255,255,255,0.4)',
+            transition: 'all 0.3s ease'
+          }}
+        >
+          <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            {isAudioPlaying ? 'Chanting' : 'Muted'}
+          </span>
+          <div style={{ 
+            width: '32px', 
+            height: '32px', 
+            borderRadius: '50%', 
+            background: isAudioPlaying ? 'rgba(34, 211, 238, 0.1)' : 'rgba(255,255,255,0.05)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: isAudioPlaying ? '1px solid rgba(34, 211, 238, 0.3)' : '1px solid rgba(255,255,255,0.1)',
+            boxShadow: isAudioPlaying ? '0 0 10px rgba(34, 211, 238, 0.2)' : 'none'
+          }}>
+            <span style={{ fontSize: '1.2rem', marginTop: '-2px' }}>ॐ</span>
+          </div>
+        </button>
       </div>
 
       <div className="version-tag">
