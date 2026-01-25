@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { Quote } from "../types";
 
@@ -9,6 +10,7 @@ const QUOTE_SCHEMA = {
       id: { type: Type.STRING },
       text: { type: Type.STRING },
       hindi: { type: Type.STRING },
+      tamil: { type: Type.STRING },
       source: { type: Type.STRING },
       context: { type: Type.STRING },
       sanskrit: { type: Type.STRING },
@@ -17,7 +19,7 @@ const QUOTE_SCHEMA = {
         items: { type: Type.STRING }
       }
     },
-    required: ["id", "text", "hindi", "source", "themes"]
+    required: ["id", "text", "hindi", "tamil", "source", "themes"]
   }
 };
 
@@ -31,16 +33,15 @@ function getAIClient() {
 
 export async function fetchInitialQuotes(): Promise<Quote[]> {
   const ai = getAIClient();
-  // Using a larger entropy pool for the seed
   const randomSeed = Math.floor(Math.random() * 2147483647);
   
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Pick 3 RANDOM and highly diverse profound quotes from different Indian scriptures (Vedas, Upanishads, Puranas, Gita, or Yoga Vasistha). Ensure they are not always from the same book. Today's unique entropy: ${randomSeed}. Provide unique IDs, original Sanskrit, English translation, and Hindi translation. Output JSON only.`,
+    contents: `Pick 3 RANDOM and highly diverse profound quotes from different Indian scriptures (Vedas, Upanishads, Puranas, Gita, or Yoga Vasistha). Ensure they are not always from the same book. Today's unique entropy: ${randomSeed}. Provide unique IDs, original Sanskrit, English translation, Hindi translation, and Tamil translation. Output JSON only.`,
     config: {
       responseMimeType: "application/json",
       responseSchema: QUOTE_SCHEMA,
-      temperature: 1.0, // Maximum creativity/randomness for selection
+      temperature: 1.0,
       seed: randomSeed,
       thinkingConfig: { thinkingBudget: 0 }
     }
@@ -73,8 +74,7 @@ export async function fetchRecommendedQuotes(
 
   const randomSeed = Math.floor(Math.random() * 2147483647);
 
-  // Fetching 6 quotes in the background to build a larger buffer
-  const prompt = `Return 6 quotes. ${themesContext} Unique IDs. Strictly avoid these specific IDs: ${historyIds.slice(-40).join(",")}. Include Sanskrit, English, Hindi translations. JSON only. Entropy: ${randomSeed}`;
+  const prompt = `Return 6 quotes. ${themesContext} Unique IDs. Strictly avoid these specific IDs: ${historyIds.slice(-40).join(",")}. Include Sanskrit, English, Hindi, and Tamil translations. JSON only. Entropy: ${randomSeed}`;
 
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",

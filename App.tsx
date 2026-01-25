@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Quote } from './types';
 import { fetchInitialQuotes, fetchRecommendedQuotes } from './services/geminiService';
 import { QuoteCard } from './components/QuoteCard';
 
-const VERSION_TAG = "v2.2.0-entropy-sync";
+const VERSION_TAG = "v2.3.0-multi-lingual";
 
 const App: React.FC = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -12,7 +13,7 @@ const App: React.FC = () => {
   const [fetchingMore, setFetchingMore] = useState(false);
   const [interests, setInterests] = useState<Record<string, number>>({});
   const [error, setError] = useState<string | null>(null);
-  const [language, setLanguage] = useState<'en' | 'hi'>('en');
+  const [language, setLanguage] = useState<'en' | 'hi' | 'ta'>('en');
   
   const containerRef = useRef<HTMLDivElement>(null);
   const historyRef = useRef<Set<string>>(new Set());
@@ -43,7 +44,6 @@ const App: React.FC = () => {
     }
   }, [interests, error]);
 
-  // Initial Data: Split into two phases for speed and randomness
   useEffect(() => {
     const apiKey = process.env.API_KEY;
     if (!apiKey) {
@@ -54,10 +54,8 @@ const App: React.FC = () => {
 
     async function init() {
       try {
-        // Phase 1: Small batch for fast first paint
         const initial = await fetchInitialQuotes();
         if (initial && initial.length > 0) {
-          // Local shuffle to guarantee randomness on the very first card seen
           const shuffledInitial = [...initial].sort(() => Math.random() - 0.5);
           
           setQuotes(shuffledInitial);
@@ -67,8 +65,6 @@ const App: React.FC = () => {
           activeStartTimeRef.current = Date.now();
           setLoading(false);
 
-          // Phase 2: Immediate background buffer expansion
-          // Trigger the first recommendation fetch immediately
           const more = await fetchRecommendedQuotes({}, Array.from(historyRef.current));
           if (more && more.length > 0) {
             setQuotes(prev => {
@@ -87,7 +83,7 @@ const App: React.FC = () => {
       }
     }
     init();
-  }, []); // Run only once on mount
+  }, []);
 
   const updateInterests = useCallback((prevId: string | null) => {
     if (!prevId || !activeStartTimeRef.current) return;
@@ -123,14 +119,16 @@ const App: React.FC = () => {
       updateInterests(prevId);
     }
 
-    // Trigger pre-fetch earlier (3 screens away) to ensure no scrolling pause
     if (scrollTop + clientHeight > scrollHeight - clientHeight * 3) {
       fetchMore();
     }
   };
 
-  const toggleLanguage = () => {
-    setLanguage(prev => prev === 'en' ? 'hi' : 'en');
+  const cycleLanguage = () => {
+    const languages: ('en' | 'hi' | 'ta')[] = ['en', 'hi', 'ta'];
+    const currentIndex = languages.indexOf(language);
+    const nextIndex = (currentIndex + 1) % languages.length;
+    setLanguage(languages[nextIndex]);
   };
 
   if (loading) {
@@ -188,15 +186,15 @@ const App: React.FC = () => {
         </div>
         
         <div 
-          onClick={toggleLanguage}
+          onClick={cycleLanguage}
           style={{ 
             pointerEvents: 'auto',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.6rem',
+            gap: '0.4rem',
             background: 'rgba(0, 0, 0, 0.5)',
-            padding: '6px 16px',
+            padding: '6px 14px',
             borderRadius: '24px',
             border: '1px solid rgba(255, 153, 51, 0.4)',
             backdropFilter: 'blur(15px)',
@@ -204,9 +202,11 @@ const App: React.FC = () => {
             transition: 'all 0.3s'
           }}
         >
-          <span style={{ fontSize: '0.75rem', fontWeight: language === 'en' ? '800' : '400', color: language === 'en' ? 'var(--accent-gold)' : 'rgba(255,255,255,0.4)' }}>EN</span>
-          <div style={{ width: '1px', height: '10px', background: 'rgba(255,153,51,0.3)' }}></div>
-          <span style={{ fontSize: '0.8rem', fontWeight: language === 'hi' ? '800' : '400', color: language === 'hi' ? 'var(--accent-gold)' : 'rgba(255,255,255,0.4)' }}>हिं</span>
+          <span style={{ fontSize: '0.7rem', fontWeight: language === 'en' ? '900' : '400', color: language === 'en' ? 'var(--accent-gold)' : 'rgba(255,255,255,0.4)' }}>EN</span>
+          <div style={{ width: '1px', height: '8px', background: 'rgba(255,153,51,0.2)' }}></div>
+          <span style={{ fontSize: '0.75rem', fontWeight: language === 'hi' ? '900' : '400', color: language === 'hi' ? 'var(--accent-gold)' : 'rgba(255,255,255,0.4)' }}>हिं</span>
+          <div style={{ width: '1px', height: '8px', background: 'rgba(255,153,51,0.2)' }}></div>
+          <span style={{ fontSize: '0.75rem', fontWeight: language === 'ta' ? '900' : '400', color: language === 'ta' ? 'var(--accent-gold)' : 'rgba(255,255,255,0.4)' }}>த</span>
         </div>
       </div>
 
