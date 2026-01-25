@@ -3,39 +3,13 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Quote } from './types';
 import { fetchInitialQuotes, fetchRecommendedQuotes } from './services/geminiService';
 import { QuoteCard } from './components/QuoteCard';
-import { AdCard } from './components/AdCard';
+import { SubscriptionPaywall } from './components/SubscriptionPaywall';
 
-const VERSION_TAG = "v2.5.0-monetized";
-
-// Mock Advertisement Data
-const ADS = [
-  {
-    title: "The Meditation Hub",
-    description: "Connect with certified gurus and daily mindfulness practices tailored to your spiritual journey.",
-    ctaText: "Start Free Trial",
-    link: "https://example.com/meditation-app",
-    tag: "Wellness Partner"
-  },
-  {
-    title: "Pure Sandalwood Incense",
-    description: "Create a sacred space in your home with ethically sourced, traditional Indian fragrances.",
-    ctaText: "Shop Collection",
-    link: "https://example.com/incense-shop",
-    tag: "Home & Spirit"
-  },
-  {
-    title: "Himalayan Retreat 2025",
-    description: "Join our annual spiritual pilgrimage to the heart of the mountains. Limited spots available.",
-    ctaText: "Learn More",
-    link: "https://example.com/retreat",
-    tag: "Experiences"
-  }
-];
-
-type FeedItem = { type: 'quote'; data: Quote } | { type: 'ad'; data: typeof ADS[0] };
+const VERSION_TAG = "v2.7.0-premium";
+const FREE_LIMIT = 5;
 
 const App: React.FC = () => {
-  const [feed, setFeed] = useState<FeedItem[]>([]);
+  const [quotes, setQuotes] = useState<Quote[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [fetchingMore, setFetchingMore] = useState(false);
@@ -43,28 +17,18 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [language, setLanguage] = useState<'en' | 'hi' | 'ta'>('en');
   
+  // Subscription State
+  const [isSubscribed, setIsSubscribed] = useState<boolean>(() => {
+    return localStorage.getItem('dharma_pro') === 'true';
+  });
+  const [viewCount, setViewCount] = useState<number>(0);
+  const [showPaywall, setShowPaywall] = useState<boolean>(false);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const historyRef = useRef<Set<string>>(new Set());
   const activeStartTimeRef = useRef<number | null>(null);
   const activeIdRef = useRef<string | null>(null);
   const isFetchingRef = useRef(false);
-  const quoteCountRef = useRef(0);
-
-  const processIncomingQuotes = (newQuotes: Quote[]): FeedItem[] => {
-    const items: FeedItem[] = [];
-    newQuotes.forEach((q) => {
-      // Add the quote
-      items.push({ type: 'quote', data: q });
-      quoteCountRef.current++;
-
-      // Every 5 quotes, insert an ad
-      if (quoteCountRef.current % 5 === 0) {
-        const adIndex = Math.floor(quoteCountRef.current / 5 - 1) % ADS.length;
-        items.push({ type: 'ad', data: ADS[adIndex] });
-      }
-    });
-    return items;
-  };
 
   const fetchMore = useCallback(async (currentHistory: string[]) => {
     if (isFetchingRef.current || error) return;
@@ -75,10 +39,10 @@ const App: React.FC = () => {
     try {
       const more = await fetchRecommendedQuotes(interests, currentHistory);
       if (more && more.length > 0) {
-        setFeed(prev => {
+        setQuotes(prev => {
           const unique = more.filter(q => !historyRef.current.has(q.id));
           unique.forEach(q => historyRef.current.add(q.id));
-          return [...prev, ...processIncomingQuotes(unique)];
+          return [...prev, ...unique];
         });
       }
     } catch (e) {
@@ -101,15 +65,11 @@ const App: React.FC = () => {
       try {
         const initial = await fetchInitialQuotes();
         if (initial && initial.length > 0) {
-          const initialItems = processIncomingQuotes(initial);
-          setFeed(initialItems);
+          setQuotes(initial);
           initial.forEach(q => historyRef.current.add(q.id));
           
-          if (initialItems[0].type === 'quote') {
-            setActiveId(initialItems[0].data.id);
-            activeIdRef.current = initialItems[0].data.id;
-          }
-          
+          setActiveId(initial[0].id);
+          activeIdRef.current = initial[0].id;
           activeStartTimeRef.current = Date.now();
           setLoading(false);
 
@@ -126,18 +86,25 @@ const App: React.FC = () => {
     init();
   }, []);
 
+  const handleSubscribe = (plan: 'monthly' | 'annual') => {
+    // In a real app, this would trigger Stripe/Apple Pay
+    console.log(`Subscribed to ${plan} plan`);
+    localStorage.setItem('dharma_pro', 'true');
+    setIsSubscribed(true);
+    setShowPaywall(false);
+  };
+
   const updateInterests = useCallback((prevId: string | null) => {
     if (!prevId || !activeStartTimeRef.current) return;
     
     const durationMs = Date.now() - activeStartTimeRef.current;
     const durationSec = durationMs / 1000;
     
-    // Find quote in feed
-    const prevItem = feed.find(item => item.type === 'quote' && item.data.id === prevId);
-    if (prevItem && prevItem.type === 'quote' && durationSec > 0.5) {
+    const prevQuote = quotes.find(q => q.id === prevId);
+    if (prevQuote && durationSec > 0.5) {
       setInterests(prev => {
         const next = { ...prev };
-        prevItem.data.themes.forEach(t => {
+        prevQuote.themes.forEach(t => {
           next[t] = (next[t] || 0) + durationSec;
         });
         return next;
@@ -145,19 +112,31 @@ const App: React.FC = () => {
     }
     
     activeStartTimeRef.current = Date.now();
-  }, [feed]);
+  }, [quotes]);
 
   const handleScroll = () => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || showPaywall) return;
     const { scrollTop, clientHeight, scrollHeight } = containerRef.current;
     
     const index = Math.round(scrollTop / clientHeight);
-    const currentItem = feed[index];
+    const currentQuote = quotes[index];
     
-    if (currentItem && currentItem.type === 'quote' && currentItem.data.id !== activeIdRef.current) {
+    if (currentQuote && currentQuote.id !== activeIdRef.current) {
+      // Check Subscription Limit
+      if (!isSubscribed) {
+        const nextViewCount = viewCount + 1;
+        if (nextViewCount >= FREE_LIMIT) {
+          setShowPaywall(true);
+          // Snap back to last allowed quote to prevent peeking
+          containerRef.current.scrollTo({ top: (FREE_LIMIT - 1) * clientHeight, behavior: 'smooth' });
+          return;
+        }
+        setViewCount(nextViewCount);
+      }
+
       const prevId = activeIdRef.current;
-      activeIdRef.current = currentItem.data.id;
-      setActiveId(currentItem.data.id);
+      activeIdRef.current = currentQuote.id;
+      setActiveId(currentQuote.id);
       updateInterests(prevId);
     }
 
@@ -199,31 +178,23 @@ const App: React.FC = () => {
 
   return (
     <div style={{ backgroundColor: 'var(--bg-dark)', position: 'relative' }}>
+      {showPaywall && <SubscriptionPaywall onSubscribe={handleSubscribe} />}
+      
       <div 
         ref={containerRef}
         className="snap-container"
         onScroll={handleScroll}
+        style={{ filter: showPaywall ? 'blur(10px)' : 'none', pointerEvents: showPaywall ? 'none' : 'auto' }}
       >
-        {feed.map((item, idx) => (
-          item.type === 'quote' ? (
-            <QuoteCard 
-              key={item.data.id} 
-              quote={item.data} 
-              isActive={activeId === item.data.id}
-              language={language}
-              onViewStart={() => {}}
-              onViewEnd={() => {}}
-            />
-          ) : (
-            <AdCard 
-              key={`ad-${idx}`}
-              title={item.data.title}
-              description={item.data.description}
-              ctaText={item.data.ctaText}
-              link={item.data.link}
-              tag={item.data.tag}
-            />
-          )
+        {quotes.map((quote) => (
+          <QuoteCard 
+            key={quote.id} 
+            quote={quote} 
+            isActive={activeId === quote.id}
+            language={language}
+            onViewStart={() => {}}
+            onViewEnd={() => {}}
+          />
         ))}
         {fetchingMore && (
            <div className="snap-item" style={{ height: '100vh', justifyContent: 'center', opacity: 0.15 }}>
@@ -235,7 +206,12 @@ const App: React.FC = () => {
       <div className="header-logo">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
           <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>ॐ</span>
-          <span style={{ fontWeight: 800, fontSize: '0.8rem', letterSpacing: '3px' }}>DHARMA SCROLL</span>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontWeight: 800, fontSize: '0.8rem', letterSpacing: '3px' }}>DHARMA SCROLL</span>
+            {isSubscribed && (
+              <span style={{ fontSize: '0.5rem', fontWeight: 900, color: 'var(--accent-gold)', letterSpacing: '2px', textTransform: 'uppercase' }}>PRO MEMBER</span>
+            )}
+          </div>
         </div>
         
         <div 
