@@ -5,7 +5,7 @@ import { Quote } from '../types';
 interface QuoteCardProps {
   quote: Quote;
   isActive: boolean;
-  language: 'en' | 'hi' | 'ta';
+  language: 'en' | 'hi';
   onViewStart: (id: string) => void;
   onViewEnd: (id: string) => void;
 }
@@ -39,7 +39,6 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
 
   const getDisplayText = () => {
     if (language === 'hi') return quote.hindi;
-    if (language === 'ta') return quote.tamil;
     return quote.text;
   };
 

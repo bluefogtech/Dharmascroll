@@ -5,7 +5,7 @@ import { fetchInitialQuotes, fetchRecommendedQuotes } from './services/geminiSer
 import { QuoteCard } from './components/QuoteCard';
 import { SubscriptionPaywall } from './components/SubscriptionPaywall';
 
-const VERSION_TAG = "v2.7.0-premium";
+const VERSION_TAG = "v2.8.0-premium-lite";
 const FREE_LIMIT = 5;
 
 const App: React.FC = () => {
@@ -15,7 +15,7 @@ const App: React.FC = () => {
   const [fetchingMore, setFetchingMore] = useState(false);
   const [interests, setInterests] = useState<Record<string, number>>({});
   const [error, setError] = useState<string | null>(null);
-  const [language, setLanguage] = useState<'en' | 'hi' | 'ta'>('en');
+  const [language, setLanguage] = useState<'en' | 'hi'>('en');
   
   // Subscription State
   const [isSubscribed, setIsSubscribed] = useState<boolean>(() => {
@@ -146,7 +146,7 @@ const App: React.FC = () => {
   };
 
   const cycleLanguage = () => {
-    const languages: ('en' | 'hi' | 'ta')[] = ['en', 'hi', 'ta'];
+    const languages: ('en' | 'hi')[] = ['en', 'hi'];
     const currentIndex = languages.indexOf(language);
     const nextIndex = (currentIndex + 1) % languages.length;
     setLanguage(languages[nextIndex]);
@@ -234,8 +234,6 @@ const App: React.FC = () => {
           <span style={{ fontSize: '0.7rem', fontWeight: language === 'en' ? '900' : '400', color: language === 'en' ? 'var(--accent-gold)' : 'rgba(255,255,255,0.4)' }}>EN</span>
           <div style={{ width: '1px', height: '8px', background: 'rgba(255,153,51,0.2)' }}></div>
           <span style={{ fontSize: '0.75rem', fontWeight: language === 'hi' ? '900' : '400', color: language === 'hi' ? 'var(--accent-gold)' : 'rgba(255,255,255,0.4)' }}>हिं</span>
-          <div style={{ width: '1px', height: '8px', background: 'rgba(255,153,51,0.2)' }}></div>
-          <span style={{ fontSize: '0.75rem', fontWeight: language === 'ta' ? '900' : '400', color: language === 'ta' ? 'var(--accent-gold)' : 'rgba(255,255,255,0.4)' }}>த</span>
         </div>
       </div>
 
@@ -246,4 +244,5 @@ const App: React.FC = () => {
   );
 };
 
+// Fixed error: Added missing default export for App component
 export default App;

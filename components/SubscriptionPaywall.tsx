@@ -90,7 +90,7 @@ export const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({ onSubs
             <span style={{ color: 'var(--accent-gold)' }}>✓</span> Unlimited scrolls of all scriptures
           </li>
           <li style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ color: 'var(--accent-gold)' }}>✓</span> Full Hindi & Tamil translations
+            <span style={{ color: 'var(--accent-gold)' }}>✓</span> Full Hindi translations
           </li>
           <li style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ color: 'var(--accent-gold)' }}>✓</span> Support local scholars & preservation

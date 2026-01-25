@@ -10,7 +10,6 @@ const QUOTE_SCHEMA = {
       id: { type: Type.STRING },
       text: { type: Type.STRING },
       hindi: { type: Type.STRING },
-      tamil: { type: Type.STRING },
       source: { type: Type.STRING },
       context: { type: Type.STRING },
       sanskrit: { type: Type.STRING },
@@ -19,7 +18,7 @@ const QUOTE_SCHEMA = {
         items: { type: Type.STRING }
       }
     },
-    required: ["id", "text", "hindi", "tamil", "source", "themes"]
+    required: ["id", "text", "hindi", "source", "themes"]
   }
 };
 
@@ -38,7 +37,7 @@ export async function fetchInitialQuotes(): Promise<Quote[]> {
   // Reduced to 2 quotes for maximum speed on first load
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Pick 2 profound quotes from Indian scriptures. Diverse books. Unique IDs, Sanskrit, English, Hindi, Tamil. JSON only. Seed: ${randomSeed}`,
+    contents: `Pick 2 profound quotes from Indian scriptures. Diverse books. Unique IDs, Sanskrit, English, Hindi. JSON only. Seed: ${randomSeed}`,
     config: {
       responseMimeType: "application/json",
       responseSchema: QUOTE_SCHEMA,
@@ -76,7 +75,7 @@ export async function fetchRecommendedQuotes(
   const randomSeed = Math.floor(Math.random() * 2147483647);
 
   // Increased to 10 quotes to buffer more content in the background
-  const prompt = `Return 10 quotes. ${themesContext} Unique IDs. Exclude: ${historyIds.slice(-40).join(",")}. Include Sanskrit, English, Hindi, Tamil. JSON only. Seed: ${randomSeed}`;
+  const prompt = `Return 10 quotes. ${themesContext} Unique IDs. Exclude: ${historyIds.slice(-40).join(",")}. Include Sanskrit, English, Hindi. JSON only. Seed: ${randomSeed}`;
 
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
