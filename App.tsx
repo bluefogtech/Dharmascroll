@@ -3,11 +3,39 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Quote } from './types';
 import { fetchInitialQuotes, fetchRecommendedQuotes } from './services/geminiService';
 import { QuoteCard } from './components/QuoteCard';
+import { AdCard } from './components/AdCard';
 
-const VERSION_TAG = "v2.4.0-optimized";
+const VERSION_TAG = "v2.5.0-monetized";
+
+// Mock Advertisement Data
+const ADS = [
+  {
+    title: "The Meditation Hub",
+    description: "Connect with certified gurus and daily mindfulness practices tailored to your spiritual journey.",
+    ctaText: "Start Free Trial",
+    link: "https://example.com/meditation-app",
+    tag: "Wellness Partner"
+  },
+  {
+    title: "Pure Sandalwood Incense",
+    description: "Create a sacred space in your home with ethically sourced, traditional Indian fragrances.",
+    ctaText: "Shop Collection",
+    link: "https://example.com/incense-shop",
+    tag: "Home & Spirit"
+  },
+  {
+    title: "Himalayan Retreat 2025",
+    description: "Join our annual spiritual pilgrimage to the heart of the mountains. Limited spots available.",
+    ctaText: "Learn More",
+    link: "https://example.com/retreat",
+    tag: "Experiences"
+  }
+];
+
+type FeedItem = { type: 'quote'; data: Quote } | { type: 'ad'; data: typeof ADS[0] };
 
 const App: React.FC = () => {
-  const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [feed, setFeed] = useState<FeedItem[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [fetchingMore, setFetchingMore] = useState(false);
@@ -20,6 +48,23 @@ const App: React.FC = () => {
   const activeStartTimeRef = useRef<number | null>(null);
   const activeIdRef = useRef<string | null>(null);
   const isFetchingRef = useRef(false);
+  const quoteCountRef = useRef(0);
+
+  const processIncomingQuotes = (newQuotes: Quote[]): FeedItem[] => {
+    const items: FeedItem[] = [];
+    newQuotes.forEach((q) => {
+      // Add the quote
+      items.push({ type: 'quote', data: q });
+      quoteCountRef.current++;
+
+      // Every 5 quotes, insert an ad
+      if (quoteCountRef.current % 5 === 0) {
+        const adIndex = Math.floor(quoteCountRef.current / 5 - 1) % ADS.length;
+        items.push({ type: 'ad', data: ADS[adIndex] });
+      }
+    });
+    return items;
+  };
 
   const fetchMore = useCallback(async (currentHistory: string[]) => {
     if (isFetchingRef.current || error) return;
@@ -30,10 +75,10 @@ const App: React.FC = () => {
     try {
       const more = await fetchRecommendedQuotes(interests, currentHistory);
       if (more && more.length > 0) {
-        setQuotes(prev => {
+        setFeed(prev => {
           const unique = more.filter(q => !historyRef.current.has(q.id));
           unique.forEach(q => historyRef.current.add(q.id));
-          return [...prev, ...unique];
+          return [...prev, ...processIncomingQuotes(unique)];
         });
       }
     } catch (e) {
@@ -54,17 +99,20 @@ const App: React.FC = () => {
 
     async function init() {
       try {
-        // Fetch only 2 for speed
         const initial = await fetchInitialQuotes();
         if (initial && initial.length > 0) {
-          setQuotes(initial);
+          const initialItems = processIncomingQuotes(initial);
+          setFeed(initialItems);
           initial.forEach(q => historyRef.current.add(q.id));
-          setActiveId(initial[0].id);
-          activeIdRef.current = initial[0].id;
+          
+          if (initialItems[0].type === 'quote') {
+            setActiveId(initialItems[0].data.id);
+            activeIdRef.current = initialItems[0].data.id;
+          }
+          
           activeStartTimeRef.current = Date.now();
           setLoading(false);
 
-          // Immediately start buffering 10 more in background
           fetchMore(initial.map(q => q.id));
         } else {
           setError("The ancient scrolls are temporarily unreachable.");
@@ -84,11 +132,12 @@ const App: React.FC = () => {
     const durationMs = Date.now() - activeStartTimeRef.current;
     const durationSec = durationMs / 1000;
     
-    const prevQuote = quotes.find(q => q.id === prevId);
-    if (prevQuote && durationSec > 0.5) {
+    // Find quote in feed
+    const prevItem = feed.find(item => item.type === 'quote' && item.data.id === prevId);
+    if (prevItem && prevItem.type === 'quote' && durationSec > 0.5) {
       setInterests(prev => {
         const next = { ...prev };
-        prevQuote.themes.forEach(t => {
+        prevItem.data.themes.forEach(t => {
           next[t] = (next[t] || 0) + durationSec;
         });
         return next;
@@ -96,23 +145,22 @@ const App: React.FC = () => {
     }
     
     activeStartTimeRef.current = Date.now();
-  }, [quotes]);
+  }, [feed]);
 
   const handleScroll = () => {
     if (!containerRef.current) return;
     const { scrollTop, clientHeight, scrollHeight } = containerRef.current;
     
     const index = Math.round(scrollTop / clientHeight);
-    const currentQuote = quotes[index];
+    const currentItem = feed[index];
     
-    if (currentQuote && currentQuote.id !== activeIdRef.current) {
+    if (currentItem && currentItem.type === 'quote' && currentItem.data.id !== activeIdRef.current) {
       const prevId = activeIdRef.current;
-      activeIdRef.current = currentQuote.id;
-      setActiveId(currentQuote.id);
+      activeIdRef.current = currentItem.data.id;
+      setActiveId(currentItem.data.id);
       updateInterests(prevId);
     }
 
-    // Trigger fetch earlier: when user is 5 quotes from the bottom
     if (scrollTop + clientHeight > scrollHeight - clientHeight * 5) {
       fetchMore(Array.from(historyRef.current));
     }
@@ -156,15 +204,26 @@ const App: React.FC = () => {
         className="snap-container"
         onScroll={handleScroll}
       >
-        {quotes.map((quote) => (
-          <QuoteCard 
-            key={quote.id} 
-            quote={quote} 
-            isActive={activeId === quote.id}
-            language={language}
-            onViewStart={() => {}}
-            onViewEnd={() => {}}
-          />
+        {feed.map((item, idx) => (
+          item.type === 'quote' ? (
+            <QuoteCard 
+              key={item.data.id} 
+              quote={item.data} 
+              isActive={activeId === item.data.id}
+              language={language}
+              onViewStart={() => {}}
+              onViewEnd={() => {}}
+            />
+          ) : (
+            <AdCard 
+              key={`ad-${idx}`}
+              title={item.data.title}
+              description={item.data.description}
+              ctaText={item.data.ctaText}
+              link={item.data.link}
+              tag={item.data.tag}
+            />
+          )
         ))}
         {fetchingMore && (
            <div className="snap-item" style={{ height: '100vh', justifyContent: 'center', opacity: 0.15 }}>
