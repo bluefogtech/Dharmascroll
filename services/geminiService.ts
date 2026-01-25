@@ -35,9 +35,10 @@ export async function fetchInitialQuotes(): Promise<Quote[]> {
   const ai = getAIClient();
   const randomSeed = Math.floor(Math.random() * 2147483647);
   
+  // Reduced to 2 quotes for maximum speed on first load
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Pick 3 RANDOM and highly diverse profound quotes from different Indian scriptures (Vedas, Upanishads, Puranas, Gita, or Yoga Vasistha). Ensure they are not always from the same book. Today's unique entropy: ${randomSeed}. Provide unique IDs, original Sanskrit, English translation, Hindi translation, and Tamil translation. Output JSON only.`,
+    contents: `Pick 2 profound quotes from Indian scriptures. Diverse books. Unique IDs, Sanskrit, English, Hindi, Tamil. JSON only. Seed: ${randomSeed}`,
     config: {
       responseMimeType: "application/json",
       responseSchema: QUOTE_SCHEMA,
@@ -69,12 +70,13 @@ export async function fetchRecommendedQuotes(
     .map(([theme]) => theme);
 
   const themesContext = topThemes.length > 0 
-    ? `User interests: ${topThemes.join(", ")}.` 
+    ? `Themes: ${topThemes.join(", ")}.` 
     : "Diverse spiritual wisdom.";
 
   const randomSeed = Math.floor(Math.random() * 2147483647);
 
-  const prompt = `Return 6 quotes. ${themesContext} Unique IDs. Strictly avoid these specific IDs: ${historyIds.slice(-40).join(",")}. Include Sanskrit, English, Hindi, and Tamil translations. JSON only. Entropy: ${randomSeed}`;
+  // Increased to 10 quotes to buffer more content in the background
+  const prompt = `Return 10 quotes. ${themesContext} Unique IDs. Exclude: ${historyIds.slice(-40).join(",")}. Include Sanskrit, English, Hindi, Tamil. JSON only. Seed: ${randomSeed}`;
 
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",

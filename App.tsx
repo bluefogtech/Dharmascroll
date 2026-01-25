@@ -4,7 +4,7 @@ import { Quote } from './types';
 import { fetchInitialQuotes, fetchRecommendedQuotes } from './services/geminiService';
 import { QuoteCard } from './components/QuoteCard';
 
-const VERSION_TAG = "v2.3.0-multi-lingual";
+const VERSION_TAG = "v2.4.0-optimized";
 
 const App: React.FC = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -21,14 +21,14 @@ const App: React.FC = () => {
   const activeIdRef = useRef<string | null>(null);
   const isFetchingRef = useRef(false);
 
-  const fetchMore = useCallback(async () => {
+  const fetchMore = useCallback(async (currentHistory: string[]) => {
     if (isFetchingRef.current || error) return;
     
     isFetchingRef.current = true;
     setFetchingMore(true);
 
     try {
-      const more = await fetchRecommendedQuotes(interests, Array.from(historyRef.current));
+      const more = await fetchRecommendedQuotes(interests, currentHistory);
       if (more && more.length > 0) {
         setQuotes(prev => {
           const unique = more.filter(q => !historyRef.current.has(q.id));
@@ -54,25 +54,18 @@ const App: React.FC = () => {
 
     async function init() {
       try {
+        // Fetch only 2 for speed
         const initial = await fetchInitialQuotes();
         if (initial && initial.length > 0) {
-          const shuffledInitial = [...initial].sort(() => Math.random() - 0.5);
-          
-          setQuotes(shuffledInitial);
-          shuffledInitial.forEach(q => historyRef.current.add(q.id));
-          setActiveId(shuffledInitial[0].id);
-          activeIdRef.current = shuffledInitial[0].id;
+          setQuotes(initial);
+          initial.forEach(q => historyRef.current.add(q.id));
+          setActiveId(initial[0].id);
+          activeIdRef.current = initial[0].id;
           activeStartTimeRef.current = Date.now();
           setLoading(false);
 
-          const more = await fetchRecommendedQuotes({}, Array.from(historyRef.current));
-          if (more && more.length > 0) {
-            setQuotes(prev => {
-              const unique = more.filter(q => !historyRef.current.has(q.id));
-              unique.forEach(q => historyRef.current.add(q.id));
-              return [...prev, ...unique];
-            });
-          }
+          // Immediately start buffering 10 more in background
+          fetchMore(initial.map(q => q.id));
         } else {
           setError("The ancient scrolls are temporarily unreachable.");
           setLoading(false);
@@ -119,8 +112,9 @@ const App: React.FC = () => {
       updateInterests(prevId);
     }
 
-    if (scrollTop + clientHeight > scrollHeight - clientHeight * 3) {
-      fetchMore();
+    // Trigger fetch earlier: when user is 5 quotes from the bottom
+    if (scrollTop + clientHeight > scrollHeight - clientHeight * 5) {
+      fetchMore(Array.from(historyRef.current));
     }
   };
 
