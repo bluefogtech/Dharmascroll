@@ -31,7 +31,6 @@ function getAIClient() {
 
 export async function fetchInitialQuotes(): Promise<Quote[]> {
   const ai = getAIClient();
-  // Using a larger entropy pool for the seed
   const randomSeed = Math.floor(Math.random() * 2147483647);
   
   const response = await ai.models.generateContent({
@@ -40,7 +39,7 @@ export async function fetchInitialQuotes(): Promise<Quote[]> {
     config: {
       responseMimeType: "application/json",
       responseSchema: QUOTE_SCHEMA,
-      temperature: 1.0, // Maximum creativity/randomness for selection
+      temperature: 1.0,
       seed: randomSeed,
       thinkingConfig: { thinkingBudget: 0 }
     }
@@ -73,7 +72,6 @@ export async function fetchRecommendedQuotes(
 
   const randomSeed = Math.floor(Math.random() * 2147483647);
 
-  // Fetching 6 quotes in the background to build a larger buffer
   const prompt = `Return 6 quotes. ${themesContext} Unique IDs. Strictly avoid these specific IDs: ${historyIds.slice(-40).join(",")}. Include Sanskrit, English, Hindi translations. JSON only. Entropy: ${randomSeed}`;
 
   const response = await ai.models.generateContent({
@@ -95,5 +93,27 @@ export async function fetchRecommendedQuotes(
   } catch (e) {
     console.error("Failed to parse recommendations", e);
     return [];
+  }
+}
+
+export async function generateSpeech(text: string): Promise<string | undefined> {
+  const ai = getAIClient();
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash-preview-tts",
+      contents: [{ parts: [{ text }] }],
+      config: {
+        responseModalities: ["AUDIO"],
+        speechConfig: {
+          voiceConfig: {
+            prebuiltVoiceConfig: { voiceName: 'Zephyr' },
+          },
+        },
+      },
+    });
+    return response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+  } catch (error) {
+    console.error("TTS generation failed:", error);
+    return undefined;
   }
 }
