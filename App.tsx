@@ -3,10 +3,9 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Quote } from './types';
 import { fetchInitialQuotes, fetchRecommendedQuotes } from './services/geminiService';
 import { QuoteCard } from './components/QuoteCard';
-import { SubscriptionPaywall } from './components/SubscriptionPaywall';
 
-const VERSION_TAG = "v2.8.0-premium-lite";
-const FREE_LIMIT = 5;
+const VERSION_TAG = "v4.0.0-free";
+const CACHE_KEY = "dharma_quotes_cache";
 
 const App: React.FC = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -14,24 +13,45 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [fetchingMore, setFetchingMore] = useState(false);
   const [interests, setInterests] = useState<Record<string, number>>({});
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{ message: string; isQuota: boolean } | null>(null);
   const [language, setLanguage] = useState<'en' | 'hi'>('en');
   
-  // Subscription State
-  const [isSubscribed, setIsSubscribed] = useState<boolean>(() => {
-    return localStorage.getItem('dharma_pro') === 'true';
-  });
-  const [viewCount, setViewCount] = useState<number>(0);
-  const [showPaywall, setShowPaywall] = useState<boolean>(false);
-
   const containerRef = useRef<HTMLDivElement>(null);
   const historyRef = useRef<Set<string>>(new Set());
   const activeStartTimeRef = useRef<number | null>(null);
   const activeIdRef = useRef<string | null>(null);
   const isFetchingRef = useRef(false);
+  const hasInitializedRef = useRef(false);
+
+  // Load cache on startup
+  useEffect(() => {
+    const saved = localStorage.getItem(CACHE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as Quote[];
+        if (parsed.length > 0) {
+          setQuotes(parsed);
+          parsed.forEach(q => historyRef.current.add(q.id));
+          setActiveId(parsed[0].id);
+          activeIdRef.current = parsed[0].id;
+          setLoading(false);
+          console.log("DharmaScroll: Loaded from cache");
+        }
+      } catch (e) {
+        localStorage.removeItem(CACHE_KEY);
+      }
+    }
+  }, []);
+
+  // Save cache whenever quotes change
+  useEffect(() => {
+    if (quotes.length > 0) {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(quotes.slice(0, 50))); // Keep last 50
+    }
+  }, [quotes]);
 
   const fetchMore = useCallback(async (currentHistory: string[]) => {
-    if (isFetchingRef.current || error) return;
+    if (isFetchingRef.current) return;
     
     isFetchingRef.current = true;
     setFetchingMore(true);
@@ -44,147 +64,122 @@ const App: React.FC = () => {
           unique.forEach(q => historyRef.current.add(q.id));
           return [...prev, ...unique];
         });
+        setError(null);
       }
-    } catch (e) {
-      console.error("DharmaScroll: Fetch More Error", e);
+    } catch (e: any) {
+      const isQuota = e.message.toLowerCase().includes('quota') || e.message.includes('429');
+      console.warn("DharmaScroll: Background Fetch Error", e.message);
+      
+      // Only show a blocking error if we have NO quotes to show
+      if (quotes.length === 0) {
+        setError({
+          message: isQuota 
+            ? "Gemini API limits hit. Please wait a minute while the sacred scrolls reset." 
+            : `Connection Error: ${e.message}`,
+          isQuota
+        });
+      }
     } finally {
       setFetchingMore(false);
       isFetchingRef.current = false;
     }
-  }, [interests, error]);
+  }, [interests, quotes.length]);
 
   useEffect(() => {
-    const apiKey = process.env.API_KEY;
-    if (!apiKey) {
-      setError("API Key missing. Accessing divine knowledge requires a key.");
-      setLoading(false);
-      return;
-    }
+    if (hasInitializedRef.current) return;
+    hasInitializedRef.current = true;
 
     async function init() {
+      // If we already have quotes from cache, just trigger a background fetch
+      if (quotes.length > 0) {
+        fetchMore(Array.from(historyRef.current));
+        return;
+      }
+
       try {
         const initial = await fetchInitialQuotes();
         if (initial && initial.length > 0) {
           setQuotes(initial);
           initial.forEach(q => historyRef.current.add(q.id));
-          
           setActiveId(initial[0].id);
           activeIdRef.current = initial[0].id;
           activeStartTimeRef.current = Date.now();
           setLoading(false);
-
           fetchMore(initial.map(q => q.id));
-        } else {
-          setError("The ancient scrolls are temporarily unreachable.");
-          setLoading(false);
         }
       } catch (err: any) {
-        setError(`A hurdle on the path: ${err.message}`);
+        const isQuota = err.message.toLowerCase().includes('quota') || err.message.includes('429');
+        setError({ 
+          message: isQuota ? "Gemini Quota Exceeded. The preview model is limited. Please try again in 60 seconds." : err.message, 
+          isQuota 
+        });
         setLoading(false);
       }
     }
     init();
-  }, []);
-
-  const handleSubscribe = (plan: 'monthly' | 'annual') => {
-    // In a real app, this would trigger Stripe/Apple Pay
-    console.log(`Subscribed to ${plan} plan`);
-    localStorage.setItem('dharma_pro', 'true');
-    setIsSubscribed(true);
-    setShowPaywall(false);
-  };
+  }, [fetchMore, quotes.length]);
 
   const updateInterests = useCallback((prevId: string | null) => {
     if (!prevId || !activeStartTimeRef.current) return;
-    
-    const durationMs = Date.now() - activeStartTimeRef.current;
-    const durationSec = durationMs / 1000;
-    
+    const durationSec = (Date.now() - activeStartTimeRef.current) / 1000;
     const prevQuote = quotes.find(q => q.id === prevId);
     if (prevQuote && durationSec > 0.5) {
       setInterests(prev => {
         const next = { ...prev };
-        prevQuote.themes.forEach(t => {
-          next[t] = (next[t] || 0) + durationSec;
-        });
+        prevQuote.themes.forEach(t => next[t] = (next[t] || 0) + durationSec);
         return next;
       });
     }
-    
     activeStartTimeRef.current = Date.now();
   }, [quotes]);
 
   const handleScroll = () => {
-    if (!containerRef.current || showPaywall) return;
+    if (!containerRef.current) return;
     const { scrollTop, clientHeight, scrollHeight } = containerRef.current;
-    
     const index = Math.round(scrollTop / clientHeight);
     const currentQuote = quotes[index];
     
     if (currentQuote && currentQuote.id !== activeIdRef.current) {
-      // Check Subscription Limit
-      if (!isSubscribed) {
-        const nextViewCount = viewCount + 1;
-        if (nextViewCount >= FREE_LIMIT) {
-          setShowPaywall(true);
-          // Snap back to last allowed quote to prevent peeking
-          containerRef.current.scrollTo({ top: (FREE_LIMIT - 1) * clientHeight, behavior: 'smooth' });
-          return;
-        }
-        setViewCount(nextViewCount);
-      }
-
       const prevId = activeIdRef.current;
       activeIdRef.current = currentQuote.id;
       setActiveId(currentQuote.id);
       updateInterests(prevId);
     }
 
-    if (scrollTop + clientHeight > scrollHeight - clientHeight * 5) {
+    // Conservative fetch: only when 1 item away from end
+    if (scrollTop + clientHeight > scrollHeight - clientHeight * 1.5) {
       fetchMore(Array.from(historyRef.current));
     }
   };
 
-  const cycleLanguage = () => {
-    const languages: ('en' | 'hi')[] = ['en', 'hi'];
-    const currentIndex = languages.indexOf(language);
-    const nextIndex = (currentIndex + 1) % languages.length;
-    setLanguage(languages[nextIndex]);
-  };
-
-  if (loading) {
+  if (loading && quotes.length === 0) {
     return (
       <div className="fullscreen-center">
         <div className="spinner"></div>
-        <p style={{ color: 'var(--accent-gold)', fontStyle: 'italic', fontSize: '1rem', letterSpacing: '0.1em', animation: 'pulse 1.5s infinite' }}>
-          Opening the Sacred Scrolls...
-        </p>
+        <p style={{ color: 'var(--accent-gold)', fontStyle: 'italic' }}>Consulting the Scrolls...</p>
       </div>
     );
   }
 
-  if (error) {
+  if (error && quotes.length === 0) {
     return (
       <div className="fullscreen-center">
-        <div className="error-symbol">ॐ</div>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--accent-gold)' }}>Path Interrupted</h2>
-        <p style={{ color: 'var(--text-slate)', maxWidth: '20rem', marginBottom: '2rem', lineHeight: '1.6' }}>{error}</p>
-        <button onClick={() => window.location.reload()} className="btn-primary">
-          Restore Connection
-        </button>
+        <div className="error-symbol">{error.isQuota ? "⌛" : "ॐ"}</div>
+        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--accent-gold)' }}>
+          {error.isQuota ? "Quota Reached" : "Path Interrupted"}
+        </h2>
+        <p style={{ color: 'var(--text-slate)', maxWidth: '20rem', marginBottom: '2rem', lineHeight: '1.6' }}>{error.message}</p>
+        <button onClick={() => window.location.reload()} className="btn-primary">Try Again</button>
       </div>
     );
   }
 
   return (
     <div style={{ backgroundColor: 'var(--bg-dark)', position: 'relative' }}>
-      {showPaywall && <SubscriptionPaywall onSubscribe={handleSubscribe} />}
-      
       <div 
         ref={containerRef}
         className="snap-container"
         onScroll={handleScroll}
-        style={{ filter: showPaywall ? 'blur(10px)' : 'none', pointerEvents: showPaywall ? 'none' : 'auto' }}
       >
         {quotes.map((quote) => (
           <QuoteCard 
@@ -208,41 +203,31 @@ const App: React.FC = () => {
           <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>ॐ</span>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span style={{ fontWeight: 800, fontSize: '0.8rem', letterSpacing: '3px' }}>DHARMA SCROLL</span>
-            {isSubscribed && (
-              <span style={{ fontSize: '0.5rem', fontWeight: 900, color: 'var(--accent-gold)', letterSpacing: '2px', textTransform: 'uppercase' }}>PRO MEMBER</span>
-            )}
           </div>
         </div>
         
         <div 
-          onClick={cycleLanguage}
+          onClick={() => setLanguage(prev => prev === 'en' ? 'hi' : 'en')}
           style={{ 
             pointerEvents: 'auto',
             cursor: 'pointer',
             display: 'flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            background: 'rgba(0, 0, 0, 0.5)',
+            background: 'rgba(0,0,0,0.5)',
             padding: '6px 14px',
             borderRadius: '24px',
             border: '1px solid rgba(255, 153, 51, 0.4)',
-            backdropFilter: 'blur(15px)',
-            boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
-            transition: 'all 0.3s'
+            backdropFilter: 'blur(15px)'
           }}
         >
-          <span style={{ fontSize: '0.7rem', fontWeight: language === 'en' ? '900' : '400', color: language === 'en' ? 'var(--accent-gold)' : 'rgba(255,255,255,0.4)' }}>EN</span>
-          <div style={{ width: '1px', height: '8px', background: 'rgba(255,153,51,0.2)' }}></div>
-          <span style={{ fontSize: '0.75rem', fontWeight: language === 'hi' ? '900' : '400', color: language === 'hi' ? 'var(--accent-gold)' : 'rgba(255,255,255,0.4)' }}>हिं</span>
+          <span style={{ fontSize: '0.7rem', color: language === 'en' ? 'var(--accent-gold)' : 'white' }}>EN</span>
+          <span style={{ margin: '0 8px', opacity: 0.2 }}>|</span>
+          <span style={{ fontSize: '0.75rem', color: language === 'hi' ? 'var(--accent-gold)' : 'white' }}>हिं</span>
         </div>
       </div>
 
-      <div className="version-tag">
-        {VERSION_TAG}
-      </div>
+      <div className="version-tag">{VERSION_TAG}</div>
     </div>
   );
 };
 
-// Fixed error: Added missing default export for App component
 export default App;

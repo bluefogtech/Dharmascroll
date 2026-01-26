@@ -1,11 +1,25 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 
 interface SubscriptionPaywallProps {
-  onSubscribe: (plan: 'monthly' | 'annual') => void;
+  onSubscribe: (plan: 'monthly' | 'annual') => Promise<void>;
 }
 
 export const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({ onSubscribe }) => {
+  const [loadingPlan, setLoadingPlan] = useState<'monthly' | 'annual' | null>(null);
+
+  const handleSubscribe = async (plan: 'monthly' | 'annual') => {
+    setLoadingPlan(plan);
+    try {
+      await onSubscribe(plan);
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong with the connection. Please try again.");
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
+
   return (
     <div className="fullscreen-center" style={{ 
       background: 'linear-gradient(to bottom, #1a0b04, #2d1409)', 
@@ -35,9 +49,10 @@ export const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({ onSubs
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
-          {/* Annual Plan (Featured) */}
+          {/* Annual Plan */}
           <button 
-            onClick={() => onSubscribe('annual')}
+            disabled={!!loadingPlan}
+            onClick={() => handleSubscribe('annual')}
             style={{
               background: 'linear-gradient(90deg, #ffcc33 0%, #ff9933 100%)',
               border: 'none',
@@ -46,32 +61,39 @@ export const SubscriptionPaywall: React.FC<SubscriptionPaywallProps> = ({ onSubs
               cursor: 'pointer',
               position: 'relative',
               overflow: 'hidden',
-              boxShadow: '0 10px 20px rgba(255, 153, 51, 0.2)'
+              boxShadow: '0 10px 20px rgba(255, 153, 51, 0.2)',
+              opacity: loadingPlan === 'monthly' ? 0.5 : 1
             }}
           >
             <div style={{ position: 'absolute', top: 0, right: 0, background: 'var(--accent-kumkum)', color: 'white', fontSize: '0.6rem', fontWeight: 900, padding: '4px 12px', borderRadius: '0 0 0 12px', textTransform: 'uppercase' }}>
               Best Value - 85% OFF
             </div>
             <div style={{ textAlign: 'left' }}>
-              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#1a0b04' }}>Annual Access</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#1a0b04' }}>
+                {loadingPlan === 'annual' ? 'Connecting to Temple...' : 'Annual Access'}
+              </div>
               <div style={{ fontSize: '0.85rem', color: 'rgba(26, 11, 4, 0.7)', fontWeight: 600 }}>$23.88 / year ($1.99/mo)</div>
             </div>
           </button>
 
           {/* Monthly Plan */}
           <button 
-            onClick={() => onSubscribe('monthly')}
+            disabled={!!loadingPlan}
+            onClick={() => handleSubscribe('monthly')}
             style={{
               background: 'rgba(255, 255, 255, 0.05)',
               border: '1px solid rgba(255, 255, 255, 0.1)',
               borderRadius: '16px',
               padding: '1.25rem',
               cursor: 'pointer',
-              transition: 'background 0.3s'
+              transition: 'background 0.3s',
+              opacity: loadingPlan === 'annual' ? 0.5 : 1
             }}
           >
             <div style={{ textAlign: 'left' }}>
-              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-white)' }}>Monthly Access</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-white)' }}>
+                {loadingPlan === 'monthly' ? 'Processing...' : 'Monthly Access'}
+              </div>
               <div style={{ fontSize: '0.85rem', color: 'var(--text-slate)', fontWeight: 600 }}>$12.99 / month</div>
             </div>
           </button>

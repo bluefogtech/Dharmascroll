@@ -30,31 +30,48 @@ function getAIClient() {
   return new GoogleGenAI({ apiKey });
 }
 
+/**
+ * Executes a function with aggressive exponential backoff for quota errors.
+ */
+async function withRetry<T>(fn: () => Promise<T>, retries = 3, delay = 5000): Promise<T> {
+  try {
+    return await fn();
+  } catch (error: any) {
+    const errorMsg = error?.message || "";
+    const isQuota = errorMsg.includes('429') || 
+                    errorMsg.toLowerCase().includes('quota') || 
+                    errorMsg.toLowerCase().includes('limit') ||
+                    errorMsg.toLowerCase().includes('exhausted');
+
+    if (isQuota && retries > 0) {
+      console.warn(`DharmaScroll: Quota hit. Waiting ${delay}ms before retry...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return withRetry(fn, retries - 1, delay * 2);
+    }
+    throw error;
+  }
+}
+
 export async function fetchInitialQuotes(): Promise<Quote[]> {
   const ai = getAIClient();
-  const randomSeed = Math.floor(Math.random() * 2147483647);
+  const randomSeed = Math.floor(Math.random() * 1000000);
   
-  // Reduced to 2 quotes for maximum speed on first load
-  const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
-    contents: `Pick 2 profound quotes from Indian scriptures. Diverse books. Unique IDs, Sanskrit, English, Hindi. JSON only. Seed: ${randomSeed}`,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: QUOTE_SCHEMA,
-      temperature: 1.0,
-      seed: randomSeed,
-      thinkingConfig: { thinkingBudget: 0 }
-    }
-  });
+  return withRetry(async () => {
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: "Return exactly 3 unique spiritual quotes from Indian scriptures (Gita, Vedas, Upanishads). Include Sanskrit, English, Hindi. JSON format.",
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: QUOTE_SCHEMA,
+        temperature: 1.0,
+        seed: randomSeed,
+        thinkingConfig: { thinkingBudget: 0 }
+      }
+    });
 
-  const text = response.text;
-  if (!text) return [];
-  try {
-    return JSON.parse(text.trim());
-  } catch (e) {
-    console.error("Failed to parse initial quotes", e);
-    return [];
-  }
+    const text = response.text;
+    return text ? JSON.parse(text.trim()) : [];
+  });
 }
 
 export async function fetchRecommendedQuotes(
@@ -62,39 +79,34 @@ export async function fetchRecommendedQuotes(
   historyIds: string[]
 ): Promise<Quote[]> {
   const ai = getAIClient();
-  
   const topThemes = Object.entries(weightedThemes)
     .sort(([, a], [, b]) => b - a)
-    .slice(0, 3)
+    .slice(0, 2)
     .map(([theme]) => theme);
 
   const themesContext = topThemes.length > 0 
-    ? `Themes: ${topThemes.join(", ")}.` 
+    ? `Focus on: ${topThemes.join(", ")}.` 
     : "Diverse spiritual wisdom.";
 
-  const randomSeed = Math.floor(Math.random() * 2147483647);
+  const randomSeed = Math.floor(Math.random() * 1000000);
 
-  // Increased to 10 quotes to buffer more content in the background
-  const prompt = `Return 10 quotes. ${themesContext} Unique IDs. Exclude: ${historyIds.slice(-40).join(",")}. Include Sanskrit, English, Hindi. JSON only. Seed: ${randomSeed}`;
+  return withRetry(async () => {
+    // Smaller batch size (8) is less likely to trigger rate limits than 20
+    const prompt = `Provide 8 unique spiritual quotes from Indian scriptures. ${themesContext} Skip these IDs: ${historyIds.slice(-20).join(",")}. Include Sanskrit, English, Hindi. JSON format. Seed: ${randomSeed}`;
 
-  const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
-    contents: prompt,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: QUOTE_SCHEMA,
-      temperature: 0.9,
-      seed: randomSeed,
-      thinkingConfig: { thinkingBudget: 0 }
-    }
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: QUOTE_SCHEMA,
+        temperature: 0.9,
+        seed: randomSeed,
+        thinkingConfig: { thinkingBudget: 0 }
+      }
+    });
+
+    const text = response.text;
+    return text ? JSON.parse(text.trim()) : [];
   });
-
-  const text = response.text;
-  if (!text) return [];
-  try {
-    return JSON.parse(text.trim());
-  } catch (e) {
-    console.error("Failed to parse recommendations", e);
-    return [];
-  }
 }
