@@ -4,7 +4,8 @@ import { Quote } from './types';
 import { fetchInitialQuotes, fetchRecommendedQuotes } from './services/geminiService';
 import { QuoteCard } from './components/QuoteCard';
 
-const VERSION_TAG = "v4.3.0-hyper-fetch";
+const VERSION_TAG = "v4.4.0-credits";
+const BUILT_BY = "Developed by Blue Fog Technology";
 const CACHE_KEY = "dharma_quotes_cache";
 
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -24,6 +25,7 @@ const App: React.FC = () => {
   const [interests, setInterests] = useState<Record<string, number>>({});
   const [error, setError] = useState<{ message: string; isQuota: boolean } | null>(null);
   const [language, setLanguage] = useState<'en' | 'hi'>('en');
+  const [showCredits, setShowCredits] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const historyRef = useRef<Set<string>>(new Set());
@@ -64,7 +66,6 @@ const App: React.FC = () => {
     if (isFetchingRef.current) return;
     
     isFetchingRef.current = true;
-    // Don't show the fetching spinner unless we are actually near the bottom to keep UI clean
     setFetchingMore(true);
 
     try {
@@ -101,7 +102,6 @@ const App: React.FC = () => {
 
     async function init() {
       if (quotes.length > 0) {
-        // Eagerly fetch more content in background immediately on load
         fetchMore(Array.from(historyRef.current));
         return;
       }
@@ -116,7 +116,6 @@ const App: React.FC = () => {
           activeIdRef.current = shuffledInitial[0].id;
           activeStartTimeRef.current = Date.now();
           setLoading(false);
-          // Fetch next batch immediately
           fetchMore(shuffledInitial.map(q => q.id));
         }
       } catch (err: any) {
@@ -158,8 +157,6 @@ const App: React.FC = () => {
       updateInterests(prevId);
     }
 
-    // HYPER-FETCH: Start fetching when 5 screens away from the end
-    // This ensures that even if API takes 5-10 seconds, content is ready before the user gets there
     if (scrollTop + clientHeight > scrollHeight - clientHeight * 5) {
       fetchMore(Array.from(historyRef.current));
     }
@@ -223,26 +220,75 @@ const App: React.FC = () => {
           </div>
         </div>
         
-        <div 
-          onClick={cycleLanguage}
-          style={{ 
-            pointerEvents: 'auto',
-            cursor: 'pointer',
-            display: 'flex',
-            background: 'rgba(0,0,0,0.5)',
-            padding: '6px 14px',
-            borderRadius: '24px',
-            border: '1px solid rgba(255, 153, 51, 0.4)',
-            backdropFilter: 'blur(15px)'
-          }}
-        >
-          <span style={{ fontSize: '0.7rem', color: language === 'en' ? 'var(--accent-gold)' : 'white' }}>EN</span>
-          <span style={{ margin: '0 8px', opacity: 0.2 }}>|</span>
-          <span style={{ fontSize: '0.75rem', color: language === 'hi' ? 'var(--accent-gold)' : 'white' }}>हिं</span>
+        <div style={{ display: 'flex', gap: '10px', pointerEvents: 'auto' }}>
+            <div 
+              onClick={cycleLanguage}
+              style={{ 
+                cursor: 'pointer',
+                display: 'flex',
+                background: 'rgba(0,0,0,0.5)',
+                padding: '6px 14px',
+                borderRadius: '24px',
+                border: '1px solid rgba(255, 153, 51, 0.4)',
+                backdropFilter: 'blur(15px)'
+              }}
+            >
+              <span style={{ fontSize: '0.7rem', color: language === 'en' ? 'var(--accent-gold)' : 'white' }}>EN</span>
+              <span style={{ margin: '0 8px', opacity: 0.2 }}>|</span>
+              <span style={{ fontSize: '0.75rem', color: language === 'hi' ? 'var(--accent-gold)' : 'white' }}>हिं</span>
+            </div>
+
+            <div 
+              onClick={() => setShowCredits(true)}
+              style={{ 
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'rgba(0,0,0,0.5)',
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                border: '1px solid rgba(255, 153, 51, 0.4)',
+                backdropFilter: 'blur(15px)',
+                color: 'var(--accent-gold)',
+                fontSize: '1.1rem',
+                fontWeight: 'bold'
+              }}
+            >
+              i
+            </div>
         </div>
       </div>
 
-      <div className="version-tag">{VERSION_TAG}</div>
+      {showCredits && (
+        <div className="overlay" onClick={() => setShowCredits(false)}>
+          <div className="overlay-content" onClick={e => e.stopPropagation()}>
+            <h2 className="overlay-title">About DharmaScroll</h2>
+            <p className="overlay-text">
+              DharmaScroll is a sanctuary for spiritual seekers, bringing the profound wisdom 
+              of Indian scriptures to your fingertips in a serene, modern experience.
+            </p>
+            <p className="overlay-text" style={{ fontSize: '0.9rem', opacity: 0.8 }}>
+              Built with care by <a href="https://www.bluefog.co.uk/" target="_blank" rel="noopener noreferrer" className="bluefog-link">Blue Fog Technology</a>.
+            </p>
+            <div style={{ borderTop: '1px solid rgba(255, 153, 51, 0.2)', paddingTop: '1.5rem', marginTop: '1rem' }}>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-slate)', marginBottom: '1rem' }}>
+                  © 2025 Blue Fog Technology. All Rights Reserved.
+                </p>
+                <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontStyle: 'italic', lineHeight: '1.4' }}>
+                  Legal: All scripture quotes and translations are generated using the Gemini API for educational and spiritual guidance. 
+                  Accuracy may vary; practitioners should consult official sources for theological depth.
+                </p>
+            </div>
+            <button className="btn-primary" style={{ marginTop: '2rem' }} onClick={() => setShowCredits(false)}>
+              Back to Scrolls
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="version-tag">{VERSION_TAG} | {BUILT_BY}</div>
     </div>
   );
 };

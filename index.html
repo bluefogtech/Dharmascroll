@@ -172,6 +172,59 @@
             color: rgba(255, 204, 51, 0.3); z-index: 50;
         }
 
+        /* Credits Overlay Styles */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(20px);
+            padding: 2rem;
+            box-sizing: border-box;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .overlay-content {
+            max-width: 32rem;
+            text-align: center;
+            color: var(--text-white);
+        }
+
+        .overlay-title {
+            font-size: 2rem;
+            color: var(--accent-gold);
+            margin-bottom: 1.5rem;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .overlay-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--text-slate);
+            margin-bottom: 2rem;
+        }
+
+        .bluefog-link {
+            color: var(--accent-saffron);
+            text-decoration: none;
+            font-weight: 600;
+            border-bottom: 1px solid var(--accent-saffron);
+            transition: all 0.2s;
+        }
+
+        .bluefog-link:hover {
+            color: var(--accent-gold);
+            border-color: var(--accent-gold);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes float { 0%, 100% { transform: translate(-50%, 0px); } 50% { transform: translate(-50%, -10px); } }
         @keyframes pulse { 0%, 100% { opacity: 0.8; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.05); } }
