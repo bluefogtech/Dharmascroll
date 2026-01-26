@@ -4,7 +4,7 @@ import { Quote } from './types';
 import { fetchInitialQuotes, fetchRecommendedQuotes } from './services/geminiService';
 import { QuoteCard } from './components/QuoteCard';
 
-const VERSION_TAG = "v4.2.0-randomized";
+const VERSION_TAG = "v4.3.0-hyper-fetch";
 const CACHE_KEY = "dharma_quotes_cache";
 
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -39,7 +39,6 @@ const App: React.FC = () => {
       try {
         let parsed = JSON.parse(saved) as Quote[];
         if (parsed.length > 0) {
-          // Shuffle the cache so they don't see the same first quote on refresh
           parsed = shuffleArray(parsed);
           setQuotes(parsed);
           parsed.forEach(q => historyRef.current.add(q.id));
@@ -65,6 +64,7 @@ const App: React.FC = () => {
     if (isFetchingRef.current) return;
     
     isFetchingRef.current = true;
+    // Don't show the fetching spinner unless we are actually near the bottom to keep UI clean
     setFetchingMore(true);
 
     try {
@@ -101,6 +101,7 @@ const App: React.FC = () => {
 
     async function init() {
       if (quotes.length > 0) {
+        // Eagerly fetch more content in background immediately on load
         fetchMore(Array.from(historyRef.current));
         return;
       }
@@ -108,7 +109,6 @@ const App: React.FC = () => {
       try {
         const initial = await fetchInitialQuotes();
         if (initial && initial.length > 0) {
-          // Also shuffle the initial fetched batch for good measure
           const shuffledInitial = shuffleArray(initial);
           setQuotes(shuffledInitial);
           shuffledInitial.forEach(q => historyRef.current.add(q.id));
@@ -116,6 +116,7 @@ const App: React.FC = () => {
           activeIdRef.current = shuffledInitial[0].id;
           activeStartTimeRef.current = Date.now();
           setLoading(false);
+          // Fetch next batch immediately
           fetchMore(shuffledInitial.map(q => q.id));
         }
       } catch (err: any) {
@@ -157,7 +158,9 @@ const App: React.FC = () => {
       updateInterests(prevId);
     }
 
-    if (scrollTop + clientHeight > scrollHeight - clientHeight * 1.5) {
+    // HYPER-FETCH: Start fetching when 5 screens away from the end
+    // This ensures that even if API takes 5-10 seconds, content is ready before the user gets there
+    if (scrollTop + clientHeight > scrollHeight - clientHeight * 5) {
       fetchMore(Array.from(historyRef.current));
     }
   };

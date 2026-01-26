@@ -31,9 +31,10 @@ function getAIClient() {
 }
 
 /**
- * Executes a function with aggressive exponential backoff for quota errors.
+ * Executes a function with exponential backoff.
+ * Reduced default delay to 2.5s for faster background recovery.
  */
-async function withRetry<T>(fn: () => Promise<T>, retries = 3, delay = 5000): Promise<T> {
+async function withRetry<T>(fn: () => Promise<T>, retries = 3, delay = 2500): Promise<T> {
   try {
     return await fn();
   } catch (error: any) {
@@ -44,7 +45,7 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 3, delay = 5000): Pr
                     errorMsg.toLowerCase().includes('exhausted');
 
     if (isQuota && retries > 0) {
-      console.warn(`DharmaScroll: Quota hit. Waiting ${delay}ms before retry...`);
+      console.warn(`DharmaScroll: Quota hit. Background retry in ${delay}ms...`);
       await new Promise(resolve => setTimeout(resolve, delay));
       return withRetry(fn, retries - 1, delay * 2);
     }
@@ -59,10 +60,9 @@ export async function fetchInitialQuotes(): Promise<Quote[]> {
   const randomTheme = themes[Math.floor(Math.random() * themes.length)];
   
   return withRetry(async () => {
-    // Adding a random theme focus forces the model to vary its starting set
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: `Return exactly 3 unique spiritual quotes from Indian scriptures (Gita, Vedas, Upanishads). Focus specifically on the theme of "${randomTheme}". Include Sanskrit, English, Hindi. JSON format.`,
+      contents: `List 3 spiritual quotes from Indian scriptures (Gita, Vedas, Upanishads) about "${randomTheme}". Include Sanskrit, English, Hindi. JSON format.`,
       config: {
         responseMimeType: "application/json",
         responseSchema: QUOTE_SCHEMA,
@@ -88,13 +88,14 @@ export async function fetchRecommendedQuotes(
     .map(([theme]) => theme);
 
   const themesContext = topThemes.length > 0 
-    ? `Focus on: ${topThemes.join(", ")}.` 
-    : "Diverse spiritual wisdom.";
+    ? `Focus: ${topThemes.join(", ")}.` 
+    : "Diverse wisdom.";
 
   const randomSeed = Math.floor(Math.random() * 1000000);
 
   return withRetry(async () => {
-    const prompt = `Provide 8 unique and profound spiritual quotes from Indian scriptures. ${themesContext} Skip these IDs: ${historyIds.slice(-30).join(",")}. Include Sanskrit, English, Hindi. JSON format. Seed: ${randomSeed}`;
+    // Increased batch to 10 for better buffering
+    const prompt = `Provide 10 unique spiritual quotes from Indian scriptures. ${themesContext} Skip these IDs: ${historyIds.slice(-40).join(",")}. Include Sanskrit, English, Hindi. JSON format. Seed: ${randomSeed}`;
 
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
