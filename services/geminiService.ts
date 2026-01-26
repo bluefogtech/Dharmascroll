@@ -55,11 +55,14 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 3, delay = 5000): Pr
 export async function fetchInitialQuotes(): Promise<Quote[]> {
   const ai = getAIClient();
   const randomSeed = Math.floor(Math.random() * 1000000);
+  const themes = ["Peace", "Action", "Duty", "Knowledge", "Love", "Surrender", "Meditation", "Truth"];
+  const randomTheme = themes[Math.floor(Math.random() * themes.length)];
   
   return withRetry(async () => {
+    // Adding a random theme focus forces the model to vary its starting set
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: "Return exactly 3 unique spiritual quotes from Indian scriptures (Gita, Vedas, Upanishads). Include Sanskrit, English, Hindi. JSON format.",
+      contents: `Return exactly 3 unique spiritual quotes from Indian scriptures (Gita, Vedas, Upanishads). Focus specifically on the theme of "${randomTheme}". Include Sanskrit, English, Hindi. JSON format.`,
       config: {
         responseMimeType: "application/json",
         responseSchema: QUOTE_SCHEMA,
@@ -91,8 +94,7 @@ export async function fetchRecommendedQuotes(
   const randomSeed = Math.floor(Math.random() * 1000000);
 
   return withRetry(async () => {
-    // Smaller batch size (8) is less likely to trigger rate limits than 20
-    const prompt = `Provide 8 unique spiritual quotes from Indian scriptures. ${themesContext} Skip these IDs: ${historyIds.slice(-20).join(",")}. Include Sanskrit, English, Hindi. JSON format. Seed: ${randomSeed}`;
+    const prompt = `Provide 8 unique and profound spiritual quotes from Indian scriptures. ${themesContext} Skip these IDs: ${historyIds.slice(-30).join(",")}. Include Sanskrit, English, Hindi. JSON format. Seed: ${randomSeed}`;
 
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",

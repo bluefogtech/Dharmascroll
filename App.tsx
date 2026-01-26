@@ -4,8 +4,17 @@ import { Quote } from './types';
 import { fetchInitialQuotes, fetchRecommendedQuotes } from './services/geminiService';
 import { QuoteCard } from './components/QuoteCard';
 
-const VERSION_TAG = "v4.1.0-free-stable";
+const VERSION_TAG = "v4.2.0-randomized";
 const CACHE_KEY = "dharma_quotes_cache";
+
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
 
 const App: React.FC = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -23,19 +32,21 @@ const App: React.FC = () => {
   const isFetchingRef = useRef(false);
   const hasInitializedRef = useRef(false);
 
-  // Load cache on startup
+  // Load cache on startup and shuffle it
   useEffect(() => {
     const saved = localStorage.getItem(CACHE_KEY);
     if (saved) {
       try {
-        const parsed = JSON.parse(saved) as Quote[];
+        let parsed = JSON.parse(saved) as Quote[];
         if (parsed.length > 0) {
+          // Shuffle the cache so they don't see the same first quote on refresh
+          parsed = shuffleArray(parsed);
           setQuotes(parsed);
           parsed.forEach(q => historyRef.current.add(q.id));
           setActiveId(parsed[0].id);
           activeIdRef.current = parsed[0].id;
           setLoading(false);
-          console.log("DharmaScroll: Loaded from cache");
+          console.log("DharmaScroll: Loaded and shuffled from cache");
         }
       } catch (e) {
         localStorage.removeItem(CACHE_KEY);
@@ -97,13 +108,15 @@ const App: React.FC = () => {
       try {
         const initial = await fetchInitialQuotes();
         if (initial && initial.length > 0) {
-          setQuotes(initial);
-          initial.forEach(q => historyRef.current.add(q.id));
-          setActiveId(initial[0].id);
-          activeIdRef.current = initial[0].id;
+          // Also shuffle the initial fetched batch for good measure
+          const shuffledInitial = shuffleArray(initial);
+          setQuotes(shuffledInitial);
+          shuffledInitial.forEach(q => historyRef.current.add(q.id));
+          setActiveId(shuffledInitial[0].id);
+          activeIdRef.current = shuffledInitial[0].id;
           activeStartTimeRef.current = Date.now();
           setLoading(false);
-          fetchMore(initial.map(q => q.id));
+          fetchMore(shuffledInitial.map(q => q.id));
         }
       } catch (err: any) {
         const isQuota = err.message.toLowerCase().includes('quota') || err.message.includes('429');
