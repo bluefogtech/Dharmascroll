@@ -4,7 +4,7 @@ import { Quote } from './types';
 import { fetchInitialQuotes, fetchRecommendedQuotes } from './services/geminiService';
 import { QuoteCard } from './components/QuoteCard';
 
-const VERSION_TAG = "v4.0.0-free";
+const VERSION_TAG = "v4.1.0-free-stable";
 const CACHE_KEY = "dharma_quotes_cache";
 
 const App: React.FC = () => {
@@ -46,7 +46,7 @@ const App: React.FC = () => {
   // Save cache whenever quotes change
   useEffect(() => {
     if (quotes.length > 0) {
-      localStorage.setItem(CACHE_KEY, JSON.stringify(quotes.slice(0, 50))); // Keep last 50
+      localStorage.setItem(CACHE_KEY, JSON.stringify(quotes.slice(0, 50))); 
     }
   }, [quotes]);
 
@@ -70,7 +70,6 @@ const App: React.FC = () => {
       const isQuota = e.message.toLowerCase().includes('quota') || e.message.includes('429');
       console.warn("DharmaScroll: Background Fetch Error", e.message);
       
-      // Only show a blocking error if we have NO quotes to show
       if (quotes.length === 0) {
         setError({
           message: isQuota 
@@ -90,7 +89,6 @@ const App: React.FC = () => {
     hasInitializedRef.current = true;
 
     async function init() {
-      // If we already have quotes from cache, just trigger a background fetch
       if (quotes.length > 0) {
         fetchMore(Array.from(historyRef.current));
         return;
@@ -110,7 +108,7 @@ const App: React.FC = () => {
       } catch (err: any) {
         const isQuota = err.message.toLowerCase().includes('quota') || err.message.includes('429');
         setError({ 
-          message: isQuota ? "Gemini Quota Exceeded. The preview model is limited. Please try again in 60 seconds." : err.message, 
+          message: isQuota ? "Gemini Quota Exceeded. Please try again in 60 seconds." : err.message, 
           isQuota 
         });
         setLoading(false);
@@ -146,10 +144,13 @@ const App: React.FC = () => {
       updateInterests(prevId);
     }
 
-    // Conservative fetch: only when 1 item away from end
     if (scrollTop + clientHeight > scrollHeight - clientHeight * 1.5) {
       fetchMore(Array.from(historyRef.current));
     }
+  };
+
+  const cycleLanguage = () => {
+    setLanguage(prev => prev === 'en' ? 'hi' : 'en');
   };
 
   if (loading && quotes.length === 0) {
@@ -207,7 +208,7 @@ const App: React.FC = () => {
         </div>
         
         <div 
-          onClick={() => setLanguage(prev => prev === 'en' ? 'hi' : 'en')}
+          onClick={cycleLanguage}
           style={{ 
             pointerEvents: 'auto',
             cursor: 'pointer',
