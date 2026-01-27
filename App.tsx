@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { QuoteCard } from './components/QuoteCard';
+import { InstallGuide } from './components/InstallGuide';
 import { Quote } from './types';
 import { fetchInitialQuotes, fetchRecommendedQuotes } from './services/geminiService';
 
-const VERSION_TAG = "v4.5.1";
+const VERSION_TAG = "v5.0.0-pwa";
 const BUILT_BY = "Developed by Blue Fog Technology";
 
 const App: React.FC = () => {
@@ -84,8 +85,8 @@ const App: React.FC = () => {
     return (
       <div className="fullscreen-center">
         <div className="spinner"></div>
-        <p style={{ color: 'var(--accent-gold)', letterSpacing: '0.1em', textTransform: 'uppercase', fontSize: '0.8rem' }}>
-          Consulting the Sages...
+        <p style={{ color: 'var(--accent-gold)', letterSpacing: '0.15em', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 600 }}>
+          Opening the Sacred Gates...
         </p>
       </div>
     );
@@ -95,7 +96,7 @@ const App: React.FC = () => {
     return (
       <div className="fullscreen-center">
         <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>📿</div>
-        <h2 style={{ color: 'var(--accent-gold)', marginBottom: '1rem' }}>Silence in the Temple</h2>
+        <h2 style={{ color: 'var(--accent-gold)', marginBottom: '1rem', fontFamily: 'Playfair Display' }}>Silence in the Temple</h2>
         <p style={{ color: 'var(--text-slate)', marginBottom: '2rem', maxWidth: '300px' }}>{error}</p>
         <button className="btn-primary" onClick={() => window.location.reload()}>Seek Wisdom Again</button>
       </div>
@@ -103,28 +104,29 @@ const App: React.FC = () => {
   }
 
   return (
-    <div style={{ position: 'relative', height: '100vh', width: '100vw', background: 'var(--bg-dark)' }}>
-      {/* Dynamic Header */}
+    <div style={{ position: 'relative', height: '100%', width: '100%', background: 'var(--bg-dark)' }}>
+      {/* App Header */}
       <div className="header-logo">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>ॐ</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
+          <span style={{ fontSize: '1.6rem', lineHeight: 1 }}>ॐ</span>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontWeight: 800, fontSize: '0.8rem', letterSpacing: '3px' }}>DHARMA SCROLL</span>
+            <span style={{ fontWeight: 800, fontSize: '0.85rem', letterSpacing: '4px' }}>DHARMA SCROLL</span>
           </div>
         </div>
         
         <button 
           onClick={() => setLanguage(language === 'en' ? 'hi' : 'en')}
           style={{ 
-            background: 'rgba(255, 153, 51, 0.15)', 
-            border: '1px solid rgba(255, 153, 51, 0.3)',
+            background: 'rgba(255, 153, 51, 0.2)', 
+            border: '1px solid rgba(255, 153, 51, 0.4)',
             color: 'var(--accent-gold)',
-            padding: '0.4rem 1rem',
+            padding: '0.5rem 1.2rem',
             borderRadius: '99px',
-            fontSize: '0.7rem',
-            fontWeight: 700,
+            fontSize: '0.75rem',
+            fontWeight: 800,
             cursor: 'pointer',
-            backdropFilter: 'blur(10px)'
+            backdropFilter: 'blur(20px)',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
           }}
         >
           {language === 'en' ? 'हिन्दी' : 'ENGLISH'}
@@ -148,6 +150,7 @@ const App: React.FC = () => {
         ))}
       </div>
 
+      <InstallGuide />
       <div className="version-tag">{VERSION_TAG} | {BUILT_BY}</div>
     </div>
   );

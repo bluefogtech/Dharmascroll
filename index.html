@@ -11,6 +11,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="DharmaScroll">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1a0b04">
+    
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3663/3663335.png">
     
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
@@ -33,12 +36,22 @@
             font-family: 'Lora', serif;
             color: var(--text-white);
             -webkit-tap-highlight-color: transparent;
+            /* Prevent bounce scrolling on iOS */
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        #root {
+            height: 100%;
+            width: 100%;
         }
 
         .snap-container {
             scroll-snap-type: y mandatory;
             overflow-y: scroll;
             height: 100vh;
+            height: 100dvh;
             scrollbar-width: none;
             -webkit-overflow-scrolling: touch;
         }
@@ -48,6 +61,7 @@
         .snap-item {
             scroll-snap-align: start;
             height: 100vh;
+            height: 100dvh;
             width: 100%;
             display: flex;
             flex-direction: column;
@@ -55,12 +69,13 @@
             justify-content: center;
             position: relative;
             box-sizing: border-box;
-            padding: calc(env(safe-area-inset-top, 0px) + 6rem) 2rem calc(env(safe-area-inset-bottom, 0px) + 2rem) 2rem;
+            padding: calc(env(safe-area-inset-top, 0px) + 4rem) 2rem calc(env(safe-area-inset-bottom, 0px) + 2rem) 2rem;
             overflow: hidden;
         }
 
         .fullscreen-center {
             height: 100vh;
+            height: 100dvh;
             width: 100%;
             display: flex;
             flex-direction: column;
@@ -132,11 +147,12 @@
             display: flex; flex-direction: column; gap: 1.25rem; z-index: 20;
         }
         .action-btn {
-            width: 3rem; height: 3rem;
+            width: 3.2rem; height: 3.2rem;
             display: flex; align-items: center; justify-content: center;
-            background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(12px);
+            background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 153, 51, 0.2); border-radius: 50%;
             cursor: pointer; transition: all 0.2s; color: var(--accent-saffron);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
 
         .action-btn.liked {
@@ -167,7 +183,7 @@
         }
 
         .scroll-cue {
-            position: absolute; bottom: calc(env(safe-area-inset-bottom, 0px) + 2rem);
+            position: absolute; bottom: calc(env(safe-area-inset-bottom, 0px) + 1.5rem);
             left: 50%; transform: translateX(-50%);
             opacity: 0.5; color: var(--accent-gold);
             animation: float 4s ease-in-out infinite;
@@ -178,12 +194,14 @@
             left: 1.25rem; right: 1.25rem;
             display: flex; justify-content: space-between; align-items: center;
             z-index: 100; color: var(--accent-gold);
+            pointer-events: none;
         }
+        .header-logo button { pointer-events: auto; }
 
         .version-tag {
-            position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
-            right: 1.5rem; font-family: monospace; font-size: 10px;
-            color: rgba(255, 204, 51, 0.3); z-index: 50;
+            position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
+            left: 1rem; font-family: monospace; font-size: 8px;
+            color: rgba(255, 204, 51, 0.2); z-index: 50;
         }
 
         .overlay {
@@ -220,41 +238,22 @@
             margin: -1rem auto 1.5rem auto;
         }
 
-        .share-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .share-option {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.75rem;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .share-option:active { transform: scale(0.9); }
-
-        .share-icon-circle {
-            width: 3.5rem; height: 3.5rem;
-            border-radius: 50%;
-            background: rgba(255, 153, 51, 0.1);
-            border: 1px solid rgba(255, 153, 51, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--accent-gold);
-        }
-
-        .share-option span {
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: var(--text-slate);
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        /* Install Banner Customization */
+        .install-guide {
+          position: fixed;
+          bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
+          left: 1rem;
+          right: 1rem;
+          background: rgba(255, 153, 51, 0.95);
+          color: white;
+          padding: 1rem;
+          border-radius: 16px;
+          z-index: 3000;
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+          animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
         @keyframes slideUp {
@@ -264,12 +263,7 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes float { 0%, 100% { transform: translate(-50%, 0px); } 50% { transform: translate(-50%, -10px); } }
-        @keyframes pulse { 0%, 100% { opacity: 0.8; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.05); } }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         @media (min-width: 768px) {
             .quote-main { font-size: 2.5rem; max-width: 80%; }
