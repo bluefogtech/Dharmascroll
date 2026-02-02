@@ -9,6 +9,7 @@ export default defineConfig(({ mode }) => {
   const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL || "";
   const supabaseKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
   const apiKey = env.API_KEY || "";
+  const test = env.TEST || "";
 
   return {
     plugins: [react()],
