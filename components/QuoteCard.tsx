@@ -156,7 +156,14 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
           <h1 className="quote-main" style={{ fontSize: language === 'ta' ? '1.4rem' : '1.6rem' }}>
             &ldquo;{getDisplayText()}&rdquo;
           </h1>
-          <div style={{ height: '2px', width: '2.5rem', backgroundColor: 'var(--accent-gold)', margin: '0 auto', opacity: 0.7 }}></div>
+          <div style={{ 
+            height: '2px', 
+            width: '2.5rem', 
+            background: 'linear-gradient(90deg, transparent, var(--accent-gold), transparent)',
+            margin: '0 auto', 
+            opacity: 0.9,
+            boxShadow: '0 0 10px rgba(255, 215, 0, 0.5)'
+          }}></div>
         </div>
       </div>
 

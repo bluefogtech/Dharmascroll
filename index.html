@@ -11,34 +11,38 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="DharmaScroll">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#1a0a0a">
+    <meta name="theme-color" content="#1a0f0a">
     
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3663/3663335.png">
     
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Hinduism-inspired color palette with black and mahogany background */
-            --bg-dark: #3d2b1f; /* Mahogany-black blend - lighter for black text visibility */
-            --bg-secondary: #2d1b1b; /* Darker mahogany-black blend */
-            --bg-mahogany: #8B4513; /* Rich mahogany */
-            --accent-saffron: #FF8C00; /* Sacred saffron (Kesari) - fire, purity */
-            --accent-gold: #FFD700; /* Divine gold - knowledge, prosperity */
-            --accent-kumkum: #DC143C; /* Sacred red (Kumkum/Tilak) - power, auspiciousness */
-            --accent-turmeric: #F4A460; /* Turmeric yellow - healing, purity */
-            --accent-lotus: #FF69B4; /* Lotus pink - beauty, enlightenment */
-            --accent-krishna: #4169E1; /* Krishna blue - divine, protection */
-            --accent-forest: #228B22; /* Forest green - nature, life, prosperity */
-            --text-gold-light: #FFE87C; /* Light gold for text highlights */
-            --text-saffron-light: #FFB84D; /* Light saffron for accents */
-            --text-slate: #000000; /* Black text */
-            --text-white: #000000; /* Black text */
+            /* Vibrant Hinduism-inspired color palette */
+            --bg-dark: #1a0f0a; /* Deep rich dark with warm undertones */
+            --bg-secondary: #2d1a14; /* Warmer dark brown */
+            --bg-gradient-start: #1a0f0a; /* Deep dark */
+            --bg-gradient-mid: #4a2c1a; /* Rich mahogany */
+            --bg-gradient-end: #6b3e26; /* Vibrant mahogany */
+            --accent-saffron: #FF6B35; /* Vibrant saffron (Kesari) - fire, purity */
+            --accent-gold: #FFD700; /* Brilliant gold - knowledge, prosperity */
+            --accent-kumkum: #FF1744; /* Vibrant red (Kumkum/Tilak) - power, auspiciousness */
+            --accent-turmeric: #FFB84D; /* Bright turmeric - healing, purity */
+            --accent-lotus: #FF6B9D; /* Vibrant lotus pink - beauty, enlightenment */
+            --accent-krishna: #5C6BC0; /* Rich Krishna blue - divine, protection */
+            --accent-forest: #2E7D32; /* Vibrant forest green - nature, life, prosperity */
+            --accent-purple: #7B1FA2; /* Spiritual purple - meditation, wisdom */
+            --text-gold-light: #FFE082; /* Bright light gold for text */
+            --text-gold-brilliant: #FFC107; /* Brilliant gold */
+            --text-saffron-light: #FF8A50; /* Bright saffron for accents */
+            --text-white: #FFFFFF; /* Pure white for contrast */
+            --text-cream: #FFF8E1; /* Soft cream for readability */
         }
 
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #1a0a0a 0%, #2d1b1b 25%, #3d2b1f 50%, #8B4513 75%, #2d1b1b 100%);
+            background: linear-gradient(135deg, #1a0f0a 0%, #2d1a14 20%, #4a2c1a 40%, #6b3e26 60%, #4a2c1a 80%, #2d1a14 100%);
             background-attachment: fixed;
             overflow: hidden;
             font-family: 'Lora', serif;
@@ -142,27 +146,33 @@
 
         .spinner {
             width: 3rem; height: 3rem;
-            border: 4px solid rgba(255, 140, 0, 0.15);
+            border: 4px solid rgba(255, 107, 53, 0.2);
             border-top: 4px solid var(--accent-saffron);
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-bottom: 1.5rem;
+            box-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
         }
 
         .btn-primary {
-            background: var(--accent-kumkum);
+            background: linear-gradient(135deg, var(--accent-kumkum) 0%, #FF1744 100%);
             color: white; border: none;
             padding: 0.85rem 2.5rem;
             border-radius: 9999px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(220, 20, 60, 0.4);
+            box-shadow: 0 4px 20px rgba(255, 23, 68, 0.5), 0 0 30px rgba(255, 23, 68, 0.3);
+        }
+        
+        .btn-primary:hover {
+            box-shadow: 0 6px 25px rgba(255, 23, 68, 0.6), 0 0 40px rgba(255, 23, 68, 0.4);
+            transform: translateY(-2px);
         }
 
         .quote-sanskrit {
             font-size: 1.1rem; 
-            color: var(--accent-gold);
+            color: var(--text-gold-brilliant);
             margin-bottom: 1.25rem; 
             line-height: 1.6;
             max-width: 100%; 
@@ -171,6 +181,7 @@
             width: 100%;
             word-wrap: break-word;
             overflow-wrap: break-word;
+            text-shadow: 0 2px 10px rgba(255, 193, 7, 0.4), 0 0 20px rgba(255, 193, 7, 0.2);
         }
         .quote-main {
             font-size: 1.6rem; 
@@ -178,8 +189,8 @@
             line-height: 1.4;
             margin-bottom: 1.5rem; 
             font-style: italic;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-            color: var(--text-gold-light);
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7), 0 0 30px rgba(255, 224, 130, 0.3);
+            color: var(--text-cream);
             text-align: center;
             width: 100%;
             max-width: 100%;
@@ -189,13 +200,13 @@
             margin-right: auto;
         }
         .quote-source {
-            color: var(--accent-gold);
+            color: var(--accent-saffron);
             text-transform: uppercase; 
             letter-spacing: 0.12em;
             font-size: 0.9rem; 
             margin-bottom: 0.5rem; 
             font-weight: 800;
-            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(255, 107, 53, 0.4);
             max-width: 95%;
             line-height: 1.4;
             white-space: normal;
@@ -204,12 +215,13 @@
             overflow: visible; /* Prevent truncation */
         }
         .quote-context {
-            color: var(--text-gold-light);
+            color: var(--accent-turmeric);
             font-size: 0.75rem; text-transform: uppercase;
-            letter-spacing: 0.08em; opacity: 0.9;
+            letter-spacing: 0.08em; opacity: 1;
             margin-bottom: 0.8rem;
             max-width: 90%;
             line-height: 1.4;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
         }
 
         .tag-container {
@@ -218,11 +230,13 @@
         }
         .tag {
             padding: 0.2rem 0.6rem;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 215, 0, 0.3);
+            background: rgba(255, 215, 0, 0.15);
+            border: 1px solid rgba(255, 215, 0, 0.5);
             border-radius: 4px; font-size: 0.55rem;
-            color: var(--accent-gold); text-transform: uppercase;
+            color: var(--text-gold-brilliant); text-transform: uppercase;
             letter-spacing: 1px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
         }
 
         .action-bar {
@@ -233,32 +247,41 @@
         .action-btn {
             width: 3rem; height: 3rem;
             display: flex; align-items: center; justify-content: center;
-            background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 140, 0, 0.3); border-radius: 50%;
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 107, 53, 0.5); border-radius: 50%;
             cursor: pointer; transition: all 0.2s; color: var(--accent-saffron);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 15px rgba(255, 107, 53, 0.2);
+        }
+        
+        .action-btn:hover {
+            border-color: var(--accent-saffron);
+            box-shadow: 0 6px 25px rgba(0,0,0,0.5), 0 0 25px rgba(255, 107, 53, 0.4);
+            transform: scale(1.1);
         }
 
         .action-btn.liked {
             color: var(--accent-kumkum);
             border-color: var(--accent-kumkum);
-            background: rgba(220, 20, 60, 0.2);
+            background: rgba(255, 23, 68, 0.25);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 20px rgba(255, 23, 68, 0.3);
         }
 
         .action-btn.shared {
             color: var(--accent-gold);
             border-color: var(--accent-gold);
-            background: rgba(255, 215, 0, 0.2);
+            background: rgba(255, 215, 0, 0.25);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 20px rgba(255, 215, 0, 0.3);
         }
 
         .lang-picker {
             display: flex;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 140, 0, 0.4);
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 107, 53, 0.6);
             border-radius: 99px;
             padding: 3px;
             pointer-events: auto;
             backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 107, 53, 0.2);
         }
         .lang-option {
             padding: 0.4rem 0.8rem;
@@ -274,9 +297,9 @@
             text-align: center;
         }
         .lang-option.active {
-            background: var(--accent-saffron);
+            background: linear-gradient(135deg, var(--accent-saffron) 0%, #FF8A50 100%);
             color: white;
-            box-shadow: 0 2px 8px rgba(255, 140, 0, 0.5);
+            box-shadow: 0 2px 12px rgba(255, 107, 53, 0.6), 0 0 20px rgba(255, 107, 53, 0.3);
         }
 
         .bg-blob {
@@ -287,23 +310,25 @@
         .scroll-cue {
             position: absolute; bottom: calc(env(safe-area-inset-bottom, 0px) + 1.2rem);
             left: 50%; transform: translateX(-50%);
-            opacity: 0.4; color: var(--accent-gold);
+            opacity: 0.7; color: var(--accent-gold);
             animation: float 4s ease-in-out infinite;
             pointer-events: none;
+            filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
         }
 
         .header-logo {
             position: fixed; top: calc(env(safe-area-inset-top, 0px) + 1rem);
             left: 1rem; right: 1rem;
             display: flex; justify-content: space-between; align-items: center;
-            z-index: 100; color: var(--accent-gold);
+            z-index: 100; color: var(--text-gold-brilliant);
             pointer-events: none;
+            text-shadow: 0 2px 10px rgba(255, 193, 7, 0.5);
         }
 
         .version-tag {
             position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 0.3rem);
             left: 1rem; font-family: monospace; font-size: 8px;
-            color: rgba(255, 204, 51, 0.2); z-index: 50;
+            color: rgba(255, 215, 0, 0.4); z-index: 50;
         }
 
         .overlay {
