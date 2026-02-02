@@ -1,4 +1,4 @@
-import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.47.10';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Quote } from "../types";
 
 // Hardcoded configuration as per user request to ensure reliability
@@ -16,9 +16,17 @@ export function isSupabaseConfigured(): boolean {
 
 /**
  * Lazily initializes and returns the Supabase client.
+ * Adds a runtime guard so TypeScript knows env vars are non-null here.
  */
 function getSupabase(): SupabaseClient {
   if (supabaseInstance) return supabaseInstance;
+
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    throw new Error(
+      "Supabase environment variables are missing. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env file."
+    );
+  }
+
   try {
     supabaseInstance = createClient(SUPABASE_URL, SUPABASE_KEY);
     return supabaseInstance;
