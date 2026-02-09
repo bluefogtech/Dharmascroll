@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">DharmaScroll</string>
+    <string name="title_activity_main">DharmaScroll</string>
+    <string name="package_name">com.bluefogtech.dharmascroll</string>
+    <string name="custom_url_scheme">com.bluefogtech.dharmascroll</string>
+</resources>

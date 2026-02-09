@@ -1,8 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { QuoteCard } from './components/QuoteCard';
 import { InstallGuide } from './components/InstallGuide';
+import { LoginForm } from './components/LoginForm';
+import { RegisterForm } from './components/RegisterForm';
 import { Quote } from './types';
 import { getQuotes } from './services/wisdomService';
+import { getCurrentUser, onAuthStateChange, signOut, mapUserToAuthUser } from './services/authService';
+import { trackEvent } from './services/analyticsService';
+import { AuthUser } from './services/authService';
 
 const VERSION_TAG = "v5.4.0-iphone-ux";
 const BUILT_BY = "Developed by Blue Fog Technology";
@@ -15,12 +20,58 @@ const App: React.FC = () => {
   const [language, setLanguage] = useState<'en' | 'hi' | 'ta'>('en');
   const [themeWeights, setThemeWeights] = useState<Record<string, number>>({});
   
+  // Authentication state
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [showRegister, setShowRegister] = useState(false);
+  
   const containerRef = useRef<HTMLDivElement>(null);
   const fetchedIds = useRef<Set<string>>(new Set());
   const isLoadingMore = useRef(false);
 
-  // Initial Load
+  // Check authentication on mount and listen for changes
   useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const currentUser = await getCurrentUser();
+        setUser(mapUserToAuthUser(currentUser));
+        
+        // Track login if user just returned from OAuth
+        if (currentUser) {
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get('code') || urlParams.get('access_token')) {
+            // User just completed OAuth flow
+            await trackEvent(currentUser.id, 'login', {
+              method: 'google',
+              timestamp: new Date().toISOString(),
+            });
+            // Clean up URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        }
+      } catch (err) {
+        console.error('Auth check error:', err);
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+
+    checkAuth();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = onAuthStateChange((user) => {
+      setUser(mapUserToAuthUser(user));
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // Initial Load (only after authentication)
+  useEffect(() => {
+    if (!user || authLoading) return;
+
     const init = async () => {
       try {
         setLoading(true);
@@ -36,7 +87,7 @@ const App: React.FC = () => {
       }
     };
     init();
-  }, []);
+  }, [user, authLoading]);
 
   // Infinite Scroll Observer
   const handleScroll = useCallback(() => {
@@ -85,6 +136,43 @@ const App: React.FC = () => {
     }
   };
 
+  const handleLogout = async () => {
+    if (user) {
+      await trackEvent(user.id, 'logout', {
+        timestamp: new Date().toISOString(),
+      });
+    }
+    await signOut();
+    setUser(null);
+  };
+
+  // Show auth loading
+  if (authLoading) {
+    return (
+      <div className="fullscreen-center">
+        <div className="spinner"></div>
+        <p style={{ color: 'var(--accent-gold)', letterSpacing: '0.15em', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 600 }}>
+          Authenticating...
+        </p>
+      </div>
+    );
+  }
+
+  // Show login/register if not authenticated
+  if (!user) {
+    return showRegister ? (
+      <RegisterForm 
+        onSuccess={() => setShowRegister(false)} 
+        onSwitchToLogin={() => setShowRegister(false)}
+      />
+    ) : (
+      <LoginForm 
+        onSuccess={() => {}} 
+        onSwitchToRegister={() => setShowRegister(true)}
+      />
+    );
+  }
+
   if (loading) {
     return (
       <div className="fullscreen-center">
@@ -126,24 +214,29 @@ const App: React.FC = () => {
           <span style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '3px' }}>DHARMA</span>
         </div>
         
-        <div className="lang-picker">
-          <button 
-            className={`lang-option ${language === 'en' ? 'active' : ''}`}
-            onClick={() => setLanguage('en')}
-          >
-            EN
-          </button>
-          <button 
-            className={`lang-option ${language === 'hi' ? 'active' : ''}`}
-            onClick={() => setLanguage('hi')}
-          >
-            हिन्दी
-          </button>
-          <button 
-            className={`lang-option ${language === 'ta' ? 'active' : ''}`}
-            onClick={() => setLanguage('ta')}
-          >
-            தமிழ்
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div className="lang-picker">
+            <button 
+              className={`lang-option ${language === 'en' ? 'active' : ''}`}
+              onClick={() => setLanguage('en')}
+            >
+              EN
+            </button>
+            <button 
+              className={`lang-option ${language === 'hi' ? 'active' : ''}`}
+              onClick={() => setLanguage('hi')}
+            >
+              हिन्दी
+            </button>
+            <button 
+              className={`lang-option ${language === 'ta' ? 'active' : ''}`}
+              onClick={() => setLanguage('ta')}
+            >
+              தமிழ்
+            </button>
+          </div>
+          <button className="logout-btn" onClick={handleLogout}>
+            Logout
           </button>
         </div>
       </div>
