@@ -7,7 +7,7 @@ import { Quote } from './types';
 import { getQuotes, getGitaQuotes } from './services/wisdomService';
 import { getCurrentUser, onAuthStateChange, signOut, mapUserToAuthUser } from './services/authService';
 import { trackEvent } from './services/analyticsService';
-import { openDonatePage, isDonateConfigured } from './services/donationService';
+import { openDonatePage, getDonateLink, getDonateLinkFromConfig } from './services/donationService';
 import { AuthUser } from './services/authService';
 
 const VERSION_TAG = "v5.4.0-iphone-ux";
@@ -30,10 +30,19 @@ const App: React.FC = () => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [showRegister, setShowRegister] = useState(false);
+  const [donateLink, setDonateLink] = useState<string | null>(() => getDonateLink());
   
   const containerRef = useRef<HTMLDivElement>(null);
   const fetchedIds = useRef<Set<string>>(new Set());
   const isLoadingMore = useRef(false);
+
+  // Load donate link from runtime config (fixes Vercel when build-time env is missing)
+  useEffect(() => {
+    setDonateLink((prev) => prev || getDonateLink());
+    getDonateLinkFromConfig().then((link) => {
+      if (link) setDonateLink((prev) => prev || link);
+    });
+  }, []);
 
   // Check authentication on mount and listen for changes
   useEffect(() => {
@@ -261,7 +270,7 @@ const App: React.FC = () => {
             <span style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '3px' }}>DHARMA</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            {isDonateConfigured() && (
+            {donateLink && (
               <button
                 className="logout-btn"
                 style={{
@@ -269,7 +278,7 @@ const App: React.FC = () => {
                   borderColor: 'var(--accent-forest, #2E7D32)',
                   color: 'var(--accent-forest, #4ade80)',
                 }}
-                onClick={openDonatePage}
+                onClick={() => openDonatePage(donateLink)}
               >
                 Donate
               </button>

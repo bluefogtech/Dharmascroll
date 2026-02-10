@@ -29,7 +29,7 @@ The app shows a **Donate** button on the landing page when a Stripe Payment Link
 
 ### Vercel (production)
 
-The build reads `VITE_STRIPE_DONATE_LINK` from the environment and writes it into the bundle (via `services/generated-env.ts`), so the Donate button appears when the variable is set at build time. If you see it on localhost but not on Vercel:
+The build runs `scripts/write-donate-config.mjs`, which writes `VITE_STRIPE_DONATE_LINK` into `public/donate-config.json`. The app loads this file at runtime, so the Donate button appears on Vercel even when build-time env injection fails. Ensure the env var is set in Vercel and redeploy. If you still don't see the button:
 
 1. In **Vercel Dashboard** → your project → **Settings** → **Environment Variables**.
 2. Add a variable:

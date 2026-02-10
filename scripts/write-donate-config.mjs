@@ -1,0 +1,26 @@
+#!/usr/bin/env node
+/**
+ * Writes public/donate-config.json from VITE_STRIPE_DONATE_LINK so the
+ * deployed app can load it at runtime (works on Vercel even when build-time
+ * injection fails). Run before vite build.
+ */
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const root = path.join(__dirname, '..');
+const publicDir = path.join(root, 'public');
+const outPath = path.join(publicDir, 'donate-config.json');
+
+const link = typeof process.env.VITE_STRIPE_DONATE_LINK === 'string'
+  ? process.env.VITE_STRIPE_DONATE_LINK.trim()
+  : '';
+
+const config = { donateLink: link.startsWith('https://') ? link : '' };
+
+if (!fs.existsSync(publicDir)) {
+  fs.mkdirSync(publicDir, { recursive: true });
+}
+fs.writeFileSync(outPath, JSON.stringify(config, null, 0), 'utf8');
+console.log('[donate-config] Wrote donate-config.json, donateLink:', config.donateLink ? 'set' : 'empty');
