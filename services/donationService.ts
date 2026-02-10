@@ -1,11 +1,9 @@
 /**
  * Donation flow via Stripe Payment Link.
- * Set VITE_STRIPE_DONATE_LINK in .env to your Stripe Payment Link URL.
- * Stripe pays out to your connected bank account (Settings → Payouts in Stripe Dashboard).
+ * Set VITE_STRIPE_DONATE_LINK in .env (local) or Vercel env vars (production).
+ * Build writes it into generated-env.ts so the link is in the bundle on Vercel.
  */
-
-// Use exact expression so Vite define / env replacement can inject the value (needed for Vercel)
-const DONATE_LINK = import.meta.env.VITE_STRIPE_DONATE_LINK;
+import { VITE_STRIPE_DONATE_LINK as DONATE_LINK } from './generated-env';
 
 export function getDonateLink(): string | null {
   if (typeof DONATE_LINK === 'string' && DONATE_LINK.startsWith('https://')) {

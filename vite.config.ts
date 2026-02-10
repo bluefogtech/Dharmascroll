@@ -1,6 +1,21 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import process from 'node:process';
+import fs from 'node:fs';
+import path from 'node:path';
+
+// Write donate link to a file at build start so it's in the bundle (reliable on Vercel)
+function generateEnvPlugin() {
+  return {
+    name: 'generate-donate-env',
+    buildStart() {
+      const value = process.env.VITE_STRIPE_DONATE_LINK || '';
+      const outPath = path.join(process.cwd(), 'services', 'generated-env.ts');
+      const content = `// Auto-generated at build time. Do not edit.\nexport const VITE_STRIPE_DONATE_LINK: string = ${JSON.stringify(value)};\n`;
+      fs.writeFileSync(outPath, content);
+    },
+  };
+}
 
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode`. The third parameter '' loads all variables.
@@ -9,14 +24,11 @@ export default defineConfig(({ mode }) => {
   const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
   const supabaseKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
   const apiKey = env.API_KEY || process.env.API_KEY || "";
-  // Vercel injects env at runtime; loadEnv only reads .env files — so use process.env for donate link
-  const stripeDonateLink = process.env.VITE_STRIPE_DONATE_LINK || env.VITE_STRIPE_DONATE_LINK || "";
 
   return {
-    plugins: [react()],
+    plugins: [generateEnvPlugin(), react()],
     envPrefix: ['VITE_', 'NEXT_PUBLIC_', 'API_'],
     define: {
-      'import.meta.env.VITE_STRIPE_DONATE_LINK': JSON.stringify(stripeDonateLink),
       'process.env.API_KEY': JSON.stringify(apiKey),
       'process.env.NEXT_PUBLIC_SUPABASE_URL': JSON.stringify(supabaseUrl),
       'process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY': JSON.stringify(supabaseKey),

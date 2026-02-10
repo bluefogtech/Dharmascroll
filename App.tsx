@@ -244,8 +244,8 @@ const App: React.FC = () => {
   if (isLandingRoute) {
     return (
       <div
+        className="landing-container"
         style={{
-          minHeight: '100vh',
           width: '100%',
           margin: 0,
           background: 'linear-gradient(135deg, #1a0f0a 0%, #2d1a14 20%, #4a2c1a 40%, #6b3e26 60%, #4a2c1a 80%, #2d1a14 100%)',
@@ -380,7 +380,7 @@ const App: React.FC = () => {
         </div>
 
         {/* Main hero + cards */}
-        <div style={{ marginTop: '80px', textAlign: 'center', padding: '0 16px' }}>
+        <div style={{ marginTop: '80px', textAlign: 'center', padding: '0 16px', paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
           <h1
             style={{
               fontSize: '2.4rem',

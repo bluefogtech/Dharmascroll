@@ -130,6 +130,15 @@
             pointer-events: auto;
         }
 
+        /* Landing page: scrollable so both cards are reachable on small screens */
+        .landing-container {
+            height: 100vh;
+            height: 100dvh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+
         .fullscreen-center {
             height: 100vh;
             height: 100dvh;
