@@ -18,7 +18,6 @@ const App: React.FC = () => {
   const isLandingRoute = path === '/';
   const isGitaRoute = path === '/gita';
   const isRandomRoute = path === '/random';
-  const showLanding = isLandingRoute || ((isGitaRoute || isRandomRoute) && (authLoading || !user));
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -35,6 +34,8 @@ const App: React.FC = () => {
   const [donateLink, setDonateLink] = useState<string | null>(() => getDonateLink());
   const [gitaSidebarOpen, setGitaSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 768 : false);
+
+  const showLanding = isLandingRoute || ((isGitaRoute || isRandomRoute) && (authLoading || !user));
 
   const containerRef = useRef<HTMLDivElement>(null);
   const fetchedIds = useRef<Set<string>>(new Set());
