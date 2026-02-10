@@ -428,6 +428,47 @@
             }
         }
 
+        /* Gita page: mobile sidebar overlay + verse area breathing room */
+        .gita-sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .gita-sidebar-drawer {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: min(300px, 85vw);
+            max-width: 100%;
+            background: var(--bg-dark);
+            border-right: 1px solid rgba(255,255,255,0.08);
+            padding: 1.25rem 1rem;
+            overflow-y: auto;
+            z-index: 1001;
+            transition: transform 0.25s ease-out;
+            box-shadow: 4px 0 24px rgba(0,0,0,0.4);
+            -webkit-overflow-scrolling: touch;
+        }
+        @media (max-width: 768px) {
+            .gita-verse-area .quote-content-area {
+                padding: 2rem 1.25rem;
+            }
+            .gita-verse-area .quote-main {
+                font-size: 1.35rem;
+                line-height: 1.5;
+            }
+            .gita-verse-area .quote-sanskrit {
+                font-size: 1rem;
+                margin-bottom: 1rem;
+            }
+            .gita-verse-area .quote-meta-overlay {
+                padding: 0 1.25rem calc(env(safe-area-inset-bottom, 0px) + 4rem) 1.25rem;
+            }
+        }
+
         /* Authentication Styles */
         .auth-container {
             height: 100vh;
