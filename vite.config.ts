@@ -4,14 +4,13 @@ import process from 'node:process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-// Write donate link to a file at build start so it's in the bundle (reliable on Vercel)
-function generateEnvPlugin() {
+// Write donate link so it's available in dev (from .env via loadEnv) and in build (from process.env on Vercel)
+function generateEnvPlugin(donateLink: string) {
   return {
     name: 'generate-donate-env',
     buildStart() {
-      const value = process.env.VITE_STRIPE_DONATE_LINK || '';
       const outPath = path.join(process.cwd(), 'services', 'generated-env.ts');
-      const content = `// Auto-generated at build time. Do not edit.\nexport const VITE_STRIPE_DONATE_LINK: string = ${JSON.stringify(value)};\n`;
+      const content = `// Auto-generated at build time. Do not edit.\nexport const VITE_STRIPE_DONATE_LINK: string = ${JSON.stringify(donateLink)};\n`;
       fs.writeFileSync(outPath, content);
     },
   };
@@ -24,9 +23,10 @@ export default defineConfig(({ mode }) => {
   const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
   const supabaseKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
   const apiKey = env.API_KEY || process.env.API_KEY || "";
+  const donateLink = env.VITE_STRIPE_DONATE_LINK || process.env.VITE_STRIPE_DONATE_LINK || "";
 
   return {
-    plugins: [generateEnvPlugin(), react()],
+    plugins: [generateEnvPlugin(donateLink), react()],
     envPrefix: ['VITE_', 'NEXT_PUBLIC_', 'API_'],
     define: {
       'process.env.API_KEY': JSON.stringify(apiKey),

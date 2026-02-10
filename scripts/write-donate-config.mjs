@@ -13,6 +13,20 @@ const root = path.join(__dirname, '..');
 const publicDir = path.join(root, 'public');
 const outPath = path.join(publicDir, 'donate-config.json');
 
+// Load .env so local builds get VITE_STRIPE_DONATE_LINK (Vercel injects process.env at build)
+const envPath = path.join(root, '.env');
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf8');
+  for (const line of envContent.split('\n')) {
+    const m = line.match(/^\s*VITE_STRIPE_DONATE_LINK\s*=\s*(.*)$/);
+    if (m) {
+      const val = m[1].replace(/^["']|["']$/g, '').trim();
+      if (val && !process.env.VITE_STRIPE_DONATE_LINK) process.env.VITE_STRIPE_DONATE_LINK = val;
+      break;
+    }
+  }
+}
+
 const link = typeof process.env.VITE_STRIPE_DONATE_LINK === 'string'
   ? process.env.VITE_STRIPE_DONATE_LINK.trim()
   : '';
