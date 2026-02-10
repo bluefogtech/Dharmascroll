@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "seed:gita": "node scripts/seed-bhagavad-gita.mjs"
   },
   "dependencies": {
     "@google/genai": "^1.38.0",

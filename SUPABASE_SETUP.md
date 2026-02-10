@@ -1,5 +1,34 @@
 # Supabase Setup for Authentication and Analytics
 
+## Fix: "Doesn't comply with Google's OAuth 2.0 policy" (Vercel / production)
+
+If you see this when signing in with Google on **Vercel** (e.g. dharmascroll.vercel.app), add the **exact** redirect URI in Google Cloud Console.
+
+**Your Supabase redirect URI** (from your error) is:
+
+```text
+https://jfhziyuyortztzmbpiux.supabase.co/auth/v1/callback
+```
+
+**Steps:**
+
+1. Open **[Google Cloud Console](https://console.cloud.google.com/)** and select the project that has your OAuth client (client_id `829601970831-...`).
+2. Go to **APIs & Services** → **Credentials**.
+3. Click your **OAuth 2.0 Client ID** (Web application).
+4. Under **Authorized redirect URIs**, click **+ ADD URI**.
+5. Paste **exactly** (no spaces, no trailing slash):
+   ```text
+   https://jfhziyuyortztzmbpiux.supabase.co/auth/v1/callback
+   ```
+6. Click **Save**.
+7. Wait 2–5 minutes, then try “Sign in with Google” again on https://dharmascroll.vercel.app.
+
+**Also add your app URL to Authorized JavaScript origins** (if you use it):
+- `https://dharmascroll.vercel.app`
+- `https://jfhziyuyortztzmbpiux.supabase.co`
+
+---
+
 ## Fix: "Error 400: redirect_uri_mismatch" (Google Sign-In)
 
 This happens when the redirect URI in **Google Cloud Console** doesn’t match Supabase’s callback URL.
@@ -158,3 +187,74 @@ SELECT
 FROM user_analytics
 GROUP BY user_id;
 ```
+
+---
+
+## Bhagavad Gita Table (Full Text)
+
+To store the full Bhagavad Gita (700 verses) for your webapp, create a dedicated table and optionally copy into `quotes` so existing app logic shows them.
+
+### 1. Create the table
+
+Run this in the Supabase SQL Editor:
+
+```sql
+-- Bhagavad Gita verses (full 700 verses, 18 chapters)
+-- Source: Public domain / Unlicense data (e.g. gita/gita, praneshp1org/Bhagavad-Gita-JSON-data)
+CREATE TABLE IF NOT EXISTS bhagavad_gita_verses (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  chapter_number INT NOT NULL,
+  verse_number INT NOT NULL,
+  reference TEXT NOT NULL,
+  sanskrit TEXT NOT NULL,
+  transliteration TEXT,
+  english TEXT NOT NULL,
+  hindi TEXT,
+  tamil TEXT,
+  chapter_name TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_bhagavad_gita_chapter_verse ON bhagavad_gita_verses(chapter_number, verse_number);
+```
+
+If the table already exists without `tamil`, add the column:
+
+```sql
+ALTER TABLE bhagavad_gita_verses ADD COLUMN IF NOT EXISTS tamil TEXT;
+```
+
+### 2. Populate the table
+
+From the project root (with `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` set, e.g. in `.env`), run:
+
+```bash
+npm run seed:gita
+```
+
+To also insert each verse into your existing `quotes` table so they appear in the app feed:
+
+```bash
+node scripts/seed-bhagavad-gita.mjs --into-quotes
+```
+
+The script fetches the full Gita (700 verses) from public JSON (praneshp1org/Bhagavad-Gita-JSON-data and gita/gita), maps Sanskrit + English + Hindi (+ Tamil when available in the source), then inserts into `bhagavad_gita_verses`. Re-running is safe (upserts by chapter/verse). **Tamil:** The current public JSON sources do not include Tamil; the `tamil` column is present and will be filled when a Tamil translation source is added to the script, or you can update rows manually/from another dataset.
+
+**Note:** Create the table (step 1) in the Supabase SQL Editor before running the script. If you use RLS on this table, allow anonymous insert for the seed or run the script with a service role key.
+
+### 3. Using Gita verses in the webapp
+
+- **Option A – Show in current app:** The seed script can insert rows into your existing `quotes` table with `book` = `Bhagavad Gita` and `reference` = `Chapter N, Verse M`. The app’s `mapRecordToQuote()` already supports `book`, `reference`, `english`, `hindi`, `sanskrit`, `context`, `themes`; no code change needed.
+- **Option B – Query only Gita:** Fetch from `bhagavad_gita_verses` in your app when you want a “Bhagavad Gita only” view or detail page.
+- **Option C – Copy into quotes later:** Run a one-time SQL copy from `bhagavad_gita_verses` into `quotes` (mapping columns to match your `quotes` schema) so all Gita verses appear in the main feed.
+
+### 4. App mapping
+
+The app’s `mapRecordToQuote()` in `services/supabaseService.ts` already supports the fields used for Gita:
+
+- `book` or `source` → combined with reference for display (e.g. `Bhagavad Gita • Chapter 2, Verse 47`).
+- `reference` or `quote_reference` → verse location.
+- `english` / `text` / `quote_text` → main quote text.
+- `hindi`, `tamil`, `sanskrit`, `context`, `themes` / `tags` → optional.
+
+So rows in `quotes` with `book` = `Bhagavad Gita` and the above fields will show correctly in the webapp without code changes.

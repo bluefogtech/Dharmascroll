@@ -300,3 +300,49 @@ export async function fetchRecommendedQuotes(
     return [];
   }
 }
+
+/**
+ * Fetches ALL Bhagavad Gita verses in canonical order (chapter, verse).
+ * Maps them into the generic Quote shape used by the app so they can be
+ * displayed with the same layout and styling as other quotes.
+ */
+export async function fetchBhagavadGitaVerses(): Promise<Quote[]> {
+  try {
+    const supabase = getSupabase();
+
+    const { data, error } = await supabase
+      .from('bhagavad_gita_verses')
+      .select('*')
+      .order('chapter_number', { ascending: true })
+      .order('verse_number', { ascending: true });
+
+    if (error) {
+      console.error("Supabase fetchBhagavadGitaVerses failed:", error);
+      throw error;
+    }
+
+    if (!data || data.length === 0) {
+      return [];
+    }
+
+    // Map Gita table rows into the standard Quote shape
+    return (data as any[]).map((row) => {
+      const reference = row.reference || `Chapter ${row.chapter_number}, Verse ${row.verse_number}`;
+      const chapterName = row.chapter_name || '';
+
+      return {
+        id: row.id?.toString() || `${row.chapter_number}-${row.verse_number}`,
+        text: row.english || '',
+        hindi: row.hindi || '',
+        tamil: row.tamil || '',
+        source: ['Bhagavad Gita', reference].filter(Boolean).join(' • '),
+        context: chapterName,
+        themes: [], // Gita verses are shown sequentially; no theme tags for now
+        sanskrit: row.sanskrit || row.verse || '',
+      } as Quote;
+    });
+  } catch (err: any) {
+    console.error("Supabase fetchBhagavadGitaVerses error:", err);
+    throw err;
+  }
+}

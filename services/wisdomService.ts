@@ -35,3 +35,34 @@ export async function getQuotes(isInitial = true, context?: { weights: Record<st
     throw new Error(message);
   }
 }
+
+/**
+ * Fetches Bhagavad Gita quotes from the dedicated Supabase table.
+ * Returns all verses in canonical order (chapter, verse) so they can be
+ * displayed sequentially in the UI. This does NOT affect the existing
+ * quotes page logic.
+ */
+export async function getGitaQuotes(): Promise<Quote[]> {
+  const supabaseReady = supabaseService.isSupabaseConfigured();
+
+  if (!supabaseReady) {
+    throw new Error(
+      "Configuration Required: The Supabase URL or Anon Key is missing. Please provide valid credentials in your .env file to load Bhagavad Gita verses."
+    );
+  }
+
+  try {
+    console.log("DharmaScroll: Fetching Bhagavad Gita verses from Supabase...");
+    const quotes = await supabaseService.fetchBhagavadGitaVerses();
+
+    if (!quotes || quotes.length === 0) {
+      throw new Error("Bhagavad Gita table is empty: Connected to Supabase, but 'bhagavad_gita_verses' returned no results.");
+    }
+
+    return quotes;
+  } catch (err: any) {
+    console.error("Supabase getGitaQuotes failed:", err);
+    const message = err.message || "Unable to connect to the Bhagavad Gita table.";
+    throw new Error(message);
+  }
+}

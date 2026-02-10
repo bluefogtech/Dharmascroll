@@ -4,7 +4,7 @@ import { InstallGuide } from './components/InstallGuide';
 import { LoginForm } from './components/LoginForm';
 import { RegisterForm } from './components/RegisterForm';
 import { Quote } from './types';
-import { getQuotes } from './services/wisdomService';
+import { getQuotes, getGitaQuotes } from './services/wisdomService';
 import { getCurrentUser, onAuthStateChange, signOut, mapUserToAuthUser } from './services/authService';
 import { trackEvent } from './services/analyticsService';
 import { AuthUser } from './services/authService';
@@ -13,12 +13,14 @@ const VERSION_TAG = "v5.4.0-iphone-ux";
 const BUILT_BY = "Developed by Blue Fog Technology";
 
 const App: React.FC = () => {
+  const isGitaRoute = typeof window !== 'undefined' && window.location.pathname === '/gita';
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [language, setLanguage] = useState<'en' | 'hi' | 'ta'>('en');
   const [themeWeights, setThemeWeights] = useState<Record<string, number>>({});
+  const [expandedChapters, setExpandedChapters] = useState<Set<number>>(new Set());
   
   // Authentication state
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -68,6 +70,13 @@ const App: React.FC = () => {
     };
   }, []);
 
+  // On Gita page, ensure Tamil is not selected (since we hide the Tamil toggle)
+  useEffect(() => {
+    if (isGitaRoute && language === 'ta') {
+      setLanguage('en');
+    }
+  }, [isGitaRoute, language]);
+
   // Initial Load (only after authentication)
   useEffect(() => {
     if (!user || authLoading) return;
@@ -76,7 +85,9 @@ const App: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        const initial = await getQuotes(true);
+        const initial = isGitaRoute 
+          ? await getGitaQuotes()
+          : await getQuotes(true);
         setQuotes(initial);
         initial.forEach(q => fetchedIds.current.add(q.id));
       } catch (err: any) {
@@ -99,11 +110,11 @@ const App: React.FC = () => {
       setActiveIndex(newIndex);
     }
 
-    // Load more when 2 items from the end
-    if (newIndex >= quotes.length - 2 && !isLoadingMore.current && quotes.length > 0) {
+    // Load more when 2 items from the end (main quotes page only)
+    if (!isGitaRoute && newIndex >= quotes.length - 2 && !isLoadingMore.current && quotes.length > 0) {
       loadMoreQuotes();
     }
-  }, [activeIndex, quotes.length]);
+  }, [activeIndex, quotes.length, isGitaRoute]);
 
   const loadMoreQuotes = async () => {
     if (isLoadingMore.current) return;
@@ -122,6 +133,19 @@ const App: React.FC = () => {
       isLoadingMore.current = false;
     }
   };
+
+  // Scroll to a specific verse index (Gita page)
+  const scrollToIndex = useCallback(
+    (index: number) => {
+      if (!containerRef.current) return;
+      const { clientHeight } = containerRef.current;
+      containerRef.current.scrollTo({
+        top: index * clientHeight,
+        behavior: 'smooth',
+      });
+    },
+    []
+  );
 
   const handleViewEnd = (id: string) => {
     const quote = quotes.find(q => q.id === id);
@@ -228,12 +252,14 @@ const App: React.FC = () => {
             >
               हिन्दी
             </button>
-            <button 
-              className={`lang-option ${language === 'ta' ? 'active' : ''}`}
-              onClick={() => setLanguage('ta')}
-            >
-              தமிழ்
-            </button>
+            {!isGitaRoute && (
+              <button 
+                className={`lang-option ${language === 'ta' ? 'active' : ''}`}
+                onClick={() => setLanguage('ta')}
+              >
+                தமிழ்
+              </button>
+            )}
           </div>
           <button className="logout-btn" onClick={handleLogout}>
             Logout
@@ -241,21 +267,143 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      <div 
-        ref={containerRef}
-        className="snap-container"
-        onScroll={handleScroll}
-      >
-        {quotes.map((quote, idx) => (
-          <QuoteCard 
-            key={quote.id}
-            quote={quote} 
-            isActive={activeIndex === idx} 
-            language={language}
-            onViewStart={() => {}} 
-            onViewEnd={handleViewEnd}
-          />
-        ))}
+      {/* Main content area */}
+      <div style={{ display: 'flex', height: 'calc(100% - 56px)' }}>
+        {isGitaRoute && (
+          <div
+            style={{
+              width: '32%',
+              maxWidth: '260px',
+              borderRight: '1px solid rgba(255,255,255,0.06)',
+              padding: '0.75rem 0.5rem 0.75rem 0.75rem',
+              overflowY: 'auto',
+              boxSizing: 'border-box',
+            }}
+          >
+            <div
+              style={{
+                color: 'var(--accent-gold)',
+                fontSize: '0.75rem',
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
+                marginBottom: '0.5rem',
+              }}
+            >
+              Bhagavad Gita Index
+            </div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-slate)', maxHeight: '100%', overflowY: 'auto' }}>
+              {(() => {
+                // Build chapter/verse index from the quotes' source strings
+                const chapters: { chapter: number; verses: { verse: number; index: number }[] }[] = [];
+                const chapterMap = new Map<number, { verse: number; index: number }[]>();
+
+                quotes.forEach((q, idx) => {
+                  const parts = q.source.split('•');
+                  const refPart = parts[1]?.trim() || '';
+                  // Match strings like: "Chapter 2, Verse 47"
+                  const match = refPart.match(/Chapter\s+(\d+)\s*,\s*Verse\s+(\d+)/i);
+                  if (!match) return;
+                  const chapterNum = parseInt(match[1], 10);
+                  const verseNum = parseInt(match[2], 10);
+                  if (!chapterMap.has(chapterNum)) {
+                    chapterMap.set(chapterNum, []);
+                  }
+                  chapterMap.get(chapterNum)!.push({ verse: verseNum, index: idx });
+                });
+
+                Array.from(chapterMap.entries())
+                  .sort((a, b) => a[0] - b[0])
+                  .forEach(([chapter, verses]) => {
+                    chapters.push({
+                      chapter,
+                      verses: verses.sort((a, b) => a.verse - b.verse),
+                    });
+                  });
+
+                const toggleChapter = (chapterNum: number) => {
+                  setExpandedChapters(prev => {
+                    const next = new Set(prev);
+                    if (next.has(chapterNum)) {
+                      next.delete(chapterNum);
+                    } else {
+                      next.add(chapterNum);
+                    }
+                    return next;
+                  });
+                };
+
+                return chapters.map(ch => {
+                  const isExpanded = expandedChapters.has(ch.chapter);
+                  return (
+                    <div key={ch.chapter} style={{ marginBottom: '0.5rem' }}>
+                      <button
+                        onClick={() => toggleChapter(ch.chapter)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          width: '100%',
+                          background: 'transparent',
+                          border: 'none',
+                          color: 'var(--accent-gold)',
+                          fontWeight: 600,
+                          fontSize: '0.78rem',
+                          padding: '0.2rem 0',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <span>Chapter {ch.chapter}</span>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                          {isExpanded ? '−' : '+'}
+                        </span>
+                      </button>
+                      {isExpanded && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.2rem', marginTop: '0.15rem' }}>
+                          {ch.verses.map(v => (
+                            <button
+                              key={`${ch.chapter}-${v.verse}`}
+                              onClick={() => scrollToIndex(v.index)}
+                              style={{
+                                border: 'none',
+                                padding: '0.1rem 0.25rem',
+                                borderRadius: '999px',
+                                fontSize: '0.7rem',
+                                backgroundColor: 'rgba(255,255,255,0.06)',
+                                color: 'var(--text-slate)',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              {v.verse}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+          </div>
+        )}
+
+        <div style={{ flex: 1 }}>
+          <div 
+            ref={containerRef}
+            className="snap-container"
+            onScroll={handleScroll}
+          >
+            {quotes.map((quote, idx) => (
+              <QuoteCard 
+                key={quote.id}
+                quote={quote} 
+                isActive={activeIndex === idx} 
+                language={language}
+                onViewStart={() => {}} 
+                onViewEnd={handleViewEnd}
+              />
+            ))}
+          </div>
+        </div>
       </div>
 
       <InstallGuide />
