@@ -4,14 +4,22 @@ import process from 'node:process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-// Write donate link so it's available in dev (from .env via loadEnv) and in build (from process.env on Vercel)
+// Write donate link so it's available in dev (from .env via loadEnv) and in build (from process.env on Vercel).
+// Also write public/donate-config.json here (not in the pre-build script) so Vercel's process.env is available.
 function generateEnvPlugin(donateLink: string) {
   return {
     name: 'generate-donate-env',
     buildStart() {
-      const outPath = path.join(process.cwd(), 'services', 'generated-env.ts');
-      const content = `// Auto-generated at build time. Do not edit.\nexport const VITE_STRIPE_DONATE_LINK: string = ${JSON.stringify(donateLink)};\n`;
-      fs.writeFileSync(outPath, content);
+      const cwd = process.cwd();
+      const link = typeof donateLink === 'string' && donateLink.startsWith('https://') ? donateLink : '';
+      // generated-env.ts for bundle
+      const envPath = path.join(cwd, 'services', 'generated-env.ts');
+      fs.writeFileSync(envPath, `// Auto-generated at build time. Do not edit.\nexport const VITE_STRIPE_DONATE_LINK: string = ${JSON.stringify(donateLink)};\n`);
+      // public/donate-config.json for runtime fetch (Vercel has process.env when Vite runs, not when the pre-build script runs)
+      const publicDir = path.join(cwd, 'public');
+      if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir, { recursive: true });
+      const configPath = path.join(publicDir, 'donate-config.json');
+      fs.writeFileSync(configPath, JSON.stringify({ donateLink: link }), 'utf8');
     },
   };
 }

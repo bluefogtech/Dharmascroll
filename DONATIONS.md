@@ -29,7 +29,7 @@ The app shows a **Donate** button on the landing page when a Stripe Payment Link
 
 ### Vercel (production)
 
-The build runs `scripts/write-donate-config.mjs`, which writes `VITE_STRIPE_DONATE_LINK` into `public/donate-config.json`. The app loads this file at runtime, so the Donate button appears on Vercel even when build-time env injection fails. Ensure the env var is set in Vercel and redeploy. If you still don't see the button:
+During `vite build`, a Vite plugin writes `VITE_STRIPE_DONATE_LINK` into `public/donate-config.json` (and into the bundle). The app loads the JSON at runtime. **Vercel only exposes env vars to the build process**—so the variable must be set in the project and will be read when `vite build` runs. If the build log shows "donateLink: empty", the pre-build script didn't see the var; the plugin still writes the file when Vite runs, so ensure the var is set in Vercel. If you still don't see the button:
 
 1. In **Vercel Dashboard** → your project → **Settings** → **Environment Variables**.
 2. Add a variable:
