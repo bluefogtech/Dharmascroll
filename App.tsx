@@ -7,6 +7,7 @@ import { Quote } from './types';
 import { getQuotes, getGitaQuotes } from './services/wisdomService';
 import { getCurrentUser, onAuthStateChange, signOut, mapUserToAuthUser } from './services/authService';
 import { trackEvent } from './services/analyticsService';
+import { openDonatePage, isDonateConfigured } from './services/donationService';
 import { AuthUser } from './services/authService';
 
 const VERSION_TAG = "v5.4.0-iphone-ux";
@@ -259,7 +260,20 @@ const App: React.FC = () => {
             <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>ॐ</span>
             <span style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '3px' }}>DHARMA</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            {isDonateConfigured() && (
+              <button
+                className="logout-btn"
+                style={{
+                  background: 'rgba(46, 125, 50, 0.25)',
+                  borderColor: 'var(--accent-forest, #2E7D32)',
+                  color: 'var(--accent-forest, #4ade80)',
+                }}
+                onClick={openDonatePage}
+              >
+                Donate
+              </button>
+            )}
             {!user ? (
               <button
                 className="logout-btn"
