@@ -17,6 +17,8 @@ const App: React.FC = () => {
   const path = typeof window !== 'undefined' ? window.location.pathname : '/';
   const isLandingRoute = path === '/';
   const isGitaRoute = path === '/gita';
+  const isRandomRoute = path === '/random';
+  const showLanding = isLandingRoute || ((isGitaRoute || isRandomRoute) && (authLoading || !user));
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -108,6 +110,7 @@ const App: React.FC = () => {
         setLoading(true);
         setError(null);
         if (isLandingRoute) return; // landing page doesn't need quotes
+        if ((isGitaRoute || isRandomRoute) && !user) return; // direct access without auth → landing will show
 
         const initial = isGitaRoute 
           ? await getGitaQuotes()
@@ -122,7 +125,7 @@ const App: React.FC = () => {
       }
     };
     init();
-  }, [authLoading, isGitaRoute, isLandingRoute]);
+  }, [authLoading, isGitaRoute, isLandingRoute, isRandomRoute, user]);
 
   // Infinite Scroll Observer
   const handleScroll = useCallback(() => {
@@ -258,8 +261,8 @@ const App: React.FC = () => {
     );
   }
 
-  // Landing page (main entry)
-  if (isLandingRoute) {
+  // Landing page (main entry), or direct access to /gita or /random when not logged in
+  if (showLanding) {
     return (
       <div
         className="landing-container"
@@ -614,92 +617,48 @@ const App: React.FC = () => {
   // Quotes / Gita pages
   return (
     <div style={{ position: 'relative', height: '100%', width: '100%', background: 'var(--bg-dark)' }}>
-      {/* App Header with Home + Language Picker (no auth on random/Gita pages); Gita: logo centered */}
+      {/* App Header: Home + Language only (no ॐ DHARMA on Gita/Random); Gita mobile: Chapters on left */}
       <div
         className="header-logo"
         style={{
           pointerEvents: 'auto',
-          ...(isGitaRoute
-            ? { display: 'flex', justifyContent: 'center', alignItems: 'center' }
-            : {}),
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingLeft: '0.75rem',
+          paddingRight: '1rem',
         }}
       >
-        {isGitaRoute ? (
-          <>
-            {isMobile && (
-              <button
-                className="logout-btn"
-                style={{ position: 'absolute', left: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem' }}
-                onClick={() => setGitaSidebarOpen(true)}
-                aria-label="Open chapter index"
-              >
-                <span style={{ fontSize: '1rem' }}>☰</span>
-                <span>Chapters</span>
-              </button>
-            )}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>ॐ</span>
-              <span style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '3px' }}>DHARMA</span>
-            </div>
-            <div style={{ position: 'absolute', right: '1rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <button
-                className="logout-btn"
-                style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}
-                onClick={() => { window.location.href = '/'; }}
-              >
-                <span style={{ fontSize: '1rem' }}>🏠</span>
-                {!isMobile && <span style={{ fontSize: '0.7rem' }}>Home</span>}
-              </button>
-              <div className="lang-picker">
-                <button className={`lang-option ${language === 'en' ? 'active' : ''}`} onClick={() => setLanguage('en')}>EN</button>
-                <button className={`lang-option ${language === 'hi' ? 'active' : ''}`} onClick={() => setLanguage('hi')}>हिन्दी</button>
-              </div>
-            </div>
-          </>
-        ) : (
-          <>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>ॐ</span>
-              <span style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '3px' }}>DHARMA</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          {/* Home button back to landing page */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {isGitaRoute && isMobile && (
+            <button
+              className="logout-btn"
+              style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem' }}
+              onClick={() => setGitaSidebarOpen(true)}
+              aria-label="Open chapter index"
+            >
+              <span style={{ fontSize: '1rem' }}>☰</span>
+              <span>Chapters</span>
+            </button>
+          )}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <button
             className="logout-btn"
             style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}
-            onClick={() => {
-              window.location.href = '/';
-            }}
+            onClick={() => { window.location.href = '/'; }}
           >
             <span style={{ fontSize: '1rem' }}>🏠</span>
-            <span style={{ fontSize: '0.7rem' }}>Home</span>
+            {!isMobile && <span style={{ fontSize: '0.7rem' }}>Home</span>}
           </button>
-
           <div className="lang-picker">
-            <button 
-              className={`lang-option ${language === 'en' ? 'active' : ''}`}
-              onClick={() => setLanguage('en')}
-            >
-              EN
-            </button>
-            <button 
-              className={`lang-option ${language === 'hi' ? 'active' : ''}`}
-              onClick={() => setLanguage('hi')}
-            >
-              हिन्दी
-            </button>
+            <button className={`lang-option ${language === 'en' ? 'active' : ''}`} onClick={() => setLanguage('en')}>EN</button>
+            <button className={`lang-option ${language === 'hi' ? 'active' : ''}`} onClick={() => setLanguage('hi')}>हिन्दी</button>
             {!isGitaRoute && (
-              <button 
-                className={`lang-option ${language === 'ta' ? 'active' : ''}`}
-                onClick={() => setLanguage('ta')}
-              >
-                தமிழ்
-              </button>
+              <button className={`lang-option ${language === 'ta' ? 'active' : ''}`} onClick={() => setLanguage('ta')}>தமிழ்</button>
             )}
           </div>
         </div>
-          </>
-        )}
       </div>
 
       {/* Gita sidebar overlay (mobile only): backdrop + drawer */}
