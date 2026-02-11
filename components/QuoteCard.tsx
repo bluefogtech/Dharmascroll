@@ -236,16 +236,15 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
       </div>
 
       {/* Contact and Join Mission links (left bottom, stacked) */}
-      <div style={{ position: 'absolute', bottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)', left: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', zIndex: 20 }}>
+      <div style={{ position: 'absolute', bottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)', left: '1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem', zIndex: 20 }}>
         <a
           className="contact-link"
           href="mailto:contact@bluefog.co.uk"
           style={{
             color: '#ffffff',
-            fontSize: '0.7rem',
-            fontWeight: 500,
+            fontSize: '0.85rem',
+            fontWeight: 600,
             cursor: 'pointer',
-            fontFamily: 'monospace',
             textDecoration: 'none',
             transition: 'opacity 0.2s',
           }}
