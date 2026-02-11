@@ -430,19 +430,57 @@ const App: React.FC = () => {
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '0.4rem' : '0.75rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          <button
-            className="logout-btn"
+          <a
+            href="/"
+            onClick={(e) => { e.preventDefault(); window.location.href = '/'; }}
             style={{ 
               display: 'flex', 
               alignItems: 'center', 
-              gap: '0.25rem',
-              padding: isMobile ? '0.3rem 0.4rem' : undefined,
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'opacity 0.2s',
+              position: 'relative',
             }}
-            onClick={() => { window.location.href = '/'; }}
+            aria-label="Home"
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.opacity = '0.7';
+              const tooltip = e.currentTarget.querySelector('.home-tooltip') as HTMLElement;
+              if (tooltip) tooltip.style.opacity = '1';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.opacity = '1';
+              const tooltip = e.currentTarget.querySelector('.home-tooltip') as HTMLElement;
+              if (tooltip) tooltip.style.opacity = '0';
+            }}
           >
-            <span style={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>🏠</span>
-            {!isMobile && <span style={{ fontSize: '0.7rem' }}>Home</span>}
-          </button>
+            <img 
+              src="/home-icon.png" 
+              alt="Home" 
+              style={{ 
+                height: isMobile ? '1.5rem' : '2rem', 
+                width: 'auto', 
+                objectFit: 'contain',
+              }}
+            />
+            <span
+              className="home-tooltip"
+              style={{
+                position: 'absolute',
+                bottom: '-1.5rem',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                fontSize: '0.7rem',
+                color: 'var(--accent-gold)',
+                whiteSpace: 'nowrap',
+                opacity: 0,
+                pointerEvents: 'none',
+                transition: 'opacity 0.2s',
+                fontWeight: 600,
+              }}
+            >
+              Home
+            </span>
+          </a>
           <div className="lang-picker" style={{ fontSize: isMobile ? '0.7rem' : undefined }}>
             <button className={`lang-option ${language === 'en' ? 'active' : ''}`} onClick={() => setLanguage('en')} style={{ padding: isMobile ? '0.3rem 0.6rem' : undefined }}>EN</button>
             <button className={`lang-option ${language === 'hi' ? 'active' : ''}`} onClick={() => setLanguage('hi')} style={{ padding: isMobile ? '0.3rem 0.6rem' : undefined }}>हिन्दी</button>
