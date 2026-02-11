@@ -181,8 +181,8 @@ const App: React.FC = () => {
           color: 'var(--text-slate)',
         }}
       >
-        {/* Header: brand */}
-        <div className="header-logo" style={{ pointerEvents: 'auto', padding: '1rem', marginBottom: '1rem' }}>
+        {/* Header: brand – scrolls with content on landing so hero text doesn't hide under it */}
+        <div className="header-logo" style={{ position: 'relative', pointerEvents: 'auto', padding: '1rem', marginBottom: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>ॐ</span>
             <span style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '3px' }}>DHARMA</span>
@@ -372,8 +372,9 @@ const App: React.FC = () => {
           </p>
         </div>
 
-        {/* Version tag and contact */}
+        {/* Version tag and contact – scrolls with content so disclaimer/text isn't hidden */}
         <div className="version-tag" style={{ 
+          position: 'relative',
           display: 'flex', 
           alignItems: 'center', 
           gap: '1rem', 
@@ -504,127 +505,113 @@ const App: React.FC = () => {
           </div>
         </div>
         </div>
-        
-        {/* Chapter selection for Gita page (below language) */}
-        {isGitaRoute && (
-          <div style={{ width: '100%', marginTop: '0.25rem' }}>
-            {(() => {
-              const chapters: { chapter: number; verses: { verse: number; index: number }[] }[] = [];
-              const chapterMap = new Map<number, { verse: number; index: number }[]>();
-              quotes.forEach((q, idx) => {
-                const parts = q.source.split('•');
-                const refPart = parts[1]?.trim() || '';
-                const match = refPart.match(/Chapter\s+(\d+)\s*,\s*Verse\s+(\d+)/i);
-                if (!match) return;
-                const chapterNum = parseInt(match[1], 10);
-                const verseNum = parseInt(match[2], 10);
-                if (!chapterMap.has(chapterNum)) chapterMap.set(chapterNum, []);
-                chapterMap.get(chapterNum)!.push({ verse: verseNum, index: idx });
-              });
-              Array.from(chapterMap.entries())
-                .sort((a, b) => a[0] - b[0])
-                .forEach(([chapter, verses]) => {
-                  chapters.push({ chapter, verses: verses.sort((a, b) => a.verse - b.verse) });
-                });
-              const toggleChapter = (chapterNum: number) => {
-                setExpandedChapters(prev => {
-                  const next = new Set(prev);
-                  if (next.has(chapterNum)) next.delete(chapterNum);
-                  else next.add(chapterNum);
-                  return next;
-                });
-              };
-              return (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
-                  <span style={{ color: 'var(--accent-gold)', fontSize: '0.7rem', letterSpacing: '0.1em', fontWeight: 600 }}>Chapters:</span>
-                  {chapters.map(ch => {
-                    const isExpanded = expandedChapters.has(ch.chapter);
-                    const isActiveChapter = ch.verses.some(v => v.index === activeIndex);
-                    return (
-                      <div key={ch.chapter} style={{ position: 'relative', display: 'inline-block' }}>
-                        <button
-                          type="button"
-                          onClick={() => toggleChapter(ch.chapter)}
-                          style={{
-                            display: 'flex', alignItems: 'center', gap: '0.3rem',
-                            background: isActiveChapter ? 'rgba(255,215,0,0.18)' : 'rgba(255,255,255,0.08)',
-                            border: isActiveChapter ? '1px solid var(--accent-gold)' : '1px solid rgba(255,255,255,0.1)',
-                            color: isActiveChapter ? 'var(--accent-gold)' : 'var(--text-slate)',
-                            fontWeight: isActiveChapter ? 600 : 400,
-                            fontSize: '0.7rem',
-                            padding: '0.25rem 0.5rem',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                          }}
-                          onMouseEnter={(e) => {
-                            if (!isActiveChapter) {
-                              e.currentTarget.style.background = 'rgba(255,255,255,0.12)';
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (!isActiveChapter) {
-                              e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
-                            }
-                          }}
-                        >
-                          <span>{ch.chapter}</span>
-                          <span style={{ fontSize: '0.6rem' }}>{isExpanded ? '−' : '+'}</span>
-                        </button>
-                        {isExpanded && (
-                          <div style={{ 
-                            position: 'absolute', 
-                            top: '100%',
-                            left: 0,
-                            marginTop: '0.25rem',
-                            display: 'flex', 
-                            flexWrap: 'wrap', 
-                            gap: '0.25rem',
-                            background: 'rgba(0,0,0,0.9)',
-                            padding: '0.5rem',
-                            borderRadius: '4px',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            zIndex: 200,
-                            maxWidth: '300px',
-                            backdropFilter: 'blur(10px)',
-                          }}>
-                            {ch.verses.map(v => {
-                              const isActiveVerse = v.index === activeIndex;
-                              return (
-                                <button
-                                  key={`${ch.chapter}-${v.verse}`}
-                                  type="button"
-                                  onClick={() => { setActiveIndex(v.index); scrollToIndex(v.index); }}
-                                  style={{
-                                    border: isActiveVerse ? '1px solid var(--accent-gold)' : 'none',
-                                    padding: '0.2rem 0.4rem',
-                                    borderRadius: '4px',
-                                    fontSize: '0.65rem',
-                                    backgroundColor: isActiveVerse ? 'rgba(255,215,0,0.25)' : 'rgba(255,255,255,0.06)',
-                                    color: isActiveVerse ? 'var(--accent-gold)' : 'var(--text-slate)',
-                                    cursor: 'pointer',
-                                    fontWeight: isActiveVerse ? 600 : 400,
-                                  }}
-                                >
-                                  {v.verse}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })()}
-          </div>
-        )}
       </div>
 
-      {/* Main content area */}
-      <div style={{ display: 'flex', height: '100%' }}>
-        <div style={{ flex: 1, width: '100%' }} className={isGitaRoute ? 'gita-verse-area' : ''}>
+      {/* Main content area: left chapter sidebar (Gita) + verse content */}
+      <div style={{ display: 'flex', height: '100%', paddingTop: '64px' }}>
+        {isGitaRoute && (
+          <div
+            style={{
+              width: '24%',
+              maxWidth: '200px',
+              borderRight: '1px solid rgba(255,255,255,0.06)',
+              padding: '0.75rem 0.4rem 0.75rem 0.6rem',
+              overflowY: 'auto',
+              boxSizing: 'border-box',
+              flexShrink: 0,
+            }}
+          >
+            <div style={{ color: 'var(--accent-gold)', fontSize: '0.75rem', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+              Bhagavad Gita Index
+            </div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-slate)' }}>
+              {(() => {
+                const chapters: { chapter: number; verses: { verse: number; index: number }[] }[] = [];
+                const chapterMap = new Map<number, { verse: number; index: number }[]>();
+                quotes.forEach((q, idx) => {
+                  const parts = q.source.split('•');
+                  const refPart = parts[1]?.trim() || '';
+                  const match = refPart.match(/Chapter\s+(\d+)\s*,\s*Verse\s+(\d+)/i);
+                  if (!match) return;
+                  const chapterNum = parseInt(match[1], 10);
+                  const verseNum = parseInt(match[2], 10);
+                  if (!chapterMap.has(chapterNum)) chapterMap.set(chapterNum, []);
+                  chapterMap.get(chapterNum)!.push({ verse: verseNum, index: idx });
+                });
+                Array.from(chapterMap.entries())
+                  .sort((a, b) => a[0] - b[0])
+                  .forEach(([chapter, verses]) => {
+                    chapters.push({ chapter, verses: verses.sort((a, b) => a.verse - b.verse) });
+                  });
+                const toggleChapter = (chapterNum: number) => {
+                  setExpandedChapters(prev => {
+                    const next = new Set(prev);
+                    if (next.has(chapterNum)) next.delete(chapterNum);
+                    else next.add(chapterNum);
+                    return next;
+                  });
+                };
+                return chapters.map(ch => {
+                  const isExpanded = expandedChapters.has(ch.chapter);
+                  const isActiveChapter = ch.verses.some(v => v.index === activeIndex);
+                  return (
+                    <div key={ch.chapter} style={{ marginBottom: '0.5rem' }}>
+                      <button
+                        type="button"
+                        onClick={() => toggleChapter(ch.chapter)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'flex-start',
+                          width: '100%',
+                          gap: '0.4rem',
+                          background: isActiveChapter ? 'rgba(255,215,0,0.18)' : 'transparent',
+                          border: 'none',
+                          color: 'var(--accent-gold)',
+                          fontWeight: 600,
+                          fontSize: '0.75rem',
+                          padding: '0.2rem 0',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                        }}
+                      >
+                        <span>Chapter {ch.chapter}</span>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-slate)', marginLeft: 'auto' }}>{isExpanded ? '−' : '+'}</span>
+                      </button>
+                      {isExpanded && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.2rem', marginTop: '0.15rem' }}>
+                          {ch.verses.map(v => {
+                            const isActiveVerse = v.index === activeIndex;
+                            return (
+                              <button
+                                key={`${ch.chapter}-${v.verse}`}
+                                type="button"
+                                onClick={() => { setActiveIndex(v.index); scrollToIndex(v.index); }}
+                                style={{
+                                  border: isActiveVerse ? '1px solid var(--accent-gold)' : 'none',
+                                  padding: '0.1rem 0.25rem',
+                                  borderRadius: '999px',
+                                  fontSize: '0.7rem',
+                                  backgroundColor: isActiveVerse ? 'rgba(255,215,0,0.25)' : 'rgba(255,255,255,0.06)',
+                                  color: isActiveVerse ? 'var(--accent-gold)' : 'var(--text-slate)',
+                                  cursor: 'pointer',
+                                  fontWeight: isActiveVerse ? 600 : 400,
+                                }}
+                              >
+                                {v.verse}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+          </div>
+        )}
+        <div style={{ flex: 1, width: '100%', minWidth: 0 }} className={isGitaRoute ? 'gita-verse-area' : ''}>
           <div 
             ref={containerRef}
             className="snap-container"
@@ -645,6 +632,7 @@ const App: React.FC = () => {
       </div>
 
       <div className="version-tag" style={{ 
+        position: 'relative',
         display: 'flex', 
         alignItems: 'center', 
         gap: '1rem', 
