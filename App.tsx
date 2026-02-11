@@ -112,9 +112,10 @@ const App: React.FC = () => {
     (index: number) => {
       if (!containerRef.current) return;
       const { clientHeight } = containerRef.current;
+      // Use 'auto' behavior for instant jump instead of smooth scrolling
       containerRef.current.scrollTo({
         top: index * clientHeight,
-        behavior: 'smooth',
+        behavior: 'auto',
       });
     },
     []
@@ -527,7 +528,7 @@ const App: React.FC = () => {
                           <button
                             key={`${ch.chapter}-${v.verse}`}
                             type="button"
-                            onClick={() => { scrollToIndex(v.index); setGitaSidebarOpen(false); }}
+                            onClick={() => { setActiveIndex(v.index); scrollToIndex(v.index); setGitaSidebarOpen(false); }}
                             style={{
                               border: 'none', padding: '0.35rem 0.5rem', borderRadius: '999px', fontSize: '0.8rem',
                               backgroundColor: 'rgba(255,255,255,0.08)', color: 'var(--text-slate)', cursor: 'pointer',
@@ -614,7 +615,7 @@ const App: React.FC = () => {
                               <button
                                 key={`${ch.chapter}-${v.verse}`}
                                 type="button"
-                                onClick={() => scrollToIndex(v.index)}
+                                onClick={() => { setActiveIndex(v.index); scrollToIndex(v.index); }}
                                 style={{
                                   border: isActiveVerse ? '1px solid var(--accent-gold)' : 'none',
                                   padding: '0.1rem 0.25rem',
