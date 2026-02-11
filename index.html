@@ -251,27 +251,17 @@
         }
 
         .action-bar {
-            position: absolute; right: 1rem;
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 7rem);
+            position: absolute; right: 15%;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
             display: flex; flex-direction: column; gap: 1.5rem; z-index: 20;
         }
-        .bottom-action-bar {
-            position: absolute;
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
-            left: 0;
-            right: 0;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-            z-index: 20;
-            width: 100%;
-            max-width: 100%;
-            padding: 0 1rem;
-            box-sizing: border-box;
+        @media (max-width: 1200px) {
+            .action-bar {
+                right: 2rem;
+            }
         }
         .join-mission-link {
-            color: var(--accent-forest, #4ade80);
+            color: #ffffff;
             font-size: 0.85rem;
             font-weight: 600;
             text-decoration: none;
@@ -281,24 +271,21 @@
         .join-mission-link:hover {
             opacity: 0.8;
         }
-        .bottom-action-bar .action-btn {
-            width: 3rem;
-            height: 3rem;
-            flex-shrink: 0;
-        }
         @media (max-width: 768px) {
-            .bottom-action-bar {
+            .action-bar {
                 bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
-                padding: 0 0.75rem;
+                right: 0.75rem;
+                gap: 1rem;
             }
             .join-mission-link {
                 font-size: 0.8rem;
+                left: 0.75rem;
             }
-            .bottom-action-bar .action-btn {
+            .action-btn {
                 width: 2.75rem;
                 height: 2.75rem;
             }
-            .bottom-action-bar .action-btn svg {
+            .action-btn svg {
                 width: 1.3rem !important;
                 height: 1.3rem !important;
             }

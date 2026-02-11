@@ -372,33 +372,31 @@ const App: React.FC = () => {
 
         {/* Version tag and contact */}
         <div className="version-tag">{VERSION_TAG} | {BUILT_BY}</div>
-        <button
-          className="contact-btn"
-          onClick={() => window.location.href = 'mailto:contact@bluefog.co.uk'}
+        <a
+          className="contact-link"
+          href="mailto:contact@bluefog.co.uk"
           style={{
             position: 'fixed',
             bottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.3rem)',
             right: '1rem',
-            background: 'rgba(255, 193, 7, 0.15)',
-            border: '1px solid var(--text-gold-brilliant)',
-            color: 'var(--text-gold-brilliant)',
-            padding: '0.4rem 0.8rem',
-            borderRadius: '999px',
+            color: '#ffffff',
             fontSize: '0.7rem',
-            fontWeight: 600,
+            fontWeight: 500,
             cursor: 'pointer',
             zIndex: 50,
             fontFamily: 'monospace',
+            textDecoration: 'none',
+            transition: 'opacity 0.2s',
           }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.background = 'rgba(255, 193, 7, 0.25)';
+            (e.currentTarget as HTMLElement).style.opacity = '0.8';
           }}
           onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.background = 'rgba(255, 193, 7, 0.15)';
+            (e.currentTarget as HTMLElement).style.opacity = '1';
           }}
         >
           Contact
-        </button>
+        </a>
       </div>
     );
   }
@@ -666,33 +664,31 @@ const App: React.FC = () => {
 
       <InstallGuide />
       <div className="version-tag">{VERSION_TAG} | {BUILT_BY}</div>
-      <button
-        className="contact-btn"
-        onClick={() => window.location.href = 'mailto:contact@bluefog.co.uk'}
+      <a
+        className="contact-link"
+        href="mailto:contact@bluefog.co.uk"
         style={{
           position: 'fixed',
           bottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.3rem)',
           right: '1rem',
-          background: 'rgba(255, 193, 7, 0.15)',
-          border: '1px solid var(--text-gold-brilliant)',
-          color: 'var(--text-gold-brilliant)',
-          padding: '0.4rem 0.8rem',
-          borderRadius: '999px',
+          color: '#ffffff',
           fontSize: '0.7rem',
-          fontWeight: 600,
+          fontWeight: 500,
           cursor: 'pointer',
           zIndex: 50,
           fontFamily: 'monospace',
+          textDecoration: 'none',
+          transition: 'opacity 0.2s',
         }}
         onMouseEnter={(e) => {
-          (e.currentTarget as HTMLElement).style.background = 'rgba(255, 193, 7, 0.25)';
+          (e.currentTarget as HTMLElement).style.opacity = '0.8';
         }}
         onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.background = 'rgba(255, 193, 7, 0.15)';
+          (e.currentTarget as HTMLElement).style.opacity = '1';
         }}
       >
         Contact
-      </button>
+      </a>
     </div>
   );
 };
