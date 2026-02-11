@@ -401,7 +401,7 @@ const App: React.FC = () => {
             </button>
           )}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '0.4rem' : '0.75rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           {donateLink && (
             <button
               className="logout-btn"
@@ -409,26 +409,33 @@ const App: React.FC = () => {
                 background: 'rgba(46, 125, 50, 0.25)',
                 borderColor: 'var(--accent-forest, #2E7D32)',
                 color: 'var(--accent-forest, #4ade80)',
-                fontSize: '0.75rem',
+                fontSize: isMobile ? '0.65rem' : '0.75rem',
+                padding: isMobile ? '0.3rem 0.5rem' : undefined,
+                whiteSpace: 'nowrap',
               }}
               onClick={() => openDonatePage(donateLink)}
             >
-              Join the Mission
+              {isMobile ? 'Mission' : 'Join the Mission'}
             </button>
           )}
           <button
             className="logout-btn"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.25rem',
+              padding: isMobile ? '0.3rem 0.4rem' : undefined,
+            }}
             onClick={() => { window.location.href = '/'; }}
           >
-            <span style={{ fontSize: '1rem' }}>🏠</span>
+            <span style={{ fontSize: isMobile ? '0.9rem' : '1rem' }}>🏠</span>
             {!isMobile && <span style={{ fontSize: '0.7rem' }}>Home</span>}
           </button>
-          <div className="lang-picker">
-            <button className={`lang-option ${language === 'en' ? 'active' : ''}`} onClick={() => setLanguage('en')}>EN</button>
-            <button className={`lang-option ${language === 'hi' ? 'active' : ''}`} onClick={() => setLanguage('hi')}>हिन्दी</button>
+          <div className="lang-picker" style={{ fontSize: isMobile ? '0.7rem' : undefined }}>
+            <button className={`lang-option ${language === 'en' ? 'active' : ''}`} onClick={() => setLanguage('en')} style={{ padding: isMobile ? '0.3rem 0.6rem' : undefined }}>EN</button>
+            <button className={`lang-option ${language === 'hi' ? 'active' : ''}`} onClick={() => setLanguage('hi')} style={{ padding: isMobile ? '0.3rem 0.6rem' : undefined }}>हिन्दी</button>
             {!isGitaRoute && (
-              <button className={`lang-option ${language === 'ta' ? 'active' : ''}`} onClick={() => setLanguage('ta')}>தமிழ்</button>
+              <button className={`lang-option ${language === 'ta' ? 'active' : ''}`} onClick={() => setLanguage('ta')} style={{ padding: isMobile ? '0.3rem 0.6rem' : undefined }}>தமிழ்</button>
             )}
           </div>
         </div>
