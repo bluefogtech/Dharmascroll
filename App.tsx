@@ -376,7 +376,7 @@ const App: React.FC = () => {
           </p>
         </div>
 
-        {/* Version tag and contact – at bottom of viewport on desktop, scrolls with content when long */}
+        {/* Version tag and contact – at bottom of viewport on desktop, scrolls with content when long; extra bottom padding on mobile so footer stays above browser chrome */}
         <div className="version-tag" style={{ 
           position: 'relative',
           flexShrink: 0,
@@ -387,7 +387,7 @@ const App: React.FC = () => {
           flexWrap: 'wrap', 
           justifyContent: 'flex-start',
           padding: '1rem',
-          paddingBottom: 'max(2rem, env(safe-area-inset-bottom))',
+          paddingBottom: 'max(2rem, calc(env(safe-area-inset-bottom, 0px) + 80px))',
         }}>
           <span>{BUILT_BY}</span>
           <img 
@@ -449,25 +449,6 @@ const App: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>ॐ</span>
             <span style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '3px' }}>DHARMA</span>
-            {isGitaRoute && isMobile && (
-              <button
-                type="button"
-                onClick={() => setGitaIndexOpen(true)}
-                style={{
-                  marginLeft: '0.5rem',
-                  padding: '0.35rem 0.6rem',
-                  fontSize: '0.7rem',
-                  fontWeight: 600,
-                  color: 'var(--accent-gold)',
-                  background: 'rgba(255,215,0,0.15)',
-                  border: '1px solid rgba(255,215,0,0.4)',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                }}
-              >
-                Chapters
-              </button>
-            )}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '0.4rem' : '0.75rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           <a
@@ -636,7 +617,31 @@ const App: React.FC = () => {
             </div>
           </div>
         )}
-        <div style={{ flex: 1, width: '100%', minWidth: 0 }} className={isGitaRoute ? 'gita-verse-area' : ''}>
+        <div style={{ flex: 1, width: '100%', minWidth: 0, position: 'relative' }} className={isGitaRoute ? 'gita-verse-area' : ''}>
+          {isGitaRoute && isMobile && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setGitaIndexOpen(true); }}
+              style={{
+                position: 'absolute',
+                left: '0.75rem',
+                top: '0.75rem',
+                zIndex: 30,
+                padding: '0.4rem 0.65rem',
+                fontSize: '0.7rem',
+                fontWeight: 600,
+                color: 'var(--accent-gold)',
+                background: 'rgba(0,0,0,0.5)',
+                border: '1px solid rgba(255,215,0,0.4)',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                backdropFilter: 'blur(6px)',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+              }}
+            >
+              Chapters
+            </button>
+          )}
           <div 
             ref={containerRef}
             className="snap-container"
