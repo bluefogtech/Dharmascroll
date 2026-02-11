@@ -21,7 +21,6 @@ const App: React.FC = () => {
   const [themeWeights, setThemeWeights] = useState<Record<string, number>>({});
   const [expandedChapters, setExpandedChapters] = useState<Set<number>>(new Set());
   const [donateLink, setDonateLink] = useState<string | null>(() => getDonateLink());
-  const [gitaSidebarOpen, setGitaSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 768 : false);
   const [contactFormOpen, setContactFormOpen] = useState(false);
 
@@ -183,7 +182,7 @@ const App: React.FC = () => {
         }}
       >
         {/* Header: brand */}
-        <div className="header-logo" style={{ pointerEvents: 'auto' }}>
+        <div className="header-logo" style={{ pointerEvents: 'auto', padding: '1rem', marginBottom: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>ॐ</span>
             <span style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '3px' }}>DHARMA</span>
@@ -191,7 +190,7 @@ const App: React.FC = () => {
         </div>
 
         {/* Main hero + cards */}
-        <div style={{ marginTop: '80px', textAlign: 'center', padding: '0 16px', paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
+        <div style={{ textAlign: 'center', padding: '0 16px 2rem' }}>
           <h1
             style={{
               fontSize: '2.4rem',
@@ -374,7 +373,15 @@ const App: React.FC = () => {
         </div>
 
         {/* Version tag and contact */}
-        <div className="version-tag" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', padding: '1rem' }}>
+        <div className="version-tag" style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '1rem', 
+          flexWrap: 'wrap', 
+          justifyContent: 'flex-start',
+          padding: '1rem',
+          marginTop: '2rem',
+        }}>
           <span>{BUILT_BY}</span>
           <img 
             src="/bluefog-logo.png" 
@@ -423,26 +430,20 @@ const App: React.FC = () => {
         style={{
           pointerEvents: 'auto',
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          paddingLeft: '0.75rem',
-          paddingRight: '1rem',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          gap: '0.5rem',
+          padding: '1rem',
+          marginBottom: '1rem',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {isGitaRoute && isMobile && (
-            <button
-              className="logout-btn"
-              style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem' }}
-              onClick={() => setGitaSidebarOpen(true)}
-              aria-label="Open chapter index"
-            >
-              <span style={{ fontSize: '1rem' }}>☰</span>
-              <span>Chapters</span>
-            </button>
-          )}
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '0.4rem' : '0.75rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+        {/* Top row: Brand + Home + Language */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>ॐ</span>
+            <span style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '3px' }}>DHARMA</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '0.4rem' : '0.75rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           <a
             href="/"
             onClick={(e) => { e.preventDefault(); window.location.href = '/'; }}
@@ -502,33 +503,11 @@ const App: React.FC = () => {
             )}
           </div>
         </div>
-      </div>
-
-      {/* Gita sidebar overlay (mobile only): backdrop + drawer */}
-      {isGitaRoute && isMobile && (
-        <>
-          {gitaSidebarOpen && (
-            <div
-              className="gita-sidebar-overlay"
-              onClick={() => setGitaSidebarOpen(false)}
-              aria-hidden="true"
-            />
-          )}
-          <div
-            className="gita-sidebar-drawer"
-            style={{ transform: gitaSidebarOpen ? 'translateX(0)' : 'translateX(-100%)' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-              <span style={{ color: 'var(--accent-gold)', fontSize: '0.8rem', letterSpacing: '0.1em', fontWeight: 600 }}>Chapters</span>
-              <button
-                type="button"
-                onClick={() => setGitaSidebarOpen(false)}
-                style={{ background: 'none', border: 'none', color: 'var(--text-slate)', fontSize: '1.25rem', cursor: 'pointer', padding: '0.25rem' }}
-                aria-label="Close"
-              >
-                ×
-              </button>
-            </div>
+        </div>
+        
+        {/* Chapter selection for Gita page (below language) */}
+        {isGitaRoute && (
+          <div style={{ width: '100%', marginTop: '0.25rem' }}>
             {(() => {
               const chapters: { chapter: number; verses: { verse: number; index: number }[] }[] = [];
               const chapterMap = new Map<number, { verse: number; index: number }[]>();
@@ -555,143 +534,97 @@ const App: React.FC = () => {
                   return next;
                 });
               };
-              return chapters.map(ch => {
-                const isExpanded = expandedChapters.has(ch.chapter);
-                const isActiveChapter = ch.verses.some(v => v.index === activeIndex);
-                return (
-                  <div key={ch.chapter} style={{ marginBottom: '0.5rem' }}>
-                    <button
-                      type="button"
-                      onClick={() => toggleChapter(ch.chapter)}
-                      style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%',
-                        background: isActiveChapter ? 'rgba(255,215,0,0.18)' : 'transparent', border: 'none',
-                        color: 'var(--accent-gold)', fontWeight: 600, fontSize: '0.85rem', padding: '0.35rem 0', cursor: 'pointer',
-                      }}
-                    >
-                      <span>Chapter {ch.chapter}</span>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-slate)' }}>{isExpanded ? '−' : '+'}</span>
-                    </button>
-                    {isExpanded && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.25rem' }}>
-                        {ch.verses.map(v => (
-                          <button
-                            key={`${ch.chapter}-${v.verse}`}
-                            type="button"
-                            onClick={() => { setActiveIndex(v.index); scrollToIndex(v.index); setGitaSidebarOpen(false); }}
-                            style={{
-                              border: 'none', padding: '0.35rem 0.5rem', borderRadius: '999px', fontSize: '0.8rem',
-                              backgroundColor: 'rgba(255,255,255,0.08)', color: 'var(--text-slate)', cursor: 'pointer',
-                            }}
-                          >
-                            {v.verse}
-                          </button>
-                        ))}
+              return (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
+                  <span style={{ color: 'var(--accent-gold)', fontSize: '0.7rem', letterSpacing: '0.1em', fontWeight: 600 }}>Chapters:</span>
+                  {chapters.map(ch => {
+                    const isExpanded = expandedChapters.has(ch.chapter);
+                    const isActiveChapter = ch.verses.some(v => v.index === activeIndex);
+                    return (
+                      <div key={ch.chapter} style={{ position: 'relative', display: 'inline-block' }}>
+                        <button
+                          type="button"
+                          onClick={() => toggleChapter(ch.chapter)}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: '0.3rem',
+                            background: isActiveChapter ? 'rgba(255,215,0,0.18)' : 'rgba(255,255,255,0.08)',
+                            border: isActiveChapter ? '1px solid var(--accent-gold)' : '1px solid rgba(255,255,255,0.1)',
+                            color: isActiveChapter ? 'var(--accent-gold)' : 'var(--text-slate)',
+                            fontWeight: isActiveChapter ? 600 : 400,
+                            fontSize: '0.7rem',
+                            padding: '0.25rem 0.5rem',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!isActiveChapter) {
+                              e.currentTarget.style.background = 'rgba(255,255,255,0.12)';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isActiveChapter) {
+                              e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                            }
+                          }}
+                        >
+                          <span>{ch.chapter}</span>
+                          <span style={{ fontSize: '0.6rem' }}>{isExpanded ? '−' : '+'}</span>
+                        </button>
+                        {isExpanded && (
+                          <div style={{ 
+                            position: 'absolute', 
+                            top: '100%',
+                            left: 0,
+                            marginTop: '0.25rem',
+                            display: 'flex', 
+                            flexWrap: 'wrap', 
+                            gap: '0.25rem',
+                            background: 'rgba(0,0,0,0.9)',
+                            padding: '0.5rem',
+                            borderRadius: '4px',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            zIndex: 200,
+                            maxWidth: '300px',
+                            backdropFilter: 'blur(10px)',
+                          }}>
+                            {ch.verses.map(v => {
+                              const isActiveVerse = v.index === activeIndex;
+                              return (
+                                <button
+                                  key={`${ch.chapter}-${v.verse}`}
+                                  type="button"
+                                  onClick={() => { setActiveIndex(v.index); scrollToIndex(v.index); }}
+                                  style={{
+                                    border: isActiveVerse ? '1px solid var(--accent-gold)' : 'none',
+                                    padding: '0.2rem 0.4rem',
+                                    borderRadius: '4px',
+                                    fontSize: '0.65rem',
+                                    backgroundColor: isActiveVerse ? 'rgba(255,215,0,0.25)' : 'rgba(255,255,255,0.06)',
+                                    color: isActiveVerse ? 'var(--accent-gold)' : 'var(--text-slate)',
+                                    cursor: 'pointer',
+                                    fontWeight: isActiveVerse ? 600 : 400,
+                                  }}
+                                >
+                                  {v.verse}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                );
-              });
+                    );
+                  })}
+                </div>
+              );
             })()}
           </div>
-        </>
-      )}
+        )}
+      </div>
 
       {/* Main content area */}
-      <div style={{ display: 'flex', height: 'calc(100% - 56px)' }}>
-        {isGitaRoute && !isMobile && (
-          <div
-            style={{
-              width: '24%',
-              maxWidth: '200px',
-              borderRight: '1px solid rgba(255,255,255,0.06)',
-              padding: '0.75rem 0.4rem 0.75rem 0.6rem',
-              overflowY: 'auto',
-              boxSizing: 'border-box',
-            }}
-          >
-            <div style={{ color: 'var(--accent-gold)', fontSize: '0.75rem', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-              Bhagavad Gita Index
-            </div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-slate)', maxHeight: '100%', overflowY: 'auto' }}>
-              {(() => {
-                const chapters: { chapter: number; verses: { verse: number; index: number }[] }[] = [];
-                const chapterMap = new Map<number, { verse: number; index: number }[]>();
-                quotes.forEach((q, idx) => {
-                  const parts = q.source.split('•');
-                  const refPart = parts[1]?.trim() || '';
-                  const match = refPart.match(/Chapter\s+(\d+)\s*,\s*Verse\s+(\d+)/i);
-                  if (!match) return;
-                  const chapterNum = parseInt(match[1], 10);
-                  const verseNum = parseInt(match[2], 10);
-                  if (!chapterMap.has(chapterNum)) chapterMap.set(chapterNum, []);
-                  chapterMap.get(chapterNum)!.push({ verse: verseNum, index: idx });
-                });
-                Array.from(chapterMap.entries())
-                  .sort((a, b) => a[0] - b[0])
-                  .forEach(([chapter, verses]) => {
-                    chapters.push({ chapter, verses: verses.sort((a, b) => a.verse - b.verse) });
-                  });
-                const toggleChapter = (chapterNum: number) => {
-                  setExpandedChapters(prev => {
-                    const next = new Set(prev);
-                    if (next.has(chapterNum)) next.delete(chapterNum);
-                    else next.add(chapterNum);
-                    return next;
-                  });
-                };
-                return chapters.map(ch => {
-                  const isExpanded = expandedChapters.has(ch.chapter);
-                  const isActiveChapter = ch.verses.some(v => v.index === activeIndex);
-                  return (
-                    <div key={ch.chapter} style={{ marginBottom: '0.5rem' }}>
-                      <button
-                        type="button"
-                        onClick={() => toggleChapter(ch.chapter)}
-                        style={{
-                          display: 'flex', alignItems: 'center', justifyContent: 'flex-start', width: '100%', gap: '0.4rem',
-                          background: isActiveChapter ? 'rgba(255,215,0,0.18)' : 'transparent', border: 'none',
-                          color: 'var(--accent-gold)', fontWeight: 600, fontSize: '0.75rem', padding: '0.2rem 0', cursor: 'pointer',
-                        }}
-                      >
-                        <span>Chapter {ch.chapter}</span>
-                        <span style={{ fontSize: '0.7rem', color: 'var(--text-slate)', marginLeft: 'auto' }}>{isExpanded ? '−' : '+'}</span>
-                      </button>
-                      {isExpanded && (
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.2rem', marginTop: '0.15rem' }}>
-                          {ch.verses.map(v => {
-                            const isActiveVerse = v.index === activeIndex;
-                            return (
-                              <button
-                                key={`${ch.chapter}-${v.verse}`}
-                                type="button"
-                                onClick={() => { setActiveIndex(v.index); scrollToIndex(v.index); }}
-                                style={{
-                                  border: isActiveVerse ? '1px solid var(--accent-gold)' : 'none',
-                                  padding: '0.1rem 0.25rem',
-                                  borderRadius: '999px',
-                                  fontSize: '0.7rem',
-                                  backgroundColor: isActiveVerse ? 'rgba(255,215,0,0.25)' : 'rgba(255,255,255,0.06)',
-                                  color: isActiveVerse ? 'var(--accent-gold)' : 'var(--text-slate)',
-                                  cursor: 'pointer',
-                                  fontWeight: isActiveVerse ? 600 : 400,
-                                }}
-                              >
-                                {v.verse}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  );
-                });
-              })()}
-            </div>
-          </div>
-        )}
-
-        <div style={{ flex: 1 }} className={isGitaRoute ? 'gita-verse-area' : ''}>
+      <div style={{ display: 'flex', height: '100%' }}>
+        <div style={{ flex: 1, width: '100%' }} className={isGitaRoute ? 'gita-verse-area' : ''}>
           <div 
             ref={containerRef}
             className="snap-container"
@@ -711,7 +644,15 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      <div className="version-tag" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', padding: '1rem' }}>
+      <div className="version-tag" style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '1rem', 
+        flexWrap: 'wrap', 
+        justifyContent: 'flex-start',
+        padding: '1rem',
+        marginTop: '2rem',
+      }}>
         <span>{BUILT_BY}</span>
         <img 
           src="/bluefog-logo.png" 
