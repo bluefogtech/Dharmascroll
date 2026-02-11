@@ -162,7 +162,7 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
   const themeColor = getThemeColor();
 
   return (
-    <div className="snap-item" style={{ background: 'var(--bg-dark)' }}>
+    <div className="snap-item" style={{ background: 'transparent' }}>
       {/* Decorative Themed Blobs - High blur for a seamless look */}
       <div 
         className="bg-blob" 
