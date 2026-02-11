@@ -212,14 +212,16 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
             aria-label="Join the Mission"
             onClick={onDonateClick}
             style={{
-              background: 'rgba(46, 125, 50, 0.5)',
+              background: 'rgba(46, 125, 50, 0.6)',
               borderColor: 'var(--accent-forest, #4ade80)',
               borderWidth: '2px',
+              borderStyle: 'solid',
               color: '#ffffff',
               fontSize: '0.85rem',
               fontWeight: 700,
-              padding: '0.65rem 1.25rem',
+              padding: '0.7rem 1.5rem',
               whiteSpace: 'nowrap',
+              borderRadius: '8px',
               boxShadow: '0 4px 20px rgba(74, 222, 128, 0.4), 0 0 15px rgba(46, 125, 50, 0.3)',
             }}
           >
