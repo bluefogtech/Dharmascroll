@@ -13,11 +13,13 @@ interface QuoteCardProps {
 
 export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language, onViewStart, onViewEnd, donateLink, onDonateClick }) => {
   const startTimeRef = useRef<number | null>(null);
+  const textRef = useRef<HTMLHeadingElement>(null);
   const [isLiked, setIsLiked] = useState(false);
   const [popHeart, setPopHeart] = useState(false);
   const [popShare, setPopShare] = useState(false);
   const [isShared, setIsShared] = useState(false);
   const [showShareSheet, setShowShareSheet] = useState(false);
+  const [dynamicFontSize, setDynamicFontSize] = useState<string>('');
 
   useEffect(() => {
     if (isActive) {
@@ -31,6 +33,47 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
       setShowShareSheet(false);
     }
   }, [isActive, quote.id]);
+
+  // Dynamic font sizing based on text length and available space
+  useEffect(() => {
+    const adjustFontSize = () => {
+      if (!textRef.current) return;
+      const text = getDisplayText();
+      const textLength = text.length;
+      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
+      
+      // Base font size calculation
+      let baseSize = 1.6;
+      if (language === 'ta') baseSize = 1.4;
+      if (language === 'hi') baseSize = 1.6;
+      
+      // Reduce size for longer text
+      if (textLength > 300) baseSize *= 0.75;
+      else if (textLength > 200) baseSize *= 0.85;
+      else if (textLength > 150) baseSize *= 0.9;
+      else if (textLength > 100) baseSize *= 0.95;
+      
+      // Adjust for viewport height (account for buttons: ~200px top + bottom)
+      const availableHeight = viewportHeight - 200;
+      const heightFactor = Math.min(availableHeight / 600, 1.2);
+      baseSize *= heightFactor;
+      
+      // Adjust for viewport width on mobile
+      if (viewportWidth < 768) {
+        baseSize *= 0.9;
+        if (viewportWidth < 480) baseSize *= 0.85;
+      }
+      
+      // Clamp between min and max
+      const finalSize = Math.max(1.1, Math.min(baseSize, 2.4));
+      setDynamicFontSize(`${finalSize}rem`);
+    };
+    
+    adjustFontSize();
+    window.addEventListener('resize', adjustFontSize);
+    return () => window.removeEventListener('resize', adjustFontSize);
+  }, [quote.text, quote.hindi, quote.tamil, language]);
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -155,7 +198,11 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
             </div>
           )}
           
-          <h1 className="quote-main" style={{ fontSize: language === 'ta' ? '1.4rem' : '1.6rem' }}>
+          <h1 
+            ref={textRef}
+            className="quote-main" 
+            style={{ fontSize: dynamicFontSize || (language === 'ta' ? '1.4rem' : '1.6rem') }}
+          >
             &ldquo;{getDisplayText()}&rdquo;
           </h1>
           <div style={{ 
