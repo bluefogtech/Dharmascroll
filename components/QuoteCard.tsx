@@ -41,10 +41,10 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
       const viewportHeight = window.innerHeight;
       const viewportWidth = window.innerWidth;
       
-      // Base font size calculation
-      let baseSize = 1.6;
-      if (language === 'ta') baseSize = 1.4;
-      if (language === 'hi') baseSize = 1.6;
+      // Base font size calculation – main text (en/hi/ta) larger
+      let baseSize = 1.85;
+      if (language === 'ta') baseSize = 1.6;
+      if (language === 'hi') baseSize = 1.85;
       
       // Reduce size for longer text
       if (textLength > 300) baseSize *= 0.75;
@@ -59,12 +59,12 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
       
       // Adjust for viewport width on mobile
       if (viewportWidth < 768) {
-        baseSize *= 0.9;
-        if (viewportWidth < 480) baseSize *= 0.85;
+        baseSize *= 0.92;
+        if (viewportWidth < 480) baseSize *= 0.88;
       }
       
-      // Clamp between min and max
-      const finalSize = Math.max(1.1, Math.min(baseSize, 2.4));
+      // Clamp between min and max (higher max for bigger main text)
+      const finalSize = Math.max(1.25, Math.min(baseSize, 2.6));
       setDynamicFontSize(`${finalSize}rem`);
     };
     
@@ -191,7 +191,7 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
       <div className="quote-content-area">
         <div>
           {quote.sanskrit && (
-            <div className="quote-sanskrit" style={{ fontSize: language === 'hi' ? '1.3rem' : '1.1rem' }}>
+            <div className="quote-sanskrit" style={{ fontSize: '0.95rem', opacity: 0.9 }}>
                {quote.sanskrit}
             </div>
           )}
@@ -199,7 +199,7 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
           <h1 
             ref={textRef}
             className="quote-main" 
-            style={{ fontSize: dynamicFontSize || (language === 'ta' ? '1.4rem' : '1.6rem') }}
+            style={{ fontSize: dynamicFontSize || (language === 'ta' ? '1.6rem' : '1.85rem') }}
           >
             &ldquo;{getDisplayText()}&rdquo;
           </h1>

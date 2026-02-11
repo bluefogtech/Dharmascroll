@@ -175,6 +175,9 @@ const App: React.FC = () => {
         style={{
           width: '100%',
           margin: 0,
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
           background: 'linear-gradient(135deg, #1a0f0a 0%, #2d1a14 20%, #4a2c1a 40%, #6b3e26 60%, #4a2c1a 80%, #2d1a14 100%)',
           backgroundAttachment: 'fixed',
           fontFamily: '"Georgia", serif',
@@ -182,7 +185,7 @@ const App: React.FC = () => {
         }}
       >
         {/* Header: brand – scrolls with content on landing so hero text doesn't hide under it */}
-        <div className="header-logo" style={{ position: 'relative', pointerEvents: 'auto', padding: '1rem', marginBottom: '1rem' }}>
+        <div className="header-logo" style={{ position: 'relative', flexShrink: 0, pointerEvents: 'auto', padding: '1rem', marginBottom: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>ॐ</span>
             <span style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '3px' }}>DHARMA</span>
@@ -190,7 +193,7 @@ const App: React.FC = () => {
         </div>
 
         {/* Main hero + cards */}
-        <div style={{ textAlign: 'center', padding: '0 16px 2rem' }}>
+        <div style={{ flex: 1, textAlign: 'center', padding: '0 16px 2rem' }}>
           <h1
             style={{
               fontSize: '2.4rem',
@@ -372,16 +375,18 @@ const App: React.FC = () => {
           </p>
         </div>
 
-        {/* Version tag and contact – scrolls with content so disclaimer/text isn't hidden */}
+        {/* Version tag and contact – at bottom of viewport on desktop, scrolls with content when long */}
         <div className="version-tag" style={{ 
           position: 'relative',
+          flexShrink: 0,
+          marginTop: 'auto',
           display: 'flex', 
           alignItems: 'center', 
           gap: '1rem', 
           flexWrap: 'wrap', 
           justifyContent: 'flex-start',
           padding: '1rem',
-          marginTop: '2rem',
+          paddingBottom: 'max(2rem, env(safe-area-inset-bottom))',
         }}>
           <span>{BUILT_BY}</span>
           <img 
@@ -424,7 +429,7 @@ const App: React.FC = () => {
 
   // Quotes / Gita pages
   return (
-    <div style={{ position: 'relative', height: '100%', width: '100%', background: 'var(--bg-dark)' }}>
+    <div style={{ position: 'relative', height: '100%', width: '100%', background: 'var(--bg-dark)', display: 'flex', flexDirection: 'column' }}>
       {/* App Header: Home + Language only (no ॐ DHARMA on Gita/Random); Gita mobile: Chapters on left */}
       <div
         className="header-logo"
@@ -508,7 +513,7 @@ const App: React.FC = () => {
       </div>
 
       {/* Main content area: left chapter sidebar (Gita) + verse content */}
-      <div style={{ display: 'flex', height: '100%', paddingTop: '64px' }}>
+      <div style={{ display: 'flex', flex: 1, minHeight: 0, paddingTop: '64px' }}>
         {isGitaRoute && (
           <div
             style={{
@@ -633,13 +638,14 @@ const App: React.FC = () => {
 
       <div className="version-tag" style={{ 
         position: 'relative',
+        flexShrink: 0,
         display: 'flex', 
         alignItems: 'center', 
         gap: '1rem', 
         flexWrap: 'wrap', 
         justifyContent: 'flex-start',
         padding: '1rem',
-        marginTop: '2rem',
+        marginTop: '0',
       }}>
         <span>{BUILT_BY}</span>
         <img 
