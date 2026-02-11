@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { QuoteCard } from './components/QuoteCard';
-import { InstallGuide } from './components/InstallGuide';
 import { Quote } from './types';
 import { getQuotes, getGitaQuotes } from './services/wisdomService';
 import { openDonatePage, getDonateLink, getDonateLinkFromConfig } from './services/donationService';
@@ -663,7 +662,6 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      <InstallGuide />
       <div className="version-tag">{BUILT_BY}</div>
     </div>
   );
