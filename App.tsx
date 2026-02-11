@@ -523,10 +523,10 @@ const App: React.FC = () => {
         {isGitaRoute && !isMobile && (
           <div
             style={{
-              width: '32%',
-              maxWidth: '260px',
+              width: '24%',
+              maxWidth: '200px',
               borderRight: '1px solid rgba(255,255,255,0.06)',
-              padding: '0.75rem 0.5rem 0.75rem 0.75rem',
+              padding: '0.75rem 0.4rem 0.75rem 0.6rem',
               overflowY: 'auto',
               boxSizing: 'border-box',
             }}
@@ -570,29 +570,38 @@ const App: React.FC = () => {
                         type="button"
                         onClick={() => toggleChapter(ch.chapter)}
                         style={{
-                          display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%',
+                          display: 'flex', alignItems: 'center', justifyContent: 'flex-start', width: '100%', gap: '0.4rem',
                           background: isActiveChapter ? 'rgba(255,215,0,0.18)' : 'transparent', border: 'none',
-                          color: 'var(--accent-gold)', fontWeight: 600, fontSize: '0.78rem', padding: '0.2rem 0', cursor: 'pointer',
+                          color: 'var(--accent-gold)', fontWeight: 600, fontSize: '0.75rem', padding: '0.2rem 0', cursor: 'pointer',
                         }}
                       >
                         <span>Chapter {ch.chapter}</span>
-                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{isExpanded ? '−' : '+'}</span>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-slate)', marginLeft: 'auto' }}>{isExpanded ? '−' : '+'}</span>
                       </button>
                       {isExpanded && (
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.2rem', marginTop: '0.15rem' }}>
-                          {ch.verses.map(v => (
-                            <button
-                              key={`${ch.chapter}-${v.verse}`}
-                              type="button"
-                              onClick={() => scrollToIndex(v.index)}
-                              style={{
-                                border: 'none', padding: '0.1rem 0.25rem', borderRadius: '999px', fontSize: '0.7rem',
-                                backgroundColor: 'rgba(255,255,255,0.06)', color: 'var(--text-slate)', cursor: 'pointer',
-                              }}
-                            >
-                              {v.verse}
-                            </button>
-                          ))}
+                          {ch.verses.map(v => {
+                            const isActiveVerse = v.index === activeIndex;
+                            return (
+                              <button
+                                key={`${ch.chapter}-${v.verse}`}
+                                type="button"
+                                onClick={() => scrollToIndex(v.index)}
+                                style={{
+                                  border: isActiveVerse ? '1px solid var(--accent-gold)' : 'none',
+                                  padding: '0.1rem 0.25rem',
+                                  borderRadius: '999px',
+                                  fontSize: '0.7rem',
+                                  backgroundColor: isActiveVerse ? 'rgba(255,215,0,0.25)' : 'rgba(255,255,255,0.06)',
+                                  color: isActiveVerse ? 'var(--accent-gold)' : 'var(--text-slate)',
+                                  cursor: 'pointer',
+                                  fontWeight: isActiveVerse ? 600 : 400,
+                                }}
+                              >
+                                {v.verse}
+                              </button>
+                            );
+                          })}
                         </div>
                       )}
                     </div>
