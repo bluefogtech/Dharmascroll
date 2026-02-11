@@ -371,7 +371,14 @@ const App: React.FC = () => {
         </div>
 
         {/* Version tag and contact */}
-        <div className="version-tag">{BUILT_BY}</div>
+        <div className="version-tag" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+          <span>{BUILT_BY}</span>
+          <img 
+            src="/bluefog-logo.png" 
+            alt="Blue Fog Technology" 
+            style={{ height: '1rem', width: 'auto', objectFit: 'contain' }}
+          />
+        </div>
         <a
           className="contact-link"
           href="mailto:contact@bluefog.co.uk"
@@ -700,7 +707,14 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      <div className="version-tag">{BUILT_BY}</div>
+      <div className="version-tag" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+        <span>{BUILT_BY}</span>
+        <img 
+          src="/bluefog-logo.png" 
+          alt="Blue Fog Technology" 
+          style={{ height: '1rem', width: 'auto', objectFit: 'contain' }}
+        />
+      </div>
     </div>
   );
 };
