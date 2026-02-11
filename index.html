@@ -122,7 +122,10 @@
             align-items: center;
             text-align: center;
             pointer-events: none;
-            background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%);
+            background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 100%);
+        }
+        .quote-content-area {
+            padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8rem) !important;
         }
         
         .quote-meta-overlay > * {
@@ -278,6 +281,12 @@
             height: auto;
             min-height: 3rem;
             border-radius: 99px;
+            transition: all 0.2s;
+        }
+        .bottom-action-bar .donate-btn:hover {
+            background: rgba(46, 125, 50, 0.7) !important;
+            box-shadow: 0 6px 25px rgba(74, 222, 128, 0.5), 0 0 20px rgba(46, 125, 50, 0.4) !important;
+            transform: scale(1.05);
         }
         @media (max-width: 768px) {
             .bottom-action-bar {
@@ -294,8 +303,9 @@
                 height: 1.3rem !important;
             }
             .bottom-action-bar .donate-btn {
-                font-size: 0.7rem !important;
-                padding: 0.4rem 0.8rem !important;
+                font-size: 0.8rem !important;
+                font-weight: 700 !important;
+                padding: 0.5rem 1rem !important;
                 min-height: 2.75rem;
             }
         }
@@ -500,18 +510,20 @@
         }
         @media (max-width: 768px) {
             .gita-verse-area .quote-content-area {
-                padding: 2rem 1.25rem 3.5rem 1.25rem;
+                padding: 2rem 1.25rem calc(env(safe-area-inset-bottom, 0px) + 9rem) 1.25rem !important;
             }
             .gita-verse-area .quote-main {
                 font-size: 1.35rem;
                 line-height: 1.5;
+                margin-bottom: 1.5rem;
             }
             .gita-verse-area .quote-sanskrit {
                 font-size: 1rem;
                 margin-bottom: 1rem;
             }
             .gita-verse-area .quote-meta-overlay {
-                padding: 0 1.25rem calc(env(safe-area-inset-bottom, 0px) + 5rem) 1.25rem;
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 5.5rem);
+                padding: 0 1.25rem 0.5rem 1.25rem;
             }
         }
 
