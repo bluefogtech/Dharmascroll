@@ -402,22 +402,6 @@ const App: React.FC = () => {
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '0.4rem' : '0.75rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          {donateLink && (
-            <button
-              className="logout-btn"
-              style={{
-                background: 'rgba(46, 125, 50, 0.25)',
-                borderColor: 'var(--accent-forest, #2E7D32)',
-                color: 'var(--accent-forest, #4ade80)',
-                fontSize: isMobile ? '0.65rem' : '0.75rem',
-                padding: isMobile ? '0.3rem 0.5rem' : undefined,
-                whiteSpace: 'nowrap',
-              }}
-              onClick={() => openDonatePage(donateLink)}
-            >
-              {isMobile ? 'Mission' : 'Join the Mission'}
-            </button>
-          )}
           <button
             className="logout-btn"
             style={{ 
@@ -633,6 +617,8 @@ const App: React.FC = () => {
                 language={language}
                 onViewStart={() => {}} 
                 onViewEnd={handleViewEnd}
+                donateLink={donateLink}
+                onDonateClick={() => donateLink && openDonatePage(donateLink)}
               />
             ))}
           </div>

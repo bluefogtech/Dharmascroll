@@ -7,9 +7,11 @@ interface QuoteCardProps {
   language: 'en' | 'hi' | 'ta';
   onViewStart: (id: string) => void;
   onViewEnd: (id: string) => void;
+  donateLink?: string | null;
+  onDonateClick?: () => void;
 }
 
-export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language, onViewStart, onViewEnd }) => {
+export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language, onViewStart, onViewEnd, donateLink, onDonateClick }) => {
   const startTimeRef = useRef<number | null>(null);
   const [isLiked, setIsLiked] = useState(false);
   const [popHeart, setPopHeart] = useState(false);
@@ -186,8 +188,8 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
         </div>
       </div>
 
-      {/* Vertical Action Bar */}
-      <div className="action-bar">
+      {/* Bottom Action Bar (horizontal) */}
+      <div className="bottom-action-bar">
         <button 
           className={`action-btn ${isLiked ? 'liked' : ''} ${popHeart ? 'heart-pop' : ''}`} 
           aria-label="Like"
@@ -204,6 +206,23 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
         >
            <svg fill="currentColor" viewBox="0 0 24 24" style={{ width: '1.4rem', height: '1.4rem' }}><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
         </button>
+        {donateLink && onDonateClick && (
+          <button
+            className="action-btn donate-btn"
+            aria-label="Join the Mission"
+            onClick={onDonateClick}
+            style={{
+              background: 'rgba(46, 125, 50, 0.3)',
+              borderColor: 'var(--accent-forest, #2E7D32)',
+              color: 'var(--accent-forest, #4ade80)',
+              fontSize: '0.75rem',
+              padding: '0.5rem 1rem',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Join the Mission
+          </button>
+        )}
       </div>
 
       {showShareSheet && (
