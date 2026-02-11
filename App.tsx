@@ -176,7 +176,7 @@ const App: React.FC = () => {
         style={{
           width: '100%',
           margin: 0,
-          minHeight: '100vh',
+          minHeight: '100dvh',
           display: 'flex',
           flexDirection: 'column',
           background: 'linear-gradient(135deg, #1a0f0a 0%, #2d1a14 20%, #4a2c1a 40%, #6b3e26 60%, #4a2c1a 80%, #2d1a14 100%)',
@@ -419,6 +419,8 @@ const App: React.FC = () => {
             Get in Touch
           </button>
         </div>
+        {/* Spacer so on mobile the footer stays visible when browser chrome (toolbar) reappears after scroll ends */}
+        <div style={{ flexShrink: 0, minHeight: '120px' }} aria-hidden="true" />
         <ContactForm
           isOpen={contactFormOpen}
           onClose={() => setContactFormOpen(false)}
