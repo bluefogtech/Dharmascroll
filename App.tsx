@@ -182,26 +182,11 @@ const App: React.FC = () => {
           color: 'var(--text-slate)',
         }}
       >
-        {/* Header: brand + donate */}
+        {/* Header: brand */}
         <div className="header-logo" style={{ pointerEvents: 'auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>ॐ</span>
             <span style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '3px' }}>DHARMA</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            {donateLink && (
-              <button
-                className="logout-btn"
-                style={{
-                  background: 'rgba(46, 125, 50, 0.25)',
-                  borderColor: 'var(--accent-forest, #2E7D32)',
-                  color: 'var(--accent-forest, #4ade80)',
-                }}
-                onClick={() => openDonatePage(donateLink)}
-              >
-                Join the Mission
-              </button>
-            )}
           </div>
         </div>
 
@@ -372,43 +357,54 @@ const App: React.FC = () => {
           </div>
         </div>
 
+        {/* Disclaimer */}
+        <div style={{ 
+          textAlign: 'center', 
+          padding: '2rem 1rem 1rem', 
+          maxWidth: '600px', 
+          margin: '0 auto',
+          color: 'var(--text-slate)',
+          fontSize: '0.75rem',
+          lineHeight: 1.6,
+          opacity: 0.7,
+        }}>
+          <p style={{ margin: 0 }}>
+            Quotes sourced from Bhagavad Gita translations and public spiritual sources. For spiritual learning only.
+          </p>
+        </div>
+
         {/* Version tag and contact */}
-        <div className="version-tag" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+        <div className="version-tag" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', padding: '1rem' }}>
           <span>{BUILT_BY}</span>
           <img 
             src="/bluefog-logo.png" 
             alt="Blue Fog Technology" 
             style={{ height: '1rem', width: 'auto', objectFit: 'contain' }}
           />
+          <button
+            onClick={() => setContactFormOpen(true)}
+            style={{
+              color: 'var(--accent-gold)',
+              fontSize: '0.75rem',
+              fontWeight: 500,
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+              textDecoration: 'none',
+              transition: 'opacity 0.2s',
+              background: 'none',
+              border: 'none',
+              padding: 0,
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.opacity = '0.8';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.opacity = '1';
+            }}
+          >
+            Get in Touch
+          </button>
         </div>
-        <button
-          className="contact-link"
-          onClick={() => setContactFormOpen(true)}
-          style={{
-            position: 'fixed',
-            bottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.3rem)',
-            right: '1rem',
-            color: '#ffffff',
-            fontSize: '0.7rem',
-            fontWeight: 500,
-            cursor: 'pointer',
-            zIndex: 50,
-            fontFamily: 'monospace',
-            textDecoration: 'none',
-            transition: 'opacity 0.2s',
-            background: 'none',
-            border: 'none',
-            padding: 0,
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.opacity = '0.8';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.opacity = '1';
-          }}
-        >
-          Contact
-        </button>
         <ContactForm
           isOpen={contactFormOpen}
           onClose={() => setContactFormOpen(false)}
@@ -709,52 +705,43 @@ const App: React.FC = () => {
                 language={language}
                 onViewStart={() => {}} 
                 onViewEnd={handleViewEnd}
-                donateLink={donateLink}
-                onDonateClick={() => donateLink && openDonatePage(donateLink)}
               />
             ))}
           </div>
         </div>
       </div>
 
-      <div className="version-tag" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+      <div className="version-tag" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', padding: '1rem' }}>
         <span>{BUILT_BY}</span>
         <img 
           src="/bluefog-logo.png" 
           alt="Blue Fog Technology" 
           style={{ height: '1rem', width: 'auto', objectFit: 'contain' }}
         />
+        <button
+          onClick={() => setContactFormOpen(true)}
+          style={{
+            color: 'var(--accent-gold)',
+            fontSize: '0.75rem',
+            fontWeight: 500,
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            textDecoration: 'none',
+            transition: 'opacity 0.2s',
+            background: 'none',
+            border: 'none',
+            padding: 0,
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.opacity = '0.8';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.opacity = '1';
+          }}
+        >
+          Get in Touch
+        </button>
       </div>
-      
-      {/* Contact button for quotes/gita pages */}
-      <button
-        className="contact-link"
-        onClick={() => setContactFormOpen(true)}
-        style={{
-          position: 'fixed',
-          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.3rem)',
-          right: '1rem',
-          color: '#ffffff',
-          fontSize: '0.7rem',
-          fontWeight: 500,
-          cursor: 'pointer',
-          zIndex: 50,
-          fontFamily: 'monospace',
-          textDecoration: 'none',
-          transition: 'opacity 0.2s',
-          background: 'none',
-          border: 'none',
-          padding: 0,
-        }}
-        onMouseEnter={(e) => {
-          (e.currentTarget as HTMLElement).style.opacity = '0.8';
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.opacity = '1';
-        }}
-      >
-        Contact
-      </button>
       
       <ContactForm
         isOpen={contactFormOpen}

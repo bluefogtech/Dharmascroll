@@ -7,11 +7,9 @@ interface QuoteCardProps {
   language: 'en' | 'hi' | 'ta';
   onViewStart: (id: string) => void;
   onViewEnd: (id: string) => void;
-  donateLink?: string | null;
-  onDonateClick?: () => void;
 }
 
-export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language, onViewStart, onViewEnd, donateLink, onDonateClick }) => {
+export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language, onViewStart, onViewEnd }) => {
   const startTimeRef = useRef<number | null>(null);
   const textRef = useRef<HTMLHeadingElement>(null);
   const [isLiked, setIsLiked] = useState(false);
@@ -235,37 +233,6 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
         </div>
       </div>
 
-      {/* Join Mission link (left bottom) */}
-      {donateLink && onDonateClick && (
-        <div style={{ position: 'absolute', bottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)', left: '1rem', zIndex: 20 }}>
-          <a
-            className="join-mission-link"
-            href={donateLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => {
-              e.preventDefault();
-              onDonateClick();
-            }}
-            style={{
-              color: '#ffffff',
-              fontSize: '0.85rem',
-              fontWeight: 600,
-              textDecoration: 'none',
-              cursor: 'pointer',
-              transition: 'opacity 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.opacity = '0.8';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.opacity = '1';
-            }}
-          >
-            Join the Mission
-          </a>
-        </div>
-      )}
 
       {/* Vertical Action Bar (right side, stacked) */}
       <div className="action-bar">
