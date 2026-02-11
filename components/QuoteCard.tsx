@@ -188,46 +188,55 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
         </div>
       </div>
 
-      {/* Bottom Action Bar (horizontal) */}
+      {/* Bottom Action Bar: Join Mission (left) + Like/Share (right) */}
       <div className="bottom-action-bar">
-        <button 
-          className={`action-btn ${isLiked ? 'liked' : ''} ${popHeart ? 'heart-pop' : ''}`} 
-          aria-label="Like"
-          onClick={handleLike}
-        >
-          <svg fill={isLiked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ width: '1.4rem', height: '1.4rem' }}>
-            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-          </svg>
-        </button>
-        <button 
-          className={`action-btn ${isShared ? 'shared' : ''} ${popShare ? 'share-pop' : ''}`} 
-          aria-label="Share"
-          onClick={handleShare}
-        >
-           <svg fill="currentColor" viewBox="0 0 24 24" style={{ width: '1.4rem', height: '1.4rem' }}><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
-        </button>
         {donateLink && onDonateClick && (
-          <button
-            className="action-btn donate-btn"
-            aria-label="Join the Mission"
-            onClick={onDonateClick}
+          <a
+            className="join-mission-link"
+            href={donateLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => {
+              e.preventDefault();
+              onDonateClick();
+            }}
             style={{
-              background: 'rgba(46, 125, 50, 0.6)',
-              borderColor: 'var(--accent-forest, #4ade80)',
-              borderWidth: '2px',
-              borderStyle: 'solid',
-              color: '#ffffff',
+              color: 'var(--accent-forest, #4ade80)',
               fontSize: '0.85rem',
-              fontWeight: 700,
-              padding: '0.7rem 1.5rem',
-              whiteSpace: 'nowrap',
-              borderRadius: '8px',
-              boxShadow: '0 4px 20px rgba(74, 222, 128, 0.4), 0 0 15px rgba(46, 125, 50, 0.3)',
+              fontWeight: 600,
+              textDecoration: 'none',
+              cursor: 'pointer',
+              transition: 'opacity 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.opacity = '0.8';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.opacity = '1';
             }}
           >
             Join the Mission
-          </button>
+          </a>
         )}
+        <div style={{ flex: 1 }}></div>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <button 
+            className={`action-btn ${isLiked ? 'liked' : ''} ${popHeart ? 'heart-pop' : ''}`} 
+            aria-label="Like"
+            onClick={handleLike}
+          >
+            <svg fill={isLiked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ width: '1.4rem', height: '1.4rem' }}>
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+          </button>
+          <button 
+            className={`action-btn ${isShared ? 'shared' : ''} ${popShare ? 'share-pop' : ''}`} 
+            aria-label="Share"
+            onClick={handleShare}
+          >
+             <svg fill="currentColor" viewBox="0 0 24 24" style={{ width: '1.4rem', height: '1.4rem' }}><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>
+          </button>
+        </div>
       </div>
 
       {showShareSheet && (
