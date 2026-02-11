@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { QuoteCard } from './components/QuoteCard';
+import { ContactForm } from './components/ContactForm';
 import { Quote } from './types';
 import { getQuotes, getGitaQuotes } from './services/wisdomService';
 import { openDonatePage, getDonateLink, getDonateLinkFromConfig } from './services/donationService';
@@ -22,6 +23,7 @@ const App: React.FC = () => {
   const [donateLink, setDonateLink] = useState<string | null>(() => getDonateLink());
   const [gitaSidebarOpen, setGitaSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 768 : false);
+  const [contactFormOpen, setContactFormOpen] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const fetchedIds = useRef<Set<string>>(new Set());
@@ -379,9 +381,9 @@ const App: React.FC = () => {
             style={{ height: '1rem', width: 'auto', objectFit: 'contain' }}
           />
         </div>
-        <a
+        <button
           className="contact-link"
-          href="mailto:contact@bluefog.co.uk"
+          onClick={() => setContactFormOpen(true)}
           style={{
             position: 'fixed',
             bottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.3rem)',
@@ -394,6 +396,9 @@ const App: React.FC = () => {
             fontFamily: 'monospace',
             textDecoration: 'none',
             transition: 'opacity 0.2s',
+            background: 'none',
+            border: 'none',
+            padding: 0,
           }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLElement).style.opacity = '0.8';
@@ -403,7 +408,12 @@ const App: React.FC = () => {
           }}
         >
           Contact
-        </a>
+        </button>
+        <ContactForm
+          isOpen={contactFormOpen}
+          onClose={() => setContactFormOpen(false)}
+          recipientEmail="contact@bluefog.co.uk"
+        />
       </div>
     );
   }
@@ -715,6 +725,42 @@ const App: React.FC = () => {
           style={{ height: '1rem', width: 'auto', objectFit: 'contain' }}
         />
       </div>
+      
+      {/* Contact button for quotes/gita pages */}
+      <button
+        className="contact-link"
+        onClick={() => setContactFormOpen(true)}
+        style={{
+          position: 'fixed',
+          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.3rem)',
+          right: '1rem',
+          color: '#ffffff',
+          fontSize: '0.7rem',
+          fontWeight: 500,
+          cursor: 'pointer',
+          zIndex: 50,
+          fontFamily: 'monospace',
+          textDecoration: 'none',
+          transition: 'opacity 0.2s',
+          background: 'none',
+          border: 'none',
+          padding: 0,
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLElement).style.opacity = '0.8';
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLElement).style.opacity = '1';
+        }}
+      >
+        Contact
+      </button>
+      
+      <ContactForm
+        isOpen={contactFormOpen}
+        onClose={() => setContactFormOpen(false)}
+        recipientEmail="contact@bluefog.co.uk"
+      />
     </div>
   );
 };
