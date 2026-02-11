@@ -20,6 +20,7 @@ const App: React.FC = () => {
   const [language, setLanguage] = useState<'en' | 'hi' | 'ta'>('en');
   const [themeWeights, setThemeWeights] = useState<Record<string, number>>({});
   const [expandedChapters, setExpandedChapters] = useState<Set<number>>(new Set());
+  const [gitaIndexOpen, setGitaIndexOpen] = useState(false);
   const [donateLink, setDonateLink] = useState<string | null>(() => getDonateLink());
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 768 : false);
   const [contactFormOpen, setContactFormOpen] = useState(false);
@@ -443,11 +444,30 @@ const App: React.FC = () => {
           marginBottom: '1rem',
         }}
       >
-        {/* Top row: Brand + Home + Language */}
+        {/* Top row: Brand + (Chapters button on mobile Gita) + Home + Language */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>ॐ</span>
             <span style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '3px' }}>DHARMA</span>
+            {isGitaRoute && isMobile && (
+              <button
+                type="button"
+                onClick={() => setGitaIndexOpen(true)}
+                style={{
+                  marginLeft: '0.5rem',
+                  padding: '0.35rem 0.6rem',
+                  fontSize: '0.7rem',
+                  fontWeight: 600,
+                  color: 'var(--accent-gold)',
+                  background: 'rgba(255,215,0,0.15)',
+                  border: '1px solid rgba(255,215,0,0.4)',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                }}
+              >
+                Chapters
+              </button>
+            )}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '0.4rem' : '0.75rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           <a
@@ -512,9 +532,9 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {/* Main content area: left chapter sidebar (Gita) + verse content */}
+      {/* Main content area: left chapter sidebar (Gita desktop only) + verse content */}
       <div style={{ display: 'flex', flex: 1, minHeight: 0, paddingTop: '64px' }}>
-        {isGitaRoute && (
+        {isGitaRoute && !isMobile && (
           <div
             style={{
               width: '24%',
@@ -621,6 +641,7 @@ const App: React.FC = () => {
             ref={containerRef}
             className="snap-container"
             onScroll={handleScroll}
+            onClick={() => isGitaRoute && isMobile && setGitaIndexOpen(false)}
           >
             {quotes.map((quote, idx) => (
               <QuoteCard 
@@ -635,6 +656,138 @@ const App: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Mobile Gita: chapter index overlay (open via Chapters button, close on verse area tap) */}
+      {isGitaRoute && isMobile && gitaIndexOpen && (
+        <>
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.6)',
+              zIndex: 400,
+            }}
+            onClick={() => setGitaIndexOpen(false)}
+            aria-hidden="true"
+          />
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              bottom: 0,
+              width: 'min(280px, 85vw)',
+              background: 'var(--bg-dark)',
+              borderRight: '1px solid rgba(255,255,255,0.1)',
+              zIndex: 401,
+              overflowY: 'auto',
+              padding: '1rem',
+              boxSizing: 'border-box',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+              <span style={{ color: 'var(--accent-gold)', fontSize: '0.8rem', letterSpacing: '0.1em', fontWeight: 600 }}>Bhagavad Gita Index</span>
+              <button
+                type="button"
+                onClick={() => setGitaIndexOpen(false)}
+                style={{ background: 'none', border: 'none', color: 'var(--text-slate)', fontSize: '1.25rem', cursor: 'pointer', padding: '0.25rem' }}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-slate)' }}>
+              {(() => {
+                const chapters: { chapter: number; verses: { verse: number; index: number }[] }[] = [];
+                const chapterMap = new Map<number, { verse: number; index: number }[]>();
+                quotes.forEach((q, idx) => {
+                  const parts = q.source.split('•');
+                  const refPart = parts[1]?.trim() || '';
+                  const match = refPart.match(/Chapter\s+(\d+)\s*,\s*Verse\s+(\d+)/i);
+                  if (!match) return;
+                  const chapterNum = parseInt(match[1], 10);
+                  const verseNum = parseInt(match[2], 10);
+                  if (!chapterMap.has(chapterNum)) chapterMap.set(chapterNum, []);
+                  chapterMap.get(chapterNum)!.push({ verse: verseNum, index: idx });
+                });
+                Array.from(chapterMap.entries())
+                  .sort((a, b) => a[0] - b[0])
+                  .forEach(([chapter, verses]) => {
+                    chapters.push({ chapter, verses: verses.sort((a, b) => a.verse - b.verse) });
+                  });
+                const toggleChapter = (chapterNum: number) => {
+                  setExpandedChapters(prev => {
+                    const next = new Set(prev);
+                    if (next.has(chapterNum)) next.delete(chapterNum);
+                    else next.add(chapterNum);
+                    return next;
+                  });
+                };
+                return chapters.map(ch => {
+                  const isExpanded = expandedChapters.has(ch.chapter);
+                  const isActiveChapter = ch.verses.some(v => v.index === activeIndex);
+                  return (
+                    <div key={ch.chapter} style={{ marginBottom: '0.5rem' }}>
+                      <button
+                        type="button"
+                        onClick={() => toggleChapter(ch.chapter)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          width: '100%',
+                          background: isActiveChapter ? 'rgba(255,215,0,0.18)' : 'transparent',
+                          border: 'none',
+                          color: 'var(--accent-gold)',
+                          fontWeight: 600,
+                          fontSize: '0.85rem',
+                          padding: '0.35rem 0',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                        }}
+                      >
+                        <span>Chapter {ch.chapter}</span>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-slate)' }}>{isExpanded ? '−' : '+'}</span>
+                      </button>
+                      {isExpanded && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginTop: '0.25rem' }}>
+                          {ch.verses.map(v => (
+                            <button
+                              key={`${ch.chapter}-${v.verse}`}
+                              type="button"
+                              onClick={() => {
+                                setActiveIndex(v.index);
+                                scrollToIndex(v.index);
+                                setGitaIndexOpen(false);
+                              }}
+                              style={{
+                                border: v.index === activeIndex ? '1px solid var(--accent-gold)' : 'none',
+                                padding: '0.35rem 0.5rem',
+                                borderRadius: '999px',
+                                fontSize: '0.8rem',
+                                backgroundColor: v.index === activeIndex ? 'rgba(255,215,0,0.25)' : 'rgba(255,255,255,0.08)',
+                                color: v.index === activeIndex ? 'var(--accent-gold)' : 'var(--text-slate)',
+                                cursor: 'pointer',
+                                fontWeight: v.index === activeIndex ? 600 : 400,
+                              }}
+                            >
+                              {v.verse}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+          </div>
+        </>
+      )}
 
       <div className="version-tag" style={{ 
         position: 'relative',
