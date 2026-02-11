@@ -188,28 +188,19 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
         </div>
       </div>
 
-      {/* Join Mission link (left bottom) */}
-      {donateLink && onDonateClick && (
+      {/* Contact and Join Mission links (left bottom, stacked) */}
+      <div style={{ position: 'absolute', bottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)', left: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', zIndex: 20 }}>
         <a
-          className="join-mission-link"
-          href={donateLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => {
-            e.preventDefault();
-            onDonateClick();
-          }}
+          className="contact-link"
+          href="mailto:contact@bluefog.co.uk"
           style={{
-            position: 'absolute',
-            bottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)',
-            left: '1rem',
             color: '#ffffff',
-            fontSize: '0.85rem',
-            fontWeight: 600,
-            textDecoration: 'none',
+            fontSize: '0.7rem',
+            fontWeight: 500,
             cursor: 'pointer',
+            fontFamily: 'monospace',
+            textDecoration: 'none',
             transition: 'opacity 0.2s',
-            zIndex: 20,
           }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLElement).style.opacity = '0.8';
@@ -218,9 +209,37 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
             (e.currentTarget as HTMLElement).style.opacity = '1';
           }}
         >
-          Join the Mission
+          Contact
         </a>
-      )}
+        {donateLink && onDonateClick && (
+          <a
+            className="join-mission-link"
+            href={donateLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => {
+              e.preventDefault();
+              onDonateClick();
+            }}
+            style={{
+              color: '#ffffff',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              textDecoration: 'none',
+              cursor: 'pointer',
+              transition: 'opacity 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.opacity = '0.8';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.opacity = '1';
+            }}
+          >
+            Join the Mission
+          </a>
+        )}
+      </div>
 
       {/* Vertical Action Bar (right side, stacked) */}
       <div className="action-bar">

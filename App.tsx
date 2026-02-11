@@ -371,7 +371,7 @@ const App: React.FC = () => {
         </div>
 
         {/* Version tag and contact */}
-        <div className="version-tag">{VERSION_TAG} | {BUILT_BY}</div>
+        <div className="version-tag">{BUILT_BY}</div>
         <a
           className="contact-link"
           href="mailto:contact@bluefog.co.uk"
@@ -663,32 +663,7 @@ const App: React.FC = () => {
       </div>
 
       <InstallGuide />
-      <div className="version-tag">{VERSION_TAG} | {BUILT_BY}</div>
-      <a
-        className="contact-link"
-        href="mailto:contact@bluefog.co.uk"
-        style={{
-          position: 'fixed',
-          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.3rem)',
-          right: '1rem',
-          color: '#ffffff',
-          fontSize: '0.7rem',
-          fontWeight: 500,
-          cursor: 'pointer',
-          zIndex: 50,
-          fontFamily: 'monospace',
-          textDecoration: 'none',
-          transition: 'opacity 0.2s',
-        }}
-        onMouseEnter={(e) => {
-          (e.currentTarget as HTMLElement).style.opacity = '0.8';
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.opacity = '1';
-        }}
-      >
-        Contact
-      </a>
+      <div className="version-tag">{BUILT_BY}</div>
     </div>
   );
 };
