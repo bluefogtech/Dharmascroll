@@ -235,29 +235,9 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
         </div>
       </div>
 
-      {/* Contact and Join Mission links (left bottom, stacked) */}
-      <div style={{ position: 'absolute', bottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)', left: '1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem', zIndex: 20 }}>
-        <a
-          className="contact-link"
-          href="mailto:contact@bluefog.co.uk"
-          style={{
-            color: '#ffffff',
-            fontSize: '0.85rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            textDecoration: 'none',
-            transition: 'opacity 0.2s',
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.opacity = '0.8';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.opacity = '1';
-          }}
-        >
-          Contact
-        </a>
-        {donateLink && onDonateClick && (
+      {/* Join Mission link (left bottom) */}
+      {donateLink && onDonateClick && (
+        <div style={{ position: 'absolute', bottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)', left: '1rem', zIndex: 20 }}>
           <a
             className="join-mission-link"
             href={donateLink}
@@ -284,8 +264,8 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
           >
             Join the Mission
           </a>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Vertical Action Bar (right side, stacked) */}
       <div className="action-bar">
