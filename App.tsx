@@ -1,14 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { QuoteCard } from './components/QuoteCard';
 import { InstallGuide } from './components/InstallGuide';
-import { LoginForm } from './components/LoginForm';
-import { RegisterForm } from './components/RegisterForm';
 import { Quote } from './types';
 import { getQuotes, getGitaQuotes } from './services/wisdomService';
-import { getCurrentUser, onAuthStateChange, signOut, mapUserToAuthUser } from './services/authService';
-import { trackEvent } from './services/analyticsService';
 import { openDonatePage, getDonateLink, getDonateLinkFromConfig } from './services/donationService';
-import { AuthUser } from './services/authService';
 
 const VERSION_TAG = "v5.4.0-iphone-ux";
 const BUILT_BY = "Developed by Blue Fog Technology";
@@ -25,17 +20,9 @@ const App: React.FC = () => {
   const [language, setLanguage] = useState<'en' | 'hi' | 'ta'>('en');
   const [themeWeights, setThemeWeights] = useState<Record<string, number>>({});
   const [expandedChapters, setExpandedChapters] = useState<Set<number>>(new Set());
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  
-  // Authentication state
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
-  const [showRegister, setShowRegister] = useState(false);
   const [donateLink, setDonateLink] = useState<string | null>(() => getDonateLink());
   const [gitaSidebarOpen, setGitaSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 768 : false);
-
-  const showLanding = isLandingRoute || ((isGitaRoute || isRandomRoute) && (authLoading || !user));
 
   const containerRef = useRef<HTMLDivElement>(null);
   const fetchedIds = useRef<Set<string>>(new Set());
@@ -56,45 +43,6 @@ const App: React.FC = () => {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // Check authentication on mount and listen for changes
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const currentUser = await getCurrentUser();
-        setUser(mapUserToAuthUser(currentUser));
-        
-        // Track login if user just returned from OAuth
-        if (currentUser) {
-          const urlParams = new URLSearchParams(window.location.search);
-          if (urlParams.get('code') || urlParams.get('access_token')) {
-            // User just completed OAuth flow
-            await trackEvent(currentUser.id, 'login', {
-              method: 'google',
-              timestamp: new Date().toISOString(),
-            });
-            // Clean up URL
-            window.history.replaceState({}, document.title, window.location.pathname);
-          }
-        }
-      } catch (err) {
-        console.error('Auth check error:', err);
-      } finally {
-        setAuthLoading(false);
-      }
-    };
-
-    checkAuth();
-
-    // Listen for auth state changes
-    const { data: { subscription } } = onAuthStateChange((user) => {
-      setUser(mapUserToAuthUser(user));
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
   // On Gita page, ensure Tamil is not selected (since we hide the Tamil toggle)
   useEffect(() => {
     if (isGitaRoute && language === 'ta') {
@@ -102,16 +50,13 @@ const App: React.FC = () => {
     }
   }, [isGitaRoute, language]);
 
-  // Initial Load (quotes data) after auth check completes
+  // Initial Load (quotes data)
   useEffect(() => {
-    if (authLoading) return;
-
     const init = async () => {
       try {
         setLoading(true);
         setError(null);
         if (isLandingRoute) return; // landing page doesn't need quotes
-        if ((isGitaRoute || isRandomRoute) && !user) return; // direct access without auth → landing will show
 
         const initial = isGitaRoute 
           ? await getGitaQuotes()
@@ -126,7 +71,7 @@ const App: React.FC = () => {
       }
     };
     init();
-  }, [authLoading, isGitaRoute, isLandingRoute, isRandomRoute, user]);
+  }, [isGitaRoute, isLandingRoute, isRandomRoute]);
 
   // Infinite Scroll Observer
   const handleScroll = useCallback(() => {
@@ -188,47 +133,6 @@ const App: React.FC = () => {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      if (user) {
-        // Best-effort tracking; ignore failures
-        try {
-          await trackEvent(user.id, 'logout', {
-            timestamp: new Date().toISOString(),
-          });
-        } catch (err) {
-          console.error('Logout tracking failed:', err);
-        }
-      }
-      // Perform Supabase sign out and clear local user
-      const { error } = await signOut();
-      if (error) {
-        console.error('Supabase signOut error:', error);
-      }
-      setUser(null);
-
-      // Close any open profile menus
-      ['profile-menu-home', 'profile-menu'].forEach((id) => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
-      });
-    } finally {
-      // Hard redirect so auth/UI state is fully reset
-      window.location.href = '/';
-    }
-  };
-
-  // Show auth loading
-  if (authLoading) {
-    return (
-      <div className="fullscreen-center">
-        <div className="spinner"></div>
-        <p style={{ color: 'var(--accent-gold)', letterSpacing: '0.15em', textTransform: 'uppercase', fontSize: '0.75rem', fontWeight: 600 }}>
-          Authenticating...
-        </p>
-      </div>
-    );
-  }
 
   if (loading) {
     return (
@@ -262,8 +166,8 @@ const App: React.FC = () => {
     );
   }
 
-  // Landing page (main entry), or direct access to /gita or /random when not logged in
-  if (showLanding) {
+  // Landing page (main entry)
+  if (isLandingRoute) {
     return (
       <div
         className="landing-container"
@@ -276,7 +180,7 @@ const App: React.FC = () => {
           color: 'var(--text-slate)',
         }}
       >
-        {/* Header: brand + auth only on home */}
+        {/* Header: brand + donate */}
         <div className="header-logo" style={{ pointerEvents: 'auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>ॐ</span>
@@ -293,110 +197,8 @@ const App: React.FC = () => {
                 }}
                 onClick={() => openDonatePage(donateLink)}
               >
-                Donate
+                Join the Mission
               </button>
-            )}
-            {!user ? (
-              <button
-                className="logout-btn"
-                onClick={() => {
-                  setShowRegister(false);
-                  setShowAuthModal(true);
-                }}
-              >
-                Sign in
-              </button>
-            ) : (
-              <div style={{ position: 'relative' }}>
-                <button
-                  className="logout-btn"
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-                  onClick={() => {
-                    const menu = document.getElementById('profile-menu-home');
-                    if (menu) {
-                      const isHidden = menu.style.display === 'none' || !menu.style.display;
-                      menu.style.display = isHidden ? 'block' : 'none';
-                    }
-                  }}
-                >
-                  {user.avatar ? (
-                    <img
-                      src={user.avatar}
-                      alt={user.name || 'Profile'}
-                      style={{ width: '20px', height: '20px', borderRadius: '50%' }}
-                    />
-                  ) : (
-                    <span style={{ fontSize: '0.8rem' }}>{user.name?.[0] || 'U'}</span>
-                  )}
-                  <span style={{ fontSize: '0.7rem' }}>Account ▾</span>
-                </button>
-                <div
-                  id="profile-menu-home"
-                  style={{
-                    position: 'absolute',
-                    top: '120%',
-                    right: 0,
-                    background: 'rgba(15, 23, 42, 0.97)',
-                    borderRadius: '0.5rem',
-                    border: '1px solid rgba(148, 163, 184, 0.4)',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.8)',
-                    minWidth: '160px',
-                    padding: '0.4rem 0',
-                    display: 'none',
-                    zIndex: 999,
-                  }}
-                >
-                  <button
-                    style={{
-                      width: '100%',
-                      background: 'transparent',
-                      border: 'none',
-                      color: 'var(--text-cream)',
-                      textAlign: 'left',
-                      padding: '0.5rem 0.9rem',
-                      fontSize: '0.8rem',
-                      cursor: 'pointer',
-                    }}
-                    onClick={() => {
-                      alert('Saved quotes coming soon.');
-                    }}
-                  >
-                    Saved quotes
-                  </button>
-                  <button
-                    style={{
-                      width: '100%',
-                      background: 'transparent',
-                      border: 'none',
-                      color: 'var(--text-cream)',
-                      textAlign: 'left',
-                      padding: '0.5rem 0.9rem',
-                      fontSize: '0.8rem',
-                      cursor: 'pointer',
-                    }}
-                    onClick={() => {
-                      alert(`Profile: ${user?.email || ''}`);
-                    }}
-                  >
-                    Profile
-                  </button>
-                  <button
-                    style={{
-                      width: '100%',
-                      background: 'transparent',
-                      border: 'none',
-                      color: '#f97373',
-                      textAlign: 'left',
-                      padding: '0.5rem 0.9rem',
-                      fontSize: '0.8rem',
-                      cursor: 'pointer',
-                    }}
-                    onClick={handleLogout}
-                  >
-                    Logout
-                  </button>
-                </div>
-              </div>
             )}
           </div>
         </div>
@@ -474,7 +276,6 @@ const App: React.FC = () => {
               </p>
               <button
                 onClick={() => {
-                  if (!user) return;
                   window.location.href = '/random';
                 }}
                 style={{
@@ -484,16 +285,14 @@ const App: React.FC = () => {
                   color: '#0b0f19',
                   borderRadius: '999px',
                   fontSize: '0.95rem',
-                  cursor: user ? 'pointer' : 'not-allowed',
+                  cursor: 'pointer',
                   marginTop: '20px',
                   fontWeight: 600,
                   letterSpacing: '0.08em',
                   textTransform: 'uppercase',
                   boxShadow: '0 0 18px rgba(250, 204, 21, 0.55)',
-                  opacity: user ? 1 : 0.6,
                 }}
                 onMouseEnter={e => {
-                  if (!user) return;
                   (e.currentTarget as HTMLButtonElement).style.filter = 'brightness(1.08)';
                 }}
                 onMouseLeave={e => {
@@ -542,7 +341,6 @@ const App: React.FC = () => {
               </p>
               <button
                 onClick={() => {
-                  if (!user) return;
                   window.location.href = '/gita';
                 }}
                 style={{
@@ -552,16 +350,14 @@ const App: React.FC = () => {
                   color: '#0b0f19',
                   borderRadius: '999px',
                   fontSize: '0.95rem',
-                  cursor: user ? 'pointer' : 'not-allowed',
+                  cursor: 'pointer',
                   marginTop: '20px',
                   fontWeight: 600,
                   letterSpacing: '0.08em',
                   textTransform: 'uppercase',
                   boxShadow: '0 0 18px rgba(250, 204, 21, 0.55)',
-                  opacity: user ? 1 : 0.6,
                 }}
                 onMouseEnter={e => {
-                  if (!user) return;
                   (e.currentTarget as HTMLButtonElement).style.filter = 'brightness(1.08)';
                 }}
                 onMouseLeave={e => {
@@ -573,44 +369,6 @@ const App: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Auth modal overlay (home only) */}
-        {showAuthModal && (
-          <>
-            <div
-              className="overlay"
-              style={{ background: 'rgba(0,0,0,0.7)', zIndex: 1500 }}
-              onClick={() => setShowAuthModal(false)}
-            ></div>
-            <div
-              style={{
-                position: 'fixed',
-                inset: 0,
-                zIndex: 1600,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              {showRegister ? (
-                <RegisterForm
-                  onSuccess={() => {
-                    setShowRegister(false);
-                    setShowAuthModal(false);
-                  }}
-                  onSwitchToLogin={() => setShowRegister(false)}
-                />
-              ) : (
-                <LoginForm
-                  onSuccess={() => {
-                    setShowAuthModal(false);
-                  }}
-                  onSwitchToRegister={() => setShowRegister(true)}
-                />
-              )}
-            </div>
-          </>
-        )}
       </div>
     );
   }
@@ -644,6 +402,20 @@ const App: React.FC = () => {
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          {donateLink && (
+            <button
+              className="logout-btn"
+              style={{
+                background: 'rgba(46, 125, 50, 0.25)',
+                borderColor: 'var(--accent-forest, #2E7D32)',
+                color: 'var(--accent-forest, #4ade80)',
+                fontSize: '0.75rem',
+              }}
+              onClick={() => openDonatePage(donateLink)}
+            >
+              Join the Mission
+            </button>
+          )}
           <button
             className="logout-btn"
             style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}
@@ -859,35 +631,6 @@ const App: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Auth modal overlay */}
-      {showAuthModal && (
-        <>
-          <div
-            className="overlay"
-            style={{ background: 'rgba(0,0,0,0.7)', zIndex: 1500 }}
-            onClick={() => setShowAuthModal(false)}
-          ></div>
-          <div style={{ position: 'fixed', inset: 0, zIndex: 1600, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {showRegister ? (
-              <RegisterForm
-                onSuccess={() => {
-                  setShowRegister(false);
-                  setShowAuthModal(false);
-                }}
-                onSwitchToLogin={() => setShowRegister(false)}
-              />
-            ) : (
-              <LoginForm
-                onSuccess={() => {
-                  setShowAuthModal(false);
-                }}
-                onSwitchToRegister={() => setShowRegister(true)}
-              />
-            )}
-          </div>
-        </>
-      )}
 
       <InstallGuide />
       <div className="version-tag">{VERSION_TAG} | {BUILT_BY}</div>
