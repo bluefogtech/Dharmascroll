@@ -837,8 +837,8 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {/* Main content area: left chapter sidebar (Gita desktop only) + verse content */}
-      <div style={{ display: 'flex', flex: 1, minHeight: 0, paddingTop: '64px' }}>
+      {/* Main content area: left chapter sidebar (Gita desktop only) + verse content. zIndex so action-bar/scroll-cue sit above version-tag. */}
+      <div style={{ display: 'flex', flex: 1, minHeight: 0, paddingTop: '64px', position: 'relative', zIndex: 55 }}>
         {isGitaRoute && !isMobile && (
           <div
             style={{

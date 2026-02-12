@@ -99,6 +99,12 @@
             min-height: 0;
             overflow: hidden;
         }
+        /* Desktop: allow action-bar and scroll-cue to appear above quote-content-area */
+        @media (min-width: 769px) {
+            .quote-content-area {
+                overflow: visible;
+            }
+        }
         
         .quote-content-area > div {
             width: 100%;
@@ -270,7 +276,7 @@
             position: absolute; right: 15%;
             bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
             display: flex; flex-direction: column; gap: 1.5rem;
-            z-index: 60;
+            z-index: 70;
         }
         @media (max-width: 1200px) {
             .action-bar {
@@ -443,7 +449,7 @@
             animation: float 4s ease-in-out infinite;
             pointer-events: none;
             filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
-            z-index: 60;
+            z-index: 70;
         }
 
         .header-logo {
@@ -510,6 +516,8 @@
         @media (min-width: 768px) {
             .quote-content-area {
                 padding: 3rem 4rem;
+                overflow: visible;
+                z-index: 1;
             }
             .quote-content-area > div {
                 max-width: 42rem;
@@ -605,8 +613,10 @@
             -webkit-overflow-scrolling: touch;
         }
         @media (max-width: 768px) {
+            /* Push content below Chapters button so Sanskrit never hides behind it */
             .gita-verse-area .quote-content-area {
                 padding: 2rem 1.25rem calc(env(safe-area-inset-bottom, 0px) + 12rem) 1.25rem !important;
+                padding-top: calc(1rem + 100px) !important;
                 padding-right: calc(1.25rem + 4rem) !important;
             }
             .gita-verse-area .quote-main {
