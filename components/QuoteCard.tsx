@@ -253,19 +253,26 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
         }}
       ></div>
 
-      {/* Main Quote Content */}
+      {/* Main Quote Content: Sanskrit (non-shrinking) then translation so they never overlap */}
       <div className="quote-content-area">
-        <div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', minHeight: 0, flex: 1 }}>
           {quote.sanskrit && (
-            <div className="quote-sanskrit" style={{ fontSize: '0.95rem', opacity: 0.9 }}>
-               {quote.sanskrit}
+            <div style={{ flexShrink: 0, marginBottom: '0.75rem', width: '100%', textAlign: 'center' }}>
+              <div className="quote-sanskrit" style={{ fontSize: '0.95rem', opacity: 0.9 }}>
+                {quote.sanskrit}
+              </div>
             </div>
           )}
-          
           <h1 
             ref={textRef}
             className="quote-main" 
-            style={{ fontSize: dynamicFontSize || (language === 'ta' ? '1.6rem' : '1.85rem') }}
+            style={{ 
+              fontSize: dynamicFontSize || (language === 'ta' ? '1.6rem' : '1.85rem'),
+              flex: '1 1 auto',
+              minHeight: 0,
+              marginTop: 0,
+              marginBottom: 0,
+            }}
           >
             &ldquo;{getDisplayText()}&rdquo;
           </h1>
@@ -273,9 +280,10 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
             height: '2px', 
             width: '2.5rem', 
             background: 'linear-gradient(90deg, transparent, var(--accent-gold), transparent)',
-            margin: '0 auto', 
+            margin: '1rem auto 0', 
             opacity: 0.9,
-            boxShadow: '0 0 10px rgba(255, 215, 0, 0.5)'
+            boxShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+            flexShrink: 0,
           }}></div>
         </div>
       </div>
