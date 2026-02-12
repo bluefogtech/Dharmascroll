@@ -4,17 +4,18 @@ import process from 'node:process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-// Write donate link so it's available in dev (from .env via loadEnv) and in build (from process.env on Vercel).
+// Write donate link and Formspree form ID so they're available in dev (from .env via loadEnv) and in build (from process.env on Vercel).
 // Also write public/donate-config.json here (not in the pre-build script) so Vercel's process.env is available.
-function generateEnvPlugin(donateLink: string) {
+function generateEnvPlugin(donateLink: string, formspreeFormId: string) {
   return {
     name: 'generate-donate-env',
     buildStart() {
       const cwd = process.cwd();
       const link = typeof donateLink === 'string' && donateLink.startsWith('https://') ? donateLink : '';
+      const formId = typeof formspreeFormId === 'string' && formspreeFormId.trim() !== '' ? formspreeFormId.trim() : '';
       // generated-env.ts for bundle
       const envPath = path.join(cwd, 'services', 'generated-env.ts');
-      fs.writeFileSync(envPath, `// Auto-generated at build time. Do not edit.\nexport const VITE_STRIPE_DONATE_LINK: string = ${JSON.stringify(donateLink)};\n`);
+      fs.writeFileSync(envPath, `// Auto-generated at build time. Do not edit.\nexport const VITE_STRIPE_DONATE_LINK: string = ${JSON.stringify(donateLink)};\nexport const VITE_FORMSPREE_CONTACT_FORM_ID: string = ${JSON.stringify(formId)};\n`);
       // public/donate-config.json for runtime fetch (Vercel has process.env when Vite runs, not when the pre-build script runs)
       const publicDir = path.join(cwd, 'public');
       if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir, { recursive: true });
@@ -32,9 +33,10 @@ export default defineConfig(({ mode }) => {
   const supabaseKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
   const apiKey = env.API_KEY || process.env.API_KEY || "";
   const donateLink = env.VITE_STRIPE_DONATE_LINK || process.env.VITE_STRIPE_DONATE_LINK || "";
+  const formspreeFormId = env.VITE_FORMSPREE_CONTACT_FORM_ID || process.env.VITE_FORMSPREE_CONTACT_FORM_ID || "";
 
   return {
-    plugins: [generateEnvPlugin(donateLink), react()],
+    plugins: [generateEnvPlugin(donateLink, formspreeFormId), react()],
     envPrefix: ['VITE_', 'NEXT_PUBLIC_', 'API_'],
     define: {
       'process.env.API_KEY': JSON.stringify(apiKey),

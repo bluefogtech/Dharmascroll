@@ -357,6 +357,72 @@ const App: React.FC = () => {
                 Begin Journey
               </button>
             </div>
+
+            {/* Card 3 - Coming Soon */}
+            <div
+              style={{
+                width: '320px',
+                padding: '32px',
+                borderRadius: '20px',
+                background:
+                  'radial-gradient(circle at top left, rgba(251, 191, 36, 0.12), transparent 55%), rgba(15, 23, 42, 0.96)',
+                boxShadow: '0 18px 40px rgba(0,0,0,0.7)',
+                border: '1px solid rgba(248, 250, 252, 0.08)',
+                transition: '0.3s',
+              }}
+              onMouseEnter={e => {
+                const el = e.currentTarget as HTMLDivElement;
+                el.style.transform = 'translateY(-6px)';
+                el.style.boxShadow = '0 26px 55px rgba(0,0,0,0.85)';
+              }}
+              onMouseLeave={e => {
+                const el = e.currentTarget as HTMLDivElement;
+                el.style.transform = 'translateY(0)';
+                el.style.boxShadow = '0 18px 40px rgba(0,0,0,0.7)';
+              }}
+            >
+              <h2
+                style={{
+                  marginBottom: '15px',
+                  color: 'var(--accent-gold)',
+                  fontSize: '1.2rem',
+                  fontWeight: 600,
+                }}
+              >
+                🎵 Coming Soon
+              </h2>
+              <p style={{ color: 'var(--text-slate)', minHeight: '60px', fontSize: '0.95rem' }}>
+                Aarti and Bhajan collection
+              </p>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  // Do nothing
+                }}
+                style={{
+                  padding: '10px 24px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #facc15, #f97316)',
+                  color: '#0b0f19',
+                  borderRadius: '999px',
+                  fontSize: '0.95rem',
+                  cursor: 'pointer',
+                  marginTop: '20px',
+                  fontWeight: 600,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  boxShadow: '0 0 18px rgba(250, 204, 21, 0.55)',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLButtonElement).style.filter = 'brightness(1.08)';
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLButtonElement).style.filter = 'brightness(1)';
+                }}
+              >
+                Explore
+              </button>
+            </div>
           </div>
         </div>
 

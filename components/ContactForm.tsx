@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { submitContactForm, isContactFormConfigured } from '../services/contactService';
 
 interface ContactFormProps {
   isOpen: boolean;
@@ -42,25 +43,38 @@ export const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose, recip
     setLoading(true);
 
     try {
-      // Create mailto link with form data
-      const subject = encodeURIComponent(formData.subject || 'Contact Form Submission');
-      const body = encodeURIComponent(
-        `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
-      );
-      const mailtoLink = `mailto:${recipientEmail}?subject=${subject}&body=${body}`;
-      
-      // Open email client
-      window.location.href = mailtoLink;
-      
-      // Show success message
-      setSuccess(true);
-      
-      // Reset form after a delay
-      setTimeout(() => {
-        setFormData({ name: '', email: '', subject: '', message: '' });
-        setSuccess(false);
-        onClose();
-      }, 2000);
+      const useFormspree = isContactFormConfigured();
+      if (useFormspree) {
+        const ok = await submitContactForm({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          subject: formData.subject.trim() || 'Contact Form Submission',
+          message: formData.message.trim(),
+        });
+        if (!ok) {
+          setError('Failed to send message. Please try again or email us directly.');
+          return;
+        }
+        setSuccess(true);
+        setTimeout(() => {
+          setFormData({ name: '', email: '', subject: '', message: '' });
+          setSuccess(false);
+          onClose();
+        }, 2000);
+      } else {
+        // Fallback: open email client with pre-filled mailto
+        const subject = encodeURIComponent(formData.subject || 'Contact Form Submission');
+        const body = encodeURIComponent(
+          `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
+        );
+        window.location.href = `mailto:${recipientEmail}?subject=${subject}&body=${body}`;
+        setSuccess(true);
+        setTimeout(() => {
+          setFormData({ name: '', email: '', subject: '', message: '' });
+          setSuccess(false);
+          onClose();
+        }, 2000);
+      }
     } catch (err: any) {
       setError('Failed to send message. Please try again or email us directly.');
       console.error('Contact form error:', err);
@@ -172,7 +186,9 @@ export const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose, recip
               fontSize: '0.9rem',
             }}
           >
-            ✓ Message sent! Your email client should open shortly.
+            {isContactFormConfigured()
+              ? "✓ Message sent! We'll get back to you soon."
+              : "✓ Your email client should open—please send the message from there."}
           </div>
         )}
 
