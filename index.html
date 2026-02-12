@@ -200,6 +200,14 @@
             overflow-wrap: break-word;
             text-shadow: 0 2px 10px rgba(255, 193, 7, 0.4), 0 0 20px rgba(255, 193, 7, 0.2);
         }
+        @media (max-width: 768px) {
+            .quote-sanskrit {
+                font-size: 0.95rem !important;
+                margin-bottom: 0.75rem !important;
+                max-height: 40px !important;
+                overflow: hidden !important;
+            }
+        }
         .quote-main {
             font-size: clamp(1.1rem, 4vw, 2.4rem);
             font-weight: 500; 
@@ -297,11 +305,30 @@
                 gap: 1rem;
             }
             .quote-content-area {
-                padding-right: calc(1.5rem + 4rem) !important;
+                padding: 1rem 1rem !important;
+                padding-top: calc(1rem + 60px) !important;
+                padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 11rem) !important;
+                padding-right: calc(1rem + 4rem) !important;
+                padding-left: 1rem !important;
+            }
+            .quote-content-area > div {
+                max-width: 100% !important;
+                width: 100% !important;
+                max-height: calc(100vh - 280px) !important;
+                overflow: hidden !important;
+            }
+            .quote-main {
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+                max-height: calc(100vh - 280px) !important;
+                line-height: 1.35 !important;
+                overflow: hidden !important;
             }
             .quote-meta-overlay {
                 bottom: calc(env(safe-area-inset-bottom, 0px) + 11rem) !important;
-                padding-right: calc(1.5rem + 4rem) !important;
+                padding-right: calc(1rem + 4rem) !important;
+                padding-left: 1rem !important;
             }
             .version-tag {
                 bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem) !important;
@@ -533,8 +560,14 @@
             }
             .quote-main {
                 font-size: clamp(1rem, 5vw, 1.5rem);
-                margin-bottom: 1.25rem;
-                max-height: calc(100vh - 300px);
+                margin-bottom: 1rem !important;
+                max-height: calc(100vh - 280px) !important;
+                overflow: hidden !important;
+                line-height: 1.35 !important;
+            }
+            .quote-content-area > div {
+                max-height: calc(100vh - 280px) !important;
+                overflow: hidden !important;
             }
         }
 

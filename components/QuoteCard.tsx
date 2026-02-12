@@ -40,38 +40,104 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
       const textLength = text.length;
       const viewportHeight = window.innerHeight;
       const viewportWidth = window.innerWidth;
+      const isMobile = viewportWidth < 768;
       
-      // Base font size calculation – main text (en/hi/ta) larger
-      let baseSize = 1.85;
-      if (language === 'ta') baseSize = 1.6;
-      if (language === 'hi') baseSize = 1.85;
+      // Calculate available space more accurately
+      // Account for all fixed elements:
+      // - Header: ~90px on mobile (includes Chapters button on Gita), ~100px desktop
+      // - Sanskrit text: ~35-40px if present
+      // - Metadata/verse number at bottom: ~90-100px
+      // - Footer/version-tag: ~50px
+      const headerSpace = isMobile ? 90 : 100;
+      const sanskritSpace = quote.sanskrit ? (isMobile ? 35 : 40) : 0;
+      const metadataSpace = isMobile ? 90 : 100; // Source, context, tags, verse number
+      const footerSpace = isMobile ? 50 : 60;
       
-      // Reduce size for longer text
-      if (textLength > 300) baseSize *= 0.75;
-      else if (textLength > 200) baseSize *= 0.85;
-      else if (textLength > 150) baseSize *= 0.9;
-      else if (textLength > 100) baseSize *= 0.95;
+      // Total reserved space
+      const reservedSpace = headerSpace + sanskritSpace + metadataSpace + footerSpace;
+      const availableHeight = viewportHeight - reservedSpace;
       
-      // Adjust for viewport height (account for buttons: ~200px top + bottom)
-      const availableHeight = viewportHeight - 200;
-      const heightFactor = Math.min(availableHeight / 600, 1.2);
-      baseSize *= heightFactor;
+      // Base font size - conservative start
+      let baseSize = isMobile ? 1.8 : 1.85;
+      if (language === 'ta') baseSize = isMobile ? 1.5 : 1.6;
+      if (language === 'hi') baseSize = isMobile ? 1.8 : 1.85;
       
-      // Adjust for viewport width on mobile
-      if (viewportWidth < 768) {
-        baseSize *= 0.92;
-        if (viewportWidth < 480) baseSize *= 0.88;
+      // More aggressive scaling based on text length
+      if (textLength > 400) baseSize *= 0.60;
+      else if (textLength > 300) baseSize *= 0.68;
+      else if (textLength > 200) baseSize *= 0.75;
+      else if (textLength > 150) baseSize *= 0.82;
+      else if (textLength > 100) baseSize *= 0.90;
+      else if (textLength > 50) baseSize *= 0.96;
+      
+      // Calculate maximum size based on available height
+      // Estimate lines: shorter text = fewer lines per character
+      const avgCharsPerLine = isMobile ? Math.max(25, Math.min(40, viewportWidth / 12)) : 50;
+      const estimatedLines = Math.ceil(textLength / avgCharsPerLine);
+      const lineHeight = 1.35; // Match CSS line-height
+      const spacingBetweenLines = 0.2; // Extra spacing
+      
+      // Use 70% of available height for main text (leave buffer)
+      const maxTextHeight = availableHeight * 0.70;
+      const maxSizeFromHeight = maxTextHeight / (estimatedLines * lineHeight * (1 + spacingBetweenLines));
+      
+      // Also consider width constraints
+      const maxSizeFromWidth = isMobile 
+        ? (viewportWidth * 0.85) / 8 // Rough estimate: ~8 characters per rem
+        : Infinity;
+      
+      // Use the most restrictive constraint
+      const maxSize = Math.min(maxSizeFromHeight, maxSizeFromWidth);
+      
+      // Apply the maximum constraint
+      baseSize = Math.min(baseSize, maxSize);
+      
+      // Scale based on viewport width for better mobile optimization
+      if (isMobile) {
+        const widthFactor = Math.min(viewportWidth / 375, 1.05);
+        baseSize *= widthFactor;
+        
+        if (viewportWidth < 400) {
+          baseSize *= 0.92;
+        }
       }
       
-      // Clamp between min and max (higher max for bigger main text)
-      const finalSize = Math.max(1.25, Math.min(baseSize, 2.6));
+      // Final clamp with safe limits
+      const minSize = isMobile ? 1.0 : 1.25;
+      const maxAllowedSize = isMobile ? 2.5 : 2.6; // Reduced max to prevent overlap
+      const finalSize = Math.max(minSize, Math.min(baseSize, maxAllowedSize));
+      
       setDynamicFontSize(`${finalSize}rem`);
+      
+      // Verify the size doesn't cause overflow by checking actual rendered height
+      // This is a safety check - if text still overflows, reduce further
+      setTimeout(() => {
+        if (textRef.current) {
+          const actualHeight = textRef.current.scrollHeight;
+          const container = textRef.current.parentElement?.parentElement;
+          if (container) {
+            const containerHeight = container.clientHeight;
+            // If text height exceeds 75% of container, reduce size
+            if (actualHeight > containerHeight * 0.75 && finalSize > minSize) {
+              const reducedSize = Math.max(minSize, finalSize * 0.85);
+              setDynamicFontSize(`${reducedSize}rem`);
+            }
+          }
+        }
+      }, 100);
     };
     
-    adjustFontSize();
+    // Use requestAnimationFrame for smoother updates
+    const timeoutId = setTimeout(() => {
+      adjustFontSize();
+    }, 0);
+    
     window.addEventListener('resize', adjustFontSize);
-    return () => window.removeEventListener('resize', adjustFontSize);
-  }, [quote.text, quote.hindi, quote.tamil, language]);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', adjustFontSize);
+    };
+  }, [quote.text, quote.hindi, quote.tamil, quote.sanskrit, language]);
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
