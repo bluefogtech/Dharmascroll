@@ -128,8 +128,10 @@
             pointer-events: none;
             background: transparent;
         }
-        .quote-content-area {
-            padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8rem) !important;
+        @media (max-width: 768px) {
+            .quote-content-area {
+                padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 11rem) !important;
+            }
         }
         
         .quote-meta-overlay > * {
@@ -290,9 +292,35 @@
         }
         @media (max-width: 768px) {
             .action-bar {
-                bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 8.5rem);
                 right: 0.75rem;
                 gap: 1rem;
+            }
+            .quote-content-area {
+                padding-right: calc(1.5rem + 4rem) !important;
+            }
+            .quote-meta-overlay {
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 11rem) !important;
+                padding-right: calc(1.5rem + 4rem) !important;
+            }
+            .version-tag {
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem) !important;
+                padding-right: calc(1rem + 4rem) !important;
+                flex-wrap: nowrap !important;
+                gap: 0.5rem !important;
+                font-size: 0.7rem !important;
+            }
+            .landing-footer {
+                flex-direction: column !important;
+                flex-wrap: wrap !important;
+            }
+            .version-tag span,
+            .version-tag button {
+                white-space: nowrap;
+                font-size: 0.7rem !important;
+            }
+            .version-tag img {
+                height: 0.85rem !important;
             }
             .contact-link {
                 font-size: 0.8rem;
@@ -478,7 +506,26 @@
             .quote-content-area {
                 padding: 1.5rem 1rem;
                 padding-top: calc(1.5rem + 60px);
-                padding-bottom: calc(1.5rem + 140px);
+                padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 11rem) !important;
+                padding-right: calc(1rem + 4rem) !important;
+            }
+            .quote-meta-overlay {
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 11rem) !important;
+                padding-right: calc(1rem + 4rem) !important;
+            }
+            .version-tag {
+                padding-right: calc(1rem + 4rem) !important;
+                flex-wrap: nowrap !important;
+                gap: 0.5rem !important;
+                font-size: 0.7rem !important;
+            }
+            .version-tag span,
+            .version-tag button {
+                white-space: nowrap;
+                font-size: 0.7rem !important;
+            }
+            .version-tag img {
+                height: 0.85rem !important;
             }
             .quote-sanskrit {
                 font-size: 1rem;
@@ -517,7 +564,8 @@
         }
         @media (max-width: 768px) {
             .gita-verse-area .quote-content-area {
-                padding: 2rem 1.25rem calc(env(safe-area-inset-bottom, 0px) + 9rem) 1.25rem !important;
+                padding: 2rem 1.25rem calc(env(safe-area-inset-bottom, 0px) + 12rem) 1.25rem !important;
+                padding-right: calc(1.25rem + 4rem) !important;
             }
             .gita-verse-area .quote-main {
                 font-size: 1.35rem;
@@ -529,8 +577,9 @@
                 margin-bottom: 1rem;
             }
             .gita-verse-area .quote-meta-overlay {
-                bottom: calc(env(safe-area-inset-bottom, 0px) + 5.5rem);
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 11rem) !important;
                 padding: 0 1.25rem 0.5rem 1.25rem;
+                padding-right: calc(1.25rem + 4rem) !important;
             }
         }
 
