@@ -42,43 +42,38 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
       const viewportWidth = window.innerWidth;
       const isMobile = viewportWidth < 768;
       
-      // Calculate available space more accurately
-      // Account for all fixed elements:
-      // - Header: ~90px on mobile (includes Chapters button on Gita), ~100px desktop
-      // - Sanskrit text: ~35-40px if present
-      // - Metadata/verse number at bottom: ~90-100px
-      // - Footer/version-tag: ~50px
+      // Calculate available space for translation text only (match CSS: scroll area 100vh-224px on mobile, minus reference + sanskrit)
       const headerSpace = isMobile ? 90 : 100;
-      const sanskritSpace = quote.sanskrit ? (isMobile ? 35 : 40) : 0;
-      const metadataSpace = isMobile ? 90 : 100; // Source, context, tags, verse number
-      const footerSpace = isMobile ? 50 : 60;
-      
-      // Total reserved space
-      const reservedSpace = headerSpace + sanskritSpace + metadataSpace + footerSpace;
-      const availableHeight = viewportHeight - reservedSpace;
-      
+      const sanskritSpace = quote.sanskrit ? (isMobile ? 40 : 50) : 0;
+      const referenceAndGaps = isMobile ? 110 : 120; // reference-top + tags + gaps
+      const bottomReserved = isMobile ? 50 : 70;     // dash + padding under quote
+      const scrollAreaReserved = isMobile ? 224 : 0; // CSS max-height: 100vh - 224px on mobile
+      const reservedForTranslation = isMobile
+        ? scrollAreaReserved + referenceAndGaps + sanskritSpace + bottomReserved
+        : headerSpace + referenceAndGaps + sanskritSpace + bottomReserved;
+      const availableHeight = viewportHeight - reservedForTranslation;
+
       // Base font size - conservative start
       let baseSize = isMobile ? 1.8 : 1.85;
       if (language === 'ta') baseSize = isMobile ? 1.5 : 1.6;
       if (language === 'hi') baseSize = isMobile ? 1.8 : 1.85;
-      
-      // More aggressive scaling based on text length
-      if (textLength > 400) baseSize *= 0.60;
-      else if (textLength > 300) baseSize *= 0.68;
-      else if (textLength > 200) baseSize *= 0.75;
-      else if (textLength > 150) baseSize *= 0.82;
-      else if (textLength > 100) baseSize *= 0.90;
-      else if (textLength > 50) baseSize *= 0.96;
-      
-      // Calculate maximum size based on available height
-      // Estimate lines: shorter text = fewer lines per character
-      const avgCharsPerLine = isMobile ? Math.max(25, Math.min(40, viewportWidth / 12)) : 50;
+
+      // More aggressive scaling for long text so it doesn't clip
+      if (textLength > 400) baseSize *= 0.52;
+      else if (textLength > 300) baseSize *= 0.62;
+      else if (textLength > 200) baseSize *= 0.72;
+      else if (textLength > 150) baseSize *= 0.80;
+      else if (textLength > 100) baseSize *= 0.88;
+      else if (textLength > 50) baseSize *= 0.94;
+
+      // Calculate maximum size based on available height for translation block
+      const avgCharsPerLine = isMobile ? Math.max(22, Math.min(38, viewportWidth / 11)) : 50;
       const estimatedLines = Math.ceil(textLength / avgCharsPerLine);
       const lineHeight = 1.35; // Match CSS line-height
-      const spacingBetweenLines = 0.2; // Extra spacing
-      
-      // Use 70% of available height for main text (leave buffer)
-      const maxTextHeight = availableHeight * 0.70;
+      const spacingBetweenLines = 0.2;
+
+      // Use 62% of available height so text reliably fits (buffer for dash + no clip)
+      const maxTextHeight = availableHeight * 0.62;
       const maxSizeFromHeight = maxTextHeight / (estimatedLines * lineHeight * (1 + spacingBetweenLines));
       
       // Also consider width constraints
@@ -108,23 +103,22 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
       const finalSize = Math.max(minSize, Math.min(baseSize, maxAllowedSize));
       
       setDynamicFontSize(`${finalSize}rem`);
-      
-      // Verify the size doesn't cause overflow by checking actual rendered height
-      // This is a safety check - if text still overflows, reduce further
-      setTimeout(() => {
-        if (textRef.current) {
-          const actualHeight = textRef.current.scrollHeight;
-          const container = textRef.current.parentElement?.parentElement;
-          if (container) {
-            const containerHeight = container.clientHeight;
-            // If text height exceeds 75% of container, reduce size
-            if (actualHeight > containerHeight * 0.75 && finalSize > minSize) {
-              const reducedSize = Math.max(minSize, finalSize * 0.85);
-              setDynamicFontSize(`${reducedSize}rem`);
-            }
-          }
+
+      // Safety check: use translation block (parent of h1) as container; reduce font if text would clip
+      const runOverflowCheck = (attempt: number) => {
+        if (!textRef.current) return;
+        const translationBlock = textRef.current.parentElement; // .quote-translation-block
+        if (!translationBlock) return;
+        const actualHeight = textRef.current.scrollHeight;
+        const containerHeight = translationBlock.clientHeight;
+        const maxAllowed = containerHeight * 0.88; // leave room for dash and no clip
+        if (actualHeight > maxAllowed && finalSize > minSize) {
+          const reduced = Math.max(minSize, finalSize * (attempt === 0 ? 0.82 : 0.75));
+          setDynamicFontSize(`${reduced}rem`);
+          if (attempt === 0) setTimeout(() => runOverflowCheck(1), 150);
         }
-      }, 100);
+      };
+      setTimeout(() => runOverflowCheck(0), 120);
     };
     
     // Use requestAnimationFrame for smoother updates
@@ -137,7 +131,7 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
       clearTimeout(timeoutId);
       window.removeEventListener('resize', adjustFontSize);
     };
-  }, [quote.text, quote.hindi, quote.tamil, quote.sanskrit, language]);
+  }, [quote.text, quote.hindi, quote.tamil, quote.sanskrit, language, isActive]);
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
