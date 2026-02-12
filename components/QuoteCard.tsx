@@ -255,9 +255,9 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
 
       {/* Main Quote Content */}
       <div className="quote-content-area">
-        <div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
           {quote.sanskrit && (
-            <div className="quote-sanskrit" style={{ fontSize: '0.95rem', opacity: 0.9 }}>
+            <div className="quote-sanskrit" style={{ fontSize: '1.9rem', opacity: 0.9, marginBottom: '1rem' }}>
                {quote.sanskrit}
             </div>
           )}
@@ -269,13 +269,14 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
           >
             &ldquo;{getDisplayText()}&rdquo;
           </h1>
-          <div style={{ 
+          <div className="quote-separator" style={{ 
             height: '2px', 
             width: '2.5rem', 
             background: 'linear-gradient(90deg, transparent, var(--accent-gold), transparent)',
-            margin: '0 auto', 
+            margin: '1rem auto', 
             opacity: 0.9,
-            boxShadow: '0 0 10px rgba(255, 215, 0, 0.5)'
+            boxShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+            flexShrink: 0,
           }}></div>
         </div>
       </div>

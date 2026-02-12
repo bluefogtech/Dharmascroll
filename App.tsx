@@ -438,34 +438,6 @@ const App: React.FC = () => {
               <p style={{ color: 'var(--text-slate)', minHeight: '60px', fontSize: '0.95rem' }}>
                 Aarti and Bhajan collection
               </p>
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  // Do nothing
-                }}
-                style={{
-                  padding: '10px 24px',
-                  border: 'none',
-                  background: 'linear-gradient(135deg, #facc15, #f97316)',
-                  color: '#0b0f19',
-                  borderRadius: '999px',
-                  fontSize: '0.95rem',
-                  cursor: 'pointer',
-                  marginTop: '20px',
-                  fontWeight: 600,
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  boxShadow: '0 0 18px rgba(250, 204, 21, 0.55)',
-                }}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLButtonElement).style.filter = 'brightness(1.08)';
-                }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLButtonElement).style.filter = 'brightness(1)';
-                }}
-              >
-                Explore
-              </button>
             </div>
           </div>
         </div>
@@ -499,19 +471,33 @@ const App: React.FC = () => {
           paddingBottom: 'max(2rem, calc(env(safe-area-inset-bottom, 0px) + 80px))',
         }}>
           {/* First line: Developed by Blue Fog */}
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '0.5rem',
-            flexWrap: 'nowrap',
-          }}>
+          <a
+            href="https://www.bluefog.co.uk"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.5rem',
+              flexWrap: 'nowrap',
+              textDecoration: 'none',
+              color: 'inherit',
+              cursor: 'pointer',
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.opacity = '0.8';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.opacity = '1';
+            }}
+          >
             <span>{BUILT_BY}</span>
             <img 
               src="/bluefog-logo.png" 
               alt="Blue Fog Technology" 
               style={{ height: '1rem', width: 'auto', objectFit: 'contain' }}
             />
-          </div>
+          </a>
           {/* Second line: Share and Get in Touch */}
           <div style={{ 
             display: 'flex', 
@@ -1129,12 +1115,32 @@ const App: React.FC = () => {
         padding: '1rem',
         marginTop: '0',
       }}>
-        <span>{BUILT_BY}</span>
-        <img 
-          src="/bluefog-logo.png" 
-          alt="Blue Fog Technology" 
-          style={{ height: '1rem', width: 'auto', objectFit: 'contain' }}
-        />
+        <a
+          href="https://www.bluefog.co.uk"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.5rem',
+            textDecoration: 'none',
+            color: 'inherit',
+            cursor: 'pointer',
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.opacity = '0.8';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.opacity = '1';
+          }}
+        >
+          <span>{BUILT_BY}</span>
+          <img 
+            src="/bluefog-logo.png" 
+            alt="Blue Fog Technology" 
+            style={{ height: '1rem', width: 'auto', objectFit: 'contain' }}
+          />
+        </a>
         <button
           onClick={() => setContactFormOpen(true)}
           style={{
