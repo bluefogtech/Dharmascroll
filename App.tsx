@@ -941,7 +941,7 @@ const App: React.FC = () => {
             </div>
           </div>
         )}
-        <div style={{ flex: 1, width: '100%', minWidth: 0, position: 'relative' }} className={isGitaRoute ? 'gita-verse-area' : ''}>
+        <div style={{ flex: 1, width: '100%', minWidth: 0, minHeight: 0, position: 'relative' }} className={isGitaRoute ? 'gita-verse-area' : ''}>
           {isGitaRoute && isMobile && (
             <button
               type="button"

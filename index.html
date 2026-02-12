@@ -66,6 +66,15 @@
             scrollbar-width: none;
             -webkit-overflow-scrolling: touch;
         }
+        /* Desktop: fill parent so share + scroll-cue stay visible above version-tag */
+        @media (min-width: 769px) {
+            .snap-container {
+                height: 100%;
+            }
+            .snap-item {
+                height: 100%;
+            }
+        }
         .snap-container::-webkit-scrollbar {
             display: none;
         }
@@ -210,8 +219,6 @@
             .quote-sanskrit {
                 font-size: 0.95rem !important;
                 margin-bottom: 0.75rem !important;
-                max-height: 40px !important;
-                overflow: hidden !important;
             }
         }
         .quote-main {
@@ -231,6 +238,15 @@
             margin-right: auto;
             max-height: calc(100vh - 280px);
             overflow-y: auto;
+        }
+        .quote-reference-top {
+            margin-top: 0;
+        }
+        .quote-reference-top .quote-source {
+            margin-bottom: 0.25rem;
+        }
+        .quote-reference-top .tag-container {
+            margin-top: 0.5rem;
         }
         .quote-source {
             color: var(--accent-saffron);
@@ -341,8 +357,26 @@
             .quote-content-area .quote-sanskrit {
                 margin-bottom: 0.5rem !important;
             }
+            /* Prevent dark panel behind English from overlapping Sanskrit: reference + Sanskrit on top */
+            .quote-reference-top {
+                position: relative;
+                z-index: 2;
+            }
+            .quote-sanskrit-wrap {
+                margin-bottom: 1rem !important;
+                padding-bottom: 0.25rem;
+                position: relative;
+                z-index: 2;
+            }
+            .quote-translation-block {
+                position: relative;
+                z-index: 0;
+            }
+            .quote-content-area .quote-main {
+                margin-top: 0.5rem !important;
+            }
             .quote-content-area > div {
-                gap: 0.25rem;
+                gap: 0.5rem;
             }
             .version-tag {
                 bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem) !important;

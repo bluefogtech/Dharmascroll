@@ -253,60 +253,61 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
         }}
       ></div>
 
-      {/* Main Quote Content: Sanskrit (non-shrinking) then translation so they never overlap */}
+      {/* Main Quote Content: reference/chapter (top) → Sanskrit → translation */}
       <div className="quote-content-area">
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', minHeight: 0, flex: 1 }}>
+          {/* Reference, chapter, and tags at top, before Sanskrit */}
+          <div className="quote-reference-top" style={{ flexShrink: 0, marginBottom: '0.75rem', width: '100%', textAlign: 'center' }}>
+            <div className="quote-source">
+              {quote.source}
+            </div>
+            {quote.context && (
+              <div className="quote-context">
+                {quote.context}
+              </div>
+            )}
+            <div className="tag-container">
+              {quote.themes.slice(0, 3).map((theme, i) => (
+                <span key={i} className="tag">
+                  #{theme.toLowerCase().replace(/\s+/g, '')}
+                </span>
+              ))}
+            </div>
+          </div>
           {quote.sanskrit && (
-            <div style={{ flexShrink: 0, marginBottom: '0.75rem', width: '100%', textAlign: 'center' }}>
+            <div className="quote-sanskrit-wrap" style={{ flexShrink: 0, marginBottom: '1rem', width: '100%', textAlign: 'center' }}>
               <div className="quote-sanskrit" style={{ fontSize: '0.95rem', opacity: 0.9 }}>
                 {quote.sanskrit}
               </div>
             </div>
           )}
-          <h1 
-            ref={textRef}
-            className="quote-main" 
-            style={{ 
-              fontSize: dynamicFontSize || (language === 'ta' ? '1.6rem' : '1.85rem'),
-              flex: '1 1 auto',
-              minHeight: 0,
-              marginTop: 0,
-              marginBottom: 0,
-            }}
-          >
-            &ldquo;{getDisplayText()}&rdquo;
-          </h1>
-          <div style={{ 
-            height: '2px', 
-            width: '2.5rem', 
-            background: 'linear-gradient(90deg, transparent, var(--accent-gold), transparent)',
-            margin: '1rem auto 0', 
-            opacity: 0.9,
-            boxShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
-            flexShrink: 0,
-          }}></div>
-        </div>
-      </div>
-
-      {/* Centered Meta Overlay (Bottom Middle) */}
-      <div className="quote-meta-overlay">
-        <div className="quote-source">
-          {quote.source}
-        </div>
-        {quote.context && (
-          <div className="quote-context">
-            {quote.context}
+          {/* Translation block: panel stays behind this only, never behind Sanskrit */}
+          <div className="quote-translation-block" style={{ flex: '1 1 auto', minHeight: 0, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <h1 
+              ref={textRef}
+              className="quote-main" 
+              style={{ 
+                fontSize: dynamicFontSize || (language === 'ta' ? '1.6rem' : '1.85rem'),
+                flex: '1 1 auto',
+                minHeight: 0,
+                marginTop: 0,
+                marginBottom: 0,
+              }}
+            >
+              &ldquo;{getDisplayText()}&rdquo;
+            </h1>
+            <div style={{ 
+              height: '2px', 
+              width: '2.5rem', 
+              background: 'linear-gradient(90deg, transparent, var(--accent-gold), transparent)',
+              margin: '1rem auto 0', 
+              opacity: 0.9,
+              boxShadow: '0 0 10px rgba(255, 215, 0, 0.5)',
+              flexShrink: 0,
+            }}></div>
           </div>
-        )}
-        <div className="tag-container">
-          {quote.themes.slice(0, 3).map((theme, i) => (
-            <span key={i} className="tag">
-              #{theme.toLowerCase().replace(/\s+/g, '')}
-            </span>
-          ))}
         </div>
       </div>
-
 
       {/* Vertical Action Bar (right side, stacked) */}
       <div className="action-bar">
