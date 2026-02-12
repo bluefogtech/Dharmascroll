@@ -338,15 +338,16 @@
                 max-width: 100% !important;
                 width: 100% !important;
                 max-height: calc(100vh - 280px) !important;
-                overflow: hidden !important;
+                overflow-y: auto !important; /* scroll so full translation + dash visible */
+                -webkit-overflow-scrolling: touch;
             }
             .quote-main {
                 width: 100% !important;
                 max-width: 100% !important;
                 padding: 0 !important;
-                max-height: calc(100vh - 280px) !important;
+                max-height: none !important; /* no clip; inner div scrolls */
                 line-height: 1.35 !important;
-                overflow: hidden !important;
+                overflow: visible !important;
             }
             .quote-meta-overlay {
                 bottom: calc(env(safe-area-inset-bottom, 0px) + 11rem) !important;
@@ -371,6 +372,7 @@
             .quote-translation-block {
                 position: relative;
                 z-index: 0;
+                background: transparent !important; /* prevent dark panel overlapping translation */
             }
             .quote-content-area .quote-main {
                 margin-top: 0.5rem !important;
@@ -612,13 +614,14 @@
             .quote-main {
                 font-size: clamp(1rem, 5vw, 1.5rem);
                 margin-bottom: 1rem !important;
-                max-height: calc(100vh - 280px) !important;
-                overflow: hidden !important;
+                max-height: none !important;
+                overflow: visible !important;
                 line-height: 1.35 !important;
             }
             .quote-content-area > div {
                 max-height: calc(100vh - 280px) !important;
-                overflow: hidden !important;
+                overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch;
             }
         }
 
