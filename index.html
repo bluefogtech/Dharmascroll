@@ -661,6 +661,22 @@
             -webkit-overflow-scrolling: touch;
         }
         @media (max-width: 768px) {
+            /* Disable scroll-snap on Gita mobile for smooth scrolling */
+            .gita-verse-area .snap-container {
+                scroll-snap-type: none !important;
+                /* Performance optimizations for smooth scrolling */
+                will-change: scroll-position;
+                transform: translateZ(0); /* Force GPU acceleration */
+            }
+            .gita-verse-area .snap-item {
+                scroll-snap-align: none !important;
+                height: auto !important; /* Let content determine height */
+                min-height: 100vh;
+                min-height: 100dvh;
+                /* Performance optimizations */
+                will-change: transform;
+                transform: translateZ(0); /* Force GPU acceleration */
+            }
             /* Push content below Chapters button so Sanskrit never hides behind it */
             .gita-verse-area .quote-content-area {
                 padding: 2rem 1rem calc(env(safe-area-inset-bottom, 0px) + 9.6rem) 1rem !important; /* 20% more toward bottom (was 12rem) */

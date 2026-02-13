@@ -75,20 +75,29 @@ const App: React.FC = () => {
     init();
   }, [isGitaRoute, isLandingRoute, isRandomRoute]);
 
-  // Infinite Scroll Observer
+  // Infinite Scroll Observer - throttled for performance, especially on mobile Gita
   const handleScroll = useCallback(() => {
     if (!containerRef.current) return;
-    const { scrollTop, clientHeight } = containerRef.current;
-    const newIndex = Math.round(scrollTop / clientHeight);
     
-    if (newIndex !== activeIndex) {
-      setActiveIndex(newIndex);
-    }
+    // Use requestAnimationFrame to throttle scroll handling
+    requestAnimationFrame(() => {
+      if (!containerRef.current) return;
+      const { scrollTop, clientHeight } = containerRef.current;
+      
+      // On mobile Gita, use a more lenient calculation since items may have variable height
+      const newIndex = isGitaRoute && window.innerWidth < 768
+        ? Math.floor(scrollTop / Math.max(clientHeight, window.innerHeight * 0.8))
+        : Math.round(scrollTop / clientHeight);
+      
+      if (newIndex !== activeIndex && newIndex >= 0 && newIndex < quotes.length) {
+        setActiveIndex(newIndex);
+      }
 
-    // Load more when 2 items from the end (main quotes page only)
-    if (!isGitaRoute && newIndex >= quotes.length - 2 && !isLoadingMore.current && quotes.length > 0) {
-      loadMoreQuotes();
-    }
+      // Load more when 2 items from the end (main quotes page only)
+      if (!isGitaRoute && newIndex >= quotes.length - 2 && !isLoadingMore.current && quotes.length > 0) {
+        loadMoreQuotes();
+      }
+    });
   }, [activeIndex, quotes.length, isGitaRoute]);
 
   const loadMoreQuotes = async () => {
