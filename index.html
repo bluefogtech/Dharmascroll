@@ -13,7 +13,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#1a0f0a">
     
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3663/3663335.png">
+    <link rel="apple-touch-icon" href="/dharmascroll-logo.png">
     
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
     <style>
@@ -921,16 +921,68 @@
             box-shadow: 0 0 15px rgba(255, 23, 68, 0.3);
         }
 
-        /* Install Guide - Add to Home Screen Prompt */
-        .install-guide {
+        /* Install Guide - Floating Button at Bottom */
+        .install-guide-btn {
             position: fixed;
             bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
             left: 50%;
             transform: translateX(-50%);
             z-index: 1000;
-            max-width: 90%;
-            width: auto;
+            background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-saffron) 100%);
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            border-radius: 50px;
+            padding: 0.75rem 1.5rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 215, 0, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
             animation: slideUpFadeIn 0.4s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 200px;
+        }
+
+        .install-guide-btn:hover {
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 30px rgba(255, 215, 0, 0.4);
+        }
+
+        .install-guide-btn:active {
+            transform: translateX(-50%) translateY(0);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .install-guide-btn-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .install-guide-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(26, 15, 10, 0.2);
+            border-radius: 8px;
+            padding: 0.25rem;
+            flex-shrink: 0;
+        }
+
+        .install-guide-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 6px;
+        }
+
+        .install-guide-text {
+            color: var(--bg-dark);
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
         }
 
         @keyframes slideUpFadeIn {
@@ -945,16 +997,31 @@
         }
 
         @media (max-width: 768px) {
-            .install-guide {
-                bottom: calc(env(safe-area-inset-bottom, 0px) + 5rem); /* Above footer */
-                max-width: calc(100% - 2rem);
+            .install-guide-btn {
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
+                min-width: 180px;
+                padding: 0.65rem 1.25rem;
+            }
+
+            .install-guide-icon {
+                width: 28px;
+                height: 28px;
+            }
+
+            .install-guide-text {
+                font-size: 0.85rem;
             }
         }
 
         @media (max-width: 480px) {
-            .install-guide {
-                bottom: calc(env(safe-area-inset-bottom, 0px) + 5.5rem);
-                max-width: calc(100% - 1.5rem);
+            .install-guide-btn {
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
+                min-width: 160px;
+                padding: 0.6rem 1rem;
+            }
+
+            .install-guide-text {
+                font-size: 0.8rem;
             }
         }
     </style>
