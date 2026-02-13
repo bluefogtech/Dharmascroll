@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { QuoteCard } from './components/QuoteCard';
 import { ContactForm } from './components/ContactForm';
+import { InstallGuide } from './components/InstallGuide';
 import { Quote } from './types';
 import { getQuotes, getGitaQuotes } from './services/wisdomService';
 import { openDonatePage, getDonateLink, getDonateLinkFromConfig } from './services/donationService';
@@ -490,6 +491,9 @@ const App: React.FC = () => {
             Quotes sourced from Bhagavad Gita translations and public spiritual sources. For spiritual learning only.
           </p>
         </div>
+
+        {/* Install Guide - Add to Home Screen prompt for mobile */}
+        <InstallGuide />
 
         {/* Version tag and contact – at bottom of viewport on desktop, scrolls with content when long; extra bottom padding on mobile so footer stays above browser chrome */}
         <div className="version-tag landing-footer" style={{ 

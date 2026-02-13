@@ -920,6 +920,43 @@
             background: rgba(255, 23, 68, 0.3);
             box-shadow: 0 0 15px rgba(255, 23, 68, 0.3);
         }
+
+        /* Install Guide - Add to Home Screen Prompt */
+        .install-guide {
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            max-width: 90%;
+            width: auto;
+            animation: slideUpFadeIn 0.4s ease-out;
+        }
+
+        @keyframes slideUpFadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .install-guide {
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 5rem); /* Above footer */
+                max-width: calc(100% - 2rem);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .install-guide {
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 5.5rem);
+                max-width: calc(100% - 1.5rem);
+            }
+        }
     </style>
 <script type="importmap">
 {
