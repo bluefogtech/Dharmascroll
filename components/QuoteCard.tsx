@@ -293,7 +293,18 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
           {/* Reference, chapter, and tags at top, before Sanskrit */}
           <div className="quote-reference-top" style={{ flexShrink: 0, marginBottom: '0.75rem', width: '100%', textAlign: 'center' }}>
             <div className="quote-source">
-              {quote.source}
+              {(() => {
+                // On Gita page: remove "Bhagavad Gita •" prefix, keep "Chapter X, Verse Y"
+                const isGitaQuote = quote.source.includes('Bhagavad Gita');
+                if (isGitaQuote) {
+                  // Extract reference part after "•" (keeps "Chapter X, Verse Y")
+                  const parts = quote.source.split('•');
+                  if (parts.length > 1) {
+                    return parts[1].trim();
+                  }
+                }
+                return quote.source;
+              })()}
             </div>
             {quote.context && (
               <div className="quote-context">
