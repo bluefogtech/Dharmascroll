@@ -323,15 +323,20 @@
         }
         @media (max-width: 768px) {
             .action-bar {
-                bottom: calc(env(safe-area-inset-bottom, 0px) + 8.5rem);
-                right: 0.75rem;
-                gap: 1rem;
+                position: fixed !important;
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 3rem) !important; /* Above version-tag */
+                right: 1rem !important;
+                left: auto !important;
+                display: flex !important;
+                flex-direction: row !important; /* Side by side */
+                gap: 0.75rem !important;
+                z-index: 70;
             }
             .quote-content-area {
                 padding: 1rem 1rem !important;
                 padding-top: calc(1rem + 60px) !important;
                 padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8rem) !important; /* 20% more toward bottom */
-                padding-right: calc(1rem + 4rem) !important;
+                padding-right: 1rem !important; /* Remove extra padding for buttons */
                 padding-left: 1rem !important;
             }
             .quote-content-area > div {
@@ -340,6 +345,8 @@
                 max-height: calc(100vh - 224px) !important; /* 20% more content height (was 280px) */
                 overflow-y: auto !important; /* scroll so full translation + dash visible */
                 -webkit-overflow-scrolling: touch;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
             }
             .quote-main {
                 width: 100% !important;
@@ -382,7 +389,7 @@
             }
             .version-tag {
                 bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem) !important;
-                padding-right: calc(1rem + 4rem) !important;
+                padding-right: 1rem !important; /* Removed extra padding for buttons */
                 flex-wrap: nowrap !important;
                 gap: 0.5rem !important;
                 font-size: 0.7rem !important;
@@ -584,17 +591,19 @@
         
         @media (max-width: 480px) {
             .quote-content-area {
-                padding: 1.5rem 1rem;
-                padding-top: calc(1.5rem + 60px);
+                padding: 1.5rem 1rem !important;
+                padding-top: calc(1.5rem + 60px) !important;
                 padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8.8rem) !important; /* 20% more toward bottom (was 11rem) */
-                padding-right: calc(1rem + 4rem) !important;
+                padding-right: 1rem !important; /* Removed extra padding */
+                padding-left: 1rem !important;
             }
             .quote-meta-overlay {
                 bottom: calc(env(safe-area-inset-bottom, 0px) + 9rem) !important;
-                padding-right: calc(1rem + 4rem) !important;
+                padding-right: 1rem !important; /* Removed extra padding */
+                padding-left: 1rem !important;
             }
             .version-tag {
-                padding-right: calc(1rem + 4rem) !important;
+                padding-right: 1rem !important; /* Removed extra padding for buttons */
                 flex-wrap: nowrap !important;
                 gap: 0.5rem !important;
                 font-size: 0.7rem !important;
@@ -652,9 +661,10 @@
         @media (max-width: 768px) {
             /* Push content below Chapters button so Sanskrit never hides behind it */
             .gita-verse-area .quote-content-area {
-                padding: 2rem 1.25rem calc(env(safe-area-inset-bottom, 0px) + 9.6rem) 1.25rem !important; /* 20% more toward bottom (was 12rem) */
+                padding: 2rem 1rem calc(env(safe-area-inset-bottom, 0px) + 9.6rem) 1rem !important; /* 20% more toward bottom (was 12rem) */
                 padding-top: calc(1rem + 100px) !important;
-                padding-right: calc(1.25rem + 4rem) !important;
+                padding-right: 1rem !important; /* Removed extra padding */
+                padding-left: 1rem !important;
                 overflow: visible !important; /* allow inner scroll; prevent clipping translation */
             }
             /* Same no-clip + scroll fix as Random page so translation + yellow dash aren't hidden */
