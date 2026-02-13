@@ -338,13 +338,14 @@
                 padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8rem) !important; /* 20% more toward bottom */
                 padding-right: 1rem !important; /* Remove extra padding for buttons */
                 padding-left: 1rem !important;
+                overflow: visible !important; /* Allow snap-container to handle scrolling */
             }
             .quote-content-area > div {
                 max-width: 100% !important;
                 width: 100% !important;
-                max-height: calc(100vh - 224px) !important; /* 20% more content height (was 280px) */
-                overflow-y: auto !important; /* scroll so full translation + dash visible */
-                -webkit-overflow-scrolling: touch;
+                max-height: none !important; /* Remove height constraint - snap-container handles scroll */
+                overflow-y: visible !important; /* No inner scroll - prevents conflicts with snap-container */
+                -webkit-overflow-scrolling: auto;
                 margin-left: 0 !important;
                 margin-right: 0 !important;
             }
@@ -596,6 +597,7 @@
                 padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8.8rem) !important; /* 20% more toward bottom (was 11rem) */
                 padding-right: 1rem !important; /* Removed extra padding */
                 padding-left: 1rem !important;
+                overflow: visible !important; /* Allow snap-container to handle scrolling */
             }
             .quote-meta-overlay {
                 bottom: calc(env(safe-area-inset-bottom, 0px) + 9rem) !important;
@@ -628,9 +630,9 @@
                 line-height: 1.35 !important;
             }
             .quote-content-area > div {
-                max-height: calc(100vh - 224px) !important; /* 20% more content height */
-                overflow-y: auto !important;
-                -webkit-overflow-scrolling: touch;
+                max-height: none !important; /* Remove height constraint - snap-container handles scroll */
+                overflow-y: visible !important; /* No inner scroll - prevents conflicts */
+                -webkit-overflow-scrolling: auto;
             }
         }
 
@@ -665,13 +667,13 @@
                 padding-top: calc(1rem + 100px) !important;
                 padding-right: 1rem !important; /* Removed extra padding */
                 padding-left: 1rem !important;
-                overflow: visible !important; /* allow inner scroll; prevent clipping translation */
+                overflow: visible !important; /* Allow snap-container to handle scrolling */
             }
-            /* Same no-clip + scroll fix as Random page so translation + yellow dash aren't hidden */
+            /* Remove inner scroll on Gita - let snap-container handle all scrolling for smooth performance */
             .gita-verse-area .quote-content-area > div {
-                max-height: calc(100vh - 256px) !important; /* 20% more content height (was 320px) */
-                overflow-y: auto !important;
-                -webkit-overflow-scrolling: touch;
+                max-height: none !important; /* Remove height constraint - snap-container handles scroll */
+                overflow-y: visible !important; /* No inner scroll - prevents conflicts */
+                -webkit-overflow-scrolling: auto;
             }
             .gita-verse-area .quote-main {
                 font-size: 1.35rem;
