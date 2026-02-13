@@ -321,7 +321,7 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
           </div>
           {quote.sanskrit && (
             <div className="quote-sanskrit-wrap" style={{ flexShrink: 0, marginBottom: '1rem', width: '100%', textAlign: 'center' }}>
-              <div className="quote-sanskrit" style={{ fontSize: '0.95rem', opacity: 0.9 }}>
+              <div className="quote-sanskrit" style={{ opacity: 0.9 }}>
                 {quote.sanskrit}
               </div>
             </div>

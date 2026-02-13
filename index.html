@@ -217,7 +217,7 @@
         }
         @media (max-width: 768px) {
             .quote-sanskrit {
-                font-size: 0.95rem !important;
+                font-size: 1.425rem !important; /* 50% increase from 0.95rem */
                 margin-bottom: 0.75rem !important;
             }
         }
@@ -430,7 +430,7 @@
             backdrop-filter: none !important; /* Remove blur background */
             border: 1px solid rgba(255, 107, 53, 0.5); border-radius: 50%;
             cursor: pointer; transition: all 0.2s; color: var(--accent-saffron);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 15px rgba(255, 107, 53, 0.2);
+            box-shadow: 0 0 15px rgba(255, 107, 53, 0.2) !important; /* Remove dark shadow, keep only glow */
         }
         
         .action-btn:hover {
@@ -444,7 +444,7 @@
             border-color: var(--accent-kumkum);
             background: transparent !important; /* Remove background hue */
             backdrop-filter: none !important;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 20px rgba(255, 23, 68, 0.3);
+            box-shadow: 0 0 20px rgba(255, 23, 68, 0.3) !important; /* Remove dark shadow, keep only glow */
         }
 
         .action-btn.shared {
@@ -452,7 +452,7 @@
             border-color: var(--accent-gold);
             background: transparent !important; /* Remove background hue */
             backdrop-filter: none !important;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 20px rgba(255, 215, 0, 0.3);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3) !important; /* Remove dark shadow, keep only glow */
         }
 
         .lang-picker {
@@ -622,7 +622,7 @@
                 height: 0.85rem !important;
             }
             .quote-sanskrit {
-                font-size: 1rem;
+                font-size: 1.5rem; /* 50% increase from 1rem */
                 margin-bottom: 1rem;
             }
             .quote-main {
@@ -708,7 +708,7 @@
                 background: transparent !important;
             }
             .gita-verse-area .quote-sanskrit {
-                font-size: 1rem;
+                font-size: 1.5rem !important; /* 50% increase from 1rem */
                 margin-bottom: 1rem;
             }
             .gita-verse-area .quote-meta-overlay {
