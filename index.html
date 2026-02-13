@@ -661,18 +661,17 @@
             -webkit-overflow-scrolling: touch;
         }
         @media (max-width: 768px) {
-            /* Disable scroll-snap on Gita mobile for smooth scrolling */
+            /* Keep scroll-snap for quote-by-quote behavior, but optimize for smooth scrolling */
             .gita-verse-area .snap-container {
-                scroll-snap-type: none !important;
+                scroll-snap-type: y mandatory !important; /* Re-enable snap for quote-by-quote */
                 /* Performance optimizations for smooth scrolling */
                 will-change: scroll-position;
                 transform: translateZ(0); /* Force GPU acceleration */
             }
             .gita-verse-area .snap-item {
-                scroll-snap-align: none !important;
-                height: auto !important; /* Let content determine height */
-                min-height: 100vh;
-                min-height: 100dvh;
+                scroll-snap-align: start !important; /* Re-enable snap alignment */
+                height: 100vh !important; /* Fixed height for proper snap behavior */
+                height: 100dvh !important;
                 /* Performance optimizations */
                 will-change: transform;
                 transform: translateZ(0); /* Force GPU acceleration */

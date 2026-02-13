@@ -79,15 +79,11 @@ const App: React.FC = () => {
   const handleScroll = useCallback(() => {
     if (!containerRef.current) return;
     
-    // Use requestAnimationFrame to throttle scroll handling
+    // Use requestAnimationFrame to throttle scroll handling for smooth performance
     requestAnimationFrame(() => {
       if (!containerRef.current) return;
       const { scrollTop, clientHeight } = containerRef.current;
-      
-      // On mobile Gita, use a more lenient calculation since items may have variable height
-      const newIndex = isGitaRoute && window.innerWidth < 768
-        ? Math.floor(scrollTop / Math.max(clientHeight, window.innerHeight * 0.8))
-        : Math.round(scrollTop / clientHeight);
+      const newIndex = Math.round(scrollTop / clientHeight);
       
       if (newIndex !== activeIndex && newIndex >= 0 && newIndex < quotes.length) {
         setActiveIndex(newIndex);
