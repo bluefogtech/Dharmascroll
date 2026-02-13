@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Quote } from '../types';
 
 interface QuoteCardProps {
@@ -17,7 +17,78 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
   const [popShare, setPopShare] = useState(false);
   const [isShared, setIsShared] = useState(false);
   const [showShareSheet, setShowShareSheet] = useState(false);
-  const [dynamicFontSize, setDynamicFontSize] = useState<string>('');
+  
+  // Calculate font size synchronously before render to avoid visible resize
+  const getDisplayText = () => {
+    if (language === 'hi') return quote.hindi;
+    if (language === 'ta') return quote.tamil || quote.text;
+    return quote.text;
+  };
+
+  const calculateFontSize = (): string => {
+    const text = getDisplayText();
+    const textLength = text.length;
+    const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
+    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 375;
+    const isMobile = viewportWidth < 768;
+    
+    // Calculate available space for translation text only (match CSS: scroll area 100vh-224px on mobile, minus reference + sanskrit)
+    const headerSpace = isMobile ? 90 : 100;
+    const sanskritSpace = quote.sanskrit ? (isMobile ? 40 : 50) : 0;
+    const referenceAndGaps = isMobile ? 110 : 120;
+    const bottomReserved = isMobile ? 50 : 70;
+    const scrollAreaReserved = isMobile ? 224 : 0;
+    const reservedForTranslation = isMobile
+      ? scrollAreaReserved + referenceAndGaps + sanskritSpace + bottomReserved
+      : headerSpace + referenceAndGaps + sanskritSpace + bottomReserved;
+    const availableHeight = viewportHeight - reservedForTranslation;
+
+    // Base font size
+    let baseSize = isMobile ? 1.8 : 1.85;
+    if (language === 'ta') baseSize = isMobile ? 1.5 : 1.6;
+    if (language === 'hi') baseSize = isMobile ? 1.8 : 1.85;
+
+    // Aggressive scaling for long text
+    if (textLength > 400) baseSize *= 0.52;
+    else if (textLength > 300) baseSize *= 0.62;
+    else if (textLength > 200) baseSize *= 0.72;
+    else if (textLength > 150) baseSize *= 0.80;
+    else if (textLength > 100) baseSize *= 0.88;
+    else if (textLength > 50) baseSize *= 0.94;
+
+    // Calculate maximum size based on available height
+    const avgCharsPerLine = isMobile ? Math.max(22, Math.min(38, viewportWidth / 11)) : 50;
+    const estimatedLines = Math.ceil(textLength / avgCharsPerLine);
+    const lineHeight = 1.35;
+    const spacingBetweenLines = 0.2;
+
+    const maxTextHeight = availableHeight * 0.62;
+    const maxSizeFromHeight = maxTextHeight / (estimatedLines * lineHeight * (1 + spacingBetweenLines));
+    
+    const maxSizeFromWidth = isMobile 
+      ? (viewportWidth * 0.85) / 8
+      : Infinity;
+    
+    const maxSize = Math.min(maxSizeFromHeight, maxSizeFromWidth);
+    baseSize = Math.min(baseSize, maxSize);
+    
+    if (isMobile) {
+      const widthFactor = Math.min(viewportWidth / 375, 1.05);
+      baseSize *= widthFactor;
+      if (viewportWidth < 400) {
+        baseSize *= 0.92;
+      }
+    }
+    
+    const minSize = isMobile ? 1.0 : 1.25;
+    const maxAllowedSize = isMobile ? 2.5 : 2.6;
+    const finalSize = Math.max(minSize, Math.min(baseSize, maxAllowedSize));
+    
+    return `${finalSize}rem`;
+  };
+
+  const initialFontSize = useMemo(() => calculateFontSize(), [quote.text, quote.hindi, quote.tamil, quote.sanskrit, language]);
+  const [dynamicFontSize, setDynamicFontSize] = useState<string>(initialFontSize);
 
   useEffect(() => {
     if (isActive) {
@@ -32,106 +103,48 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
     }
   }, [isActive, quote.id]);
 
-  // Dynamic font sizing based on text length and available space
+  // Update font size when quote/language changes or card becomes active, and run safety check
   useEffect(() => {
-    const adjustFontSize = () => {
+    // Recalculate font size (in case viewport changed or quote changed)
+    const newSize = calculateFontSize();
+    setDynamicFontSize(newSize);
+
+    // Safety check: refine size based on actual rendered dimensions (runs after render)
+    const runOverflowCheck = (attempt: number) => {
       if (!textRef.current) return;
-      const text = getDisplayText();
-      const textLength = text.length;
-      const viewportHeight = window.innerHeight;
-      const viewportWidth = window.innerWidth;
-      const isMobile = viewportWidth < 768;
-      
-      // Calculate available space for translation text only (match CSS: scroll area 100vh-224px on mobile, minus reference + sanskrit)
-      const headerSpace = isMobile ? 90 : 100;
-      const sanskritSpace = quote.sanskrit ? (isMobile ? 40 : 50) : 0;
-      const referenceAndGaps = isMobile ? 110 : 120; // reference-top + tags + gaps
-      const bottomReserved = isMobile ? 50 : 70;     // dash + padding under quote
-      const scrollAreaReserved = isMobile ? 224 : 0; // CSS max-height: 100vh - 224px on mobile
-      const reservedForTranslation = isMobile
-        ? scrollAreaReserved + referenceAndGaps + sanskritSpace + bottomReserved
-        : headerSpace + referenceAndGaps + sanskritSpace + bottomReserved;
-      const availableHeight = viewportHeight - reservedForTranslation;
-
-      // Base font size - conservative start
-      let baseSize = isMobile ? 1.8 : 1.85;
-      if (language === 'ta') baseSize = isMobile ? 1.5 : 1.6;
-      if (language === 'hi') baseSize = isMobile ? 1.8 : 1.85;
-
-      // More aggressive scaling for long text so it doesn't clip
-      if (textLength > 400) baseSize *= 0.52;
-      else if (textLength > 300) baseSize *= 0.62;
-      else if (textLength > 200) baseSize *= 0.72;
-      else if (textLength > 150) baseSize *= 0.80;
-      else if (textLength > 100) baseSize *= 0.88;
-      else if (textLength > 50) baseSize *= 0.94;
-
-      // Calculate maximum size based on available height for translation block
-      const avgCharsPerLine = isMobile ? Math.max(22, Math.min(38, viewportWidth / 11)) : 50;
-      const estimatedLines = Math.ceil(textLength / avgCharsPerLine);
-      const lineHeight = 1.35; // Match CSS line-height
-      const spacingBetweenLines = 0.2;
-
-      // Use 62% of available height so text reliably fits (buffer for dash + no clip)
-      const maxTextHeight = availableHeight * 0.62;
-      const maxSizeFromHeight = maxTextHeight / (estimatedLines * lineHeight * (1 + spacingBetweenLines));
-      
-      // Also consider width constraints
-      const maxSizeFromWidth = isMobile 
-        ? (viewportWidth * 0.85) / 8 // Rough estimate: ~8 characters per rem
-        : Infinity;
-      
-      // Use the most restrictive constraint
-      const maxSize = Math.min(maxSizeFromHeight, maxSizeFromWidth);
-      
-      // Apply the maximum constraint
-      baseSize = Math.min(baseSize, maxSize);
-      
-      // Scale based on viewport width for better mobile optimization
-      if (isMobile) {
-        const widthFactor = Math.min(viewportWidth / 375, 1.05);
-        baseSize *= widthFactor;
-        
-        if (viewportWidth < 400) {
-          baseSize *= 0.92;
-        }
-      }
-      
-      // Final clamp with safe limits
-      const minSize = isMobile ? 1.0 : 1.25;
-      const maxAllowedSize = isMobile ? 2.5 : 2.6; // Reduced max to prevent overlap
-      const finalSize = Math.max(minSize, Math.min(baseSize, maxAllowedSize));
-      
-      setDynamicFontSize(`${finalSize}rem`);
-
-      // Safety check: use translation block (parent of h1) as container; reduce font if text would clip
-      const runOverflowCheck = (attempt: number) => {
-        if (!textRef.current) return;
-        const translationBlock = textRef.current.parentElement; // .quote-translation-block
-        if (!translationBlock) return;
-        const actualHeight = textRef.current.scrollHeight;
-        const containerHeight = translationBlock.clientHeight;
-        const maxAllowed = containerHeight * 0.88; // leave room for dash and no clip
-        if (actualHeight > maxAllowed && finalSize > minSize) {
-          const reduced = Math.max(minSize, finalSize * (attempt === 0 ? 0.82 : 0.75));
+      const translationBlock = textRef.current.parentElement; // .quote-translation-block
+      if (!translationBlock) return;
+      const actualHeight = textRef.current.scrollHeight;
+      const containerHeight = translationBlock.clientHeight;
+      const maxAllowed = containerHeight * 0.88; // leave room for dash and no clip
+      if (actualHeight > maxAllowed) {
+        const currentSizeStr = textRef.current.style.fontSize || newSize;
+        const currentSize = parseFloat(currentSizeStr);
+        const minSize = window.innerWidth < 768 ? 1.0 : 1.25;
+        if (currentSize > minSize) {
+          const reduced = Math.max(minSize, currentSize * (attempt === 0 ? 0.82 : 0.75));
           setDynamicFontSize(`${reduced}rem`);
           if (attempt === 0) setTimeout(() => runOverflowCheck(1), 150);
         }
-      };
-      setTimeout(() => runOverflowCheck(0), 120);
+      }
     };
     
-    // Use requestAnimationFrame for smoother updates
-    const timeoutId = setTimeout(() => {
-      adjustFontSize();
-    }, 0);
-    
-    window.addEventListener('resize', adjustFontSize);
-    return () => {
-      clearTimeout(timeoutId);
-      window.removeEventListener('resize', adjustFontSize);
-    };
+    // Run safety check after render (only if card is active/visible)
+    if (isActive) {
+      const timeoutId = setTimeout(() => runOverflowCheck(0), 120);
+      return () => clearTimeout(timeoutId);
+    }
   }, [quote.text, quote.hindi, quote.tamil, quote.sanskrit, language, isActive]);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      const newSize = calculateFontSize();
+      setDynamicFontSize(newSize);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [quote.text, quote.hindi, quote.tamil, quote.sanskrit, language]);
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
