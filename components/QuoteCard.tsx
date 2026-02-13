@@ -224,12 +224,6 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
     return themeColors[primaryTheme] || '#451a03';
   };
 
-  const getDisplayText = () => {
-    if (language === 'hi') return quote.hindi;
-    if (language === 'ta') return quote.tamil || quote.text;
-    return quote.text;
-  };
-
   const themeColor = getThemeColor();
 
   return (
