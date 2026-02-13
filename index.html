@@ -679,6 +679,10 @@
                 will-change: transform;
                 transform: translateZ(0); /* Force GPU acceleration */
             }
+            /* Move action buttons up by their diameter (2.75rem) on Gita to avoid footer overlap */
+            .gita-verse-area .action-bar {
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 7.25rem) !important; /* 4.5rem + 2.75rem (button diameter) */
+            }
             /* Push content below Chapters button so Sanskrit never hides behind it */
             .gita-verse-area .quote-content-area {
                 padding: 2rem 1rem calc(env(safe-area-inset-bottom, 0px) + 9.6rem) 1rem !important; /* 20% more toward bottom (was 12rem) */
