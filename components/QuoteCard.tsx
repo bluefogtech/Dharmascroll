@@ -38,18 +38,20 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
     const viewportWidth = windowSize.width;
     const isMobile = viewportWidth < 768;
     
-    // Calculate available space for translation text only (match CSS: scroll area 100vh-224px on mobile, minus reference + sanskrit)
+    // Calculate available space for translation text only - be conservative with reserved space
     const headerSpace = isMobile ? 90 : 100;
-    const sanskritSpace = quote.sanskrit ? (isMobile ? 40 : 50) : 0;
-    const referenceAndGaps = isMobile ? 110 : 120;
-    const bottomReserved = isMobile ? 50 : 70;
+    const sanskritSpace = quote.sanskrit ? (isMobile ? 45 : 55) : 0; // Slightly more conservative
+    const referenceAndGaps = isMobile ? 120 : 130; // More conservative (reference + tags + gaps)
+    const bottomReserved = isMobile ? 60 : 80; // Dash + padding + buffer
     const scrollAreaReserved = isMobile ? 224 : 0;
-    const reservedForTranslation = isMobile
+    // Add extra buffer for safety (10% more reserved)
+    const bufferMultiplier = 1.1;
+    const reservedForTranslation = (isMobile
       ? scrollAreaReserved + referenceAndGaps + sanskritSpace + bottomReserved
-      : headerSpace + referenceAndGaps + sanskritSpace + bottomReserved;
+      : headerSpace + referenceAndGaps + sanskritSpace + bottomReserved) * bufferMultiplier;
     const availableHeight = viewportHeight - reservedForTranslation;
 
-    // Base font size
+    // Base font size - start conservative
     let baseSize = isMobile ? 1.8 : 1.85;
     if (language === 'ta') baseSize = isMobile ? 1.5 : 1.6;
     if (language === 'hi') baseSize = isMobile ? 1.8 : 1.85;
@@ -62,24 +64,30 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
     else if (textLength > 100) baseSize *= 0.88;
     else if (textLength > 50) baseSize *= 0.94;
 
-    // Calculate maximum size based on available height
-    const avgCharsPerLine = isMobile ? Math.max(22, Math.min(38, viewportWidth / 11)) : 50;
+    // Calculate maximum size based on available height - be very conservative
+    // Estimate lines more conservatively (assume fewer chars per line = more lines)
+    const avgCharsPerLine = isMobile 
+      ? Math.max(20, Math.min(35, viewportWidth / 12)) // More conservative: fewer chars per line
+      : 45; // More conservative for desktop too
     const estimatedLines = Math.ceil(textLength / avgCharsPerLine);
+    // Add 1-2 extra lines as buffer for word wrapping edge cases
+    const linesWithBuffer = estimatedLines + (estimatedLines > 3 ? 2 : 1);
     const lineHeight = 1.35;
-    const spacingBetweenLines = 0.2;
+    const spacingBetweenLines = 0.25; // Slightly more spacing
 
-    const maxTextHeight = availableHeight * 0.62;
-    const maxSizeFromHeight = maxTextHeight / (estimatedLines * lineHeight * (1 + spacingBetweenLines));
+    // Use only 52% of available height (was 62%) - very conservative to prevent overflow
+    const maxTextHeight = availableHeight * 0.52;
+    const maxSizeFromHeight = maxTextHeight / (linesWithBuffer * lineHeight * (1 + spacingBetweenLines));
     
     const maxSizeFromWidth = isMobile 
-      ? (viewportWidth * 0.85) / 8
+      ? (viewportWidth * 0.82) / 8 // More conservative width (was 0.85)
       : Infinity;
     
     const maxSize = Math.min(maxSizeFromHeight, maxSizeFromWidth);
     baseSize = Math.min(baseSize, maxSize);
     
     if (isMobile) {
-      const widthFactor = Math.min(viewportWidth / 375, 1.05);
+      const widthFactor = Math.min(viewportWidth / 375, 1.02); // Less aggressive (was 1.05)
       baseSize *= widthFactor;
       if (viewportWidth < 400) {
         baseSize *= 0.92;
@@ -88,7 +96,10 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
     
     const minSize = isMobile ? 1.0 : 1.25;
     const maxAllowedSize = isMobile ? 2.5 : 2.6;
-    const finalSize = Math.max(minSize, Math.min(baseSize, maxAllowedSize));
+    let finalSize = Math.max(minSize, Math.min(baseSize, maxAllowedSize));
+    
+    // Apply final safety buffer (5% reduction) to ensure no overflow
+    finalSize *= 0.95;
     
     return `${finalSize}rem`;
   };
@@ -126,29 +137,31 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
     // Reset refined size when quote/language changes (use fresh calculated size)
     setRefinedFontSize(null);
 
-    // Safety check: refine size based on actual rendered dimensions (runs after render)
-    const runOverflowCheck = (attempt: number) => {
+    // Safety check: refine size only if actual overflow detected (should rarely run with conservative calculation)
+    const runOverflowCheck = () => {
       if (!textRef.current) return;
       const translationBlock = textRef.current.parentElement; // .quote-translation-block
       if (!translationBlock) return;
       const actualHeight = textRef.current.scrollHeight;
       const containerHeight = translationBlock.clientHeight;
-      const maxAllowed = containerHeight * 0.88; // leave room for dash and no clip
+      // Only trigger if text actually exceeds container (more lenient threshold since calculation is conservative)
+      const maxAllowed = containerHeight * 0.92; // More lenient - only trigger on real overflow
       if (actualHeight > maxAllowed) {
         const currentSizeStr = textRef.current.style.fontSize || calculatedFontSize;
         const currentSize = parseFloat(currentSizeStr);
         const minSize = window.innerWidth < 768 ? 1.0 : 1.25;
         if (currentSize > minSize) {
-          const reduced = Math.max(minSize, currentSize * (attempt === 0 ? 0.82 : 0.75));
+          // Reduce by just enough to fit (less aggressive reduction)
+          const overflowRatio = maxAllowed / actualHeight;
+          const reduced = Math.max(minSize, currentSize * overflowRatio * 0.98); // Small buffer
           setRefinedFontSize(`${reduced}rem`);
-          if (attempt === 0) setTimeout(() => runOverflowCheck(1), 150);
         }
       }
     };
     
-    // Run safety check after render (only if card is active/visible)
+    // Run safety check after render (only if card is active/visible) - should rarely trigger now
     if (isActive) {
-      const timeoutId = setTimeout(() => runOverflowCheck(0), 120);
+      const timeoutId = setTimeout(() => runOverflowCheck(), 120);
       return () => clearTimeout(timeoutId);
     }
   }, [quote.text, quote.hindi, quote.tamil, quote.sanskrit, language, isActive, calculatedFontSize]);
