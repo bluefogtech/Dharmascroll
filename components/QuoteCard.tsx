@@ -25,11 +25,17 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
     return quote.text;
   };
 
+  // Track window dimensions so useMemo recalculates on resize
+  const [windowSize, setWindowSize] = useState(() => ({
+    width: typeof window !== 'undefined' ? window.innerWidth : 375,
+    height: typeof window !== 'undefined' ? window.innerHeight : 800,
+  }));
+
   const calculateFontSize = (): string => {
     const text = getDisplayText();
     const textLength = text.length;
-    const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
-    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 375;
+    const viewportHeight = windowSize.height;
+    const viewportWidth = windowSize.width;
     const isMobile = viewportWidth < 768;
     
     // Calculate available space for translation text only (match CSS: scroll area 100vh-224px on mobile, minus reference + sanskrit)
@@ -87,8 +93,20 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
     return `${finalSize}rem`;
   };
 
-  const initialFontSize = useMemo(() => calculateFontSize(), [quote.text, quote.hindi, quote.tamil, quote.sanskrit, language]);
-  const [dynamicFontSize, setDynamicFontSize] = useState<string>(initialFontSize);
+  // Calculate font size synchronously - use this directly, only update state if safety check reduces it
+  const calculatedFontSize = useMemo(() => calculateFontSize(), [
+    quote.text, 
+    quote.hindi, 
+    quote.tamil, 
+    quote.sanskrit, 
+    language,
+    windowSize.width,
+    windowSize.height,
+  ]);
+  const [refinedFontSize, setRefinedFontSize] = useState<string | null>(null);
+  
+  // Use refined size if available, otherwise use calculated size (no visible change on first render)
+  const dynamicFontSize = refinedFontSize || calculatedFontSize;
 
   useEffect(() => {
     if (isActive) {
@@ -103,11 +121,10 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
     }
   }, [isActive, quote.id]);
 
-  // Update font size when quote/language changes or card becomes active, and run safety check
+  // Only run safety check - don't recalculate font size (already correct from useMemo)
   useEffect(() => {
-    // Recalculate font size (in case viewport changed or quote changed)
-    const newSize = calculateFontSize();
-    setDynamicFontSize(newSize);
+    // Reset refined size when quote/language changes (use fresh calculated size)
+    setRefinedFontSize(null);
 
     // Safety check: refine size based on actual rendered dimensions (runs after render)
     const runOverflowCheck = (attempt: number) => {
@@ -118,12 +135,12 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
       const containerHeight = translationBlock.clientHeight;
       const maxAllowed = containerHeight * 0.88; // leave room for dash and no clip
       if (actualHeight > maxAllowed) {
-        const currentSizeStr = textRef.current.style.fontSize || newSize;
+        const currentSizeStr = textRef.current.style.fontSize || calculatedFontSize;
         const currentSize = parseFloat(currentSizeStr);
         const minSize = window.innerWidth < 768 ? 1.0 : 1.25;
         if (currentSize > minSize) {
           const reduced = Math.max(minSize, currentSize * (attempt === 0 ? 0.82 : 0.75));
-          setDynamicFontSize(`${reduced}rem`);
+          setRefinedFontSize(`${reduced}rem`);
           if (attempt === 0) setTimeout(() => runOverflowCheck(1), 150);
         }
       }
@@ -134,17 +151,20 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
       const timeoutId = setTimeout(() => runOverflowCheck(0), 120);
       return () => clearTimeout(timeoutId);
     }
-  }, [quote.text, quote.hindi, quote.tamil, quote.sanskrit, language, isActive]);
+  }, [quote.text, quote.hindi, quote.tamil, quote.sanskrit, language, isActive, calculatedFontSize]);
 
-  // Handle window resize
+  // Handle window resize - update windowSize to trigger useMemo recalculation
   useEffect(() => {
     const handleResize = () => {
-      const newSize = calculateFontSize();
-      setDynamicFontSize(newSize);
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+      setRefinedFontSize(null); // Reset refined size on resize
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [quote.text, quote.hindi, quote.tamil, quote.sanskrit, language]);
+  }, []);
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
