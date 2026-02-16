@@ -236,11 +236,13 @@ const App: React.FC = () => {
         }}
       >
         {/* Header: brand – scrolls with content on landing so hero text doesn't hide under it */}
-        <div className="header-logo" style={{ position: 'relative', flexShrink: 0, pointerEvents: 'auto', padding: '1rem', marginBottom: '1rem' }}>
+        <div className="header-logo" style={{ position: 'relative', flexShrink: 0, pointerEvents: 'auto', padding: '1rem', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>ॐ</span>
             <span style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '3px' }}>DHARMA</span>
           </div>
+          {/* Install Guide - Add to Home Screen (mobile only) */}
+          <InstallGuide />
         </div>
 
         {/* Main hero + cards */}
@@ -491,9 +493,6 @@ const App: React.FC = () => {
             Quotes sourced from Bhagavad Gita translations and public spiritual sources. For spiritual learning only.
           </p>
         </div>
-
-        {/* Install Guide - Add to Home Screen prompt for mobile */}
-        <InstallGuide />
 
         {/* Version tag and contact – at bottom of viewport on desktop, scrolls with content when long; extra bottom padding on mobile so footer stays above browser chrome */}
         <div className="version-tag landing-footer" style={{ 
@@ -799,6 +798,8 @@ const App: React.FC = () => {
             <span style={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: '3px' }}>DHARMA</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '0.4rem' : '0.75rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            {/* Install Guide - Add to Home Screen (mobile only) */}
+            <InstallGuide />
           <a
             href="/"
             onClick={(e) => { e.preventDefault(); window.location.href = '/'; }}

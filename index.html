@@ -970,135 +970,58 @@
             box-shadow: 0 0 15px rgba(255, 23, 68, 0.3);
         }
 
-        /* Install Guide - Floating Button at Bottom */
-        .install-guide-btn {
+        /* Install Guide - Text Link (behaves like header-logo) */
+        .install-guide-text-link {
+            color: var(--text-gold-brilliant);
+            font-weight: 800;
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 2px 10px rgba(255, 193, 7, 0.5);
+            transition: opacity 0.2s;
+            pointer-events: auto;
+            z-index: 100;
+        }
+
+        .install-guide-text-link:hover {
+            opacity: 0.8;
+        }
+
+        /* On other pages: fixed position (like header-logo) */
+        .install-guide-text-link {
             position: fixed;
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-saffron) 100%);
-            border: 1px solid rgba(255, 215, 0, 0.5);
-            border-radius: 50px;
-            padding: 0.75rem 1.5rem;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 215, 0, 0.3);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            animation: slideUpFadeIn 0.4s ease-out;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 200px;
+            top: calc(env(safe-area-inset-top, 0px) + 1rem);
+            right: 1rem;
+            z-index: 100;
         }
 
-        .install-guide-btn:hover {
-            transform: translateX(-50%) translateY(-2px);
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 30px rgba(255, 215, 0, 0.4);
-        }
-
-        .install-guide-btn:active {
-            transform: translateX(-50%) translateY(0);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 215, 0, 0.3);
-        }
-
-        .install-guide-btn-content {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .install-guide-icon {
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(26, 15, 10, 0.2);
-            border-radius: 8px;
-            padding: 0.25rem;
-            flex-shrink: 0;
-        }
-
-        .install-guide-icon img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            border-radius: 6px;
-        }
-
-        .install-guide-text {
-            color: var(--bg-dark);
-            font-weight: 700;
-            font-size: 0.9rem;
-            letter-spacing: 0.02em;
-            white-space: nowrap;
-        }
-
-        @keyframes slideUpFadeIn {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
+        /* On landing page: relative position (scrolls with content) */
+        .landing-container .install-guide-text-link {
+            position: relative !important;
+            top: auto !important;
+            right: auto !important;
+            text-align: right;
         }
 
         @media (max-width: 768px) {
-            .install-guide-btn {
-                top: calc(env(safe-area-inset-top, 0px) + 0.5rem);
+            .install-guide-text-link {
+                font-size: 0.6rem;
+                letter-spacing: 1.5px;
+                top: calc(env(safe-area-inset-top, 0px) + 0.75rem);
                 right: 0.75rem;
-                left: auto;
-                bottom: auto;
-                transform: none;
-                min-width: auto;
-                padding: 0.4rem 0.6rem;
-                border-radius: 20px;
             }
 
-            .install-guide-btn:hover {
-                transform: translateY(-2px);
-            }
-
-            .install-guide-btn:active {
-                transform: translateY(0);
-            }
-
-            .install-guide-icon {
-                width: 20px;
-                height: 20px;
-            }
-
-            .install-guide-text {
-                font-size: 0.7rem;
-            }
-
-            .install-guide-btn-content {
-                gap: 0.4rem;
+            .landing-container .install-guide-text-link {
+                padding: 0.75rem 1rem;
+                margin-bottom: 0.25rem;
             }
         }
 
         @media (max-width: 480px) {
-            .install-guide-btn {
-                top: calc(env(safe-area-inset-top, 0px) + 0.5rem);
+            .install-guide-text-link {
+                font-size: 0.55rem;
+                letter-spacing: 1px;
                 right: 0.5rem;
-                left: auto;
-                bottom: auto;
-                padding: 0.35rem 0.5rem;
-            }
-
-            .install-guide-icon {
-                width: 18px;
-                height: 18px;
-            }
-
-            .install-guide-text {
-                font-size: 0.65rem;
-            }
-
-            .install-guide-btn-content {
-                gap: 0.35rem;
             }
         }
 

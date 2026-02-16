@@ -79,23 +79,17 @@ export const InstallGuide: React.FC = () => {
 
   return (
     <>
-      <button 
-        className="install-guide-btn"
+      <div 
+        className="install-guide-text-link"
         onClick={handleInstall}
+        style={{
+          cursor: 'pointer',
+          userSelect: 'none',
+        }}
         aria-label="Add DharmaScroll to Home Screen"
       >
-        <div className="install-guide-btn-content">
-          <div className="install-guide-icon">
-            <img 
-              src="/dharmascroll-logo.png" 
-              alt="DharmaScroll Logo" 
-            />
-          </div>
-          <span className="install-guide-text">
-            Add to Home Screen
-          </span>
-        </div>
-      </button>
+        Add to Home Screen
+      </div>
 
       {/* iOS Instructions Modal */}
       {showInstructions && platform === 'ios' && (
