@@ -15,19 +15,20 @@
     <meta name="application-name" content="DharmaScroll">
     
     <!-- iOS Icons - multiple sizes for better compatibility -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/dharmascroll-logo.png">
-    <link rel="apple-touch-icon" sizes="192x192" href="/dharmascroll-logo.png">
-    <link rel="apple-touch-icon" sizes="512x512" href="/dharmascroll-logo.png">
-    <link rel="apple-touch-icon" href="/dharmascroll-logo.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/dharmascroll-icon.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="/dharmascroll-icon.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="/dharmascroll-icon.png">
+    <link rel="apple-touch-icon" href="/dharmascroll-icon.png">
     
     <!-- Open Graph / Facebook / Social Sharing Meta Tags -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="DharmaScroll - Daily Wisdom from Indian Scriptures">
     <meta property="og:description" content="A serene, vertical scrolling experience for exploring profound wisdom from Indian scriptures. Features quotes from Bhagavad Gita and other spiritual texts.">
     <meta property="og:image" id="og-image" content="">
-    <meta property="og:image:width" content="512">
-    <meta property="og:image:height" content="512">
+    <meta property="og:image:width" content="1536">
+    <meta property="og:image:height" content="1024">
     <meta property="og:image:type" content="image/png">
+    <meta property="og:image:alt" content="DharmaScroll - Daily Wisdom from Indian Scriptures">
     <meta property="og:url" id="og-url" content="">
     <meta property="og:site_name" content="DharmaScroll">
     
@@ -49,9 +50,9 @@
                 const ogUrl = document.getElementById('og-url');
                 const twitterImage = document.getElementById('twitter-image');
                 
-                if (ogImage) ogImage.setAttribute('content', baseUrl + '/dharmascroll-logo.png');
+                if (ogImage) ogImage.setAttribute('content', baseUrl + '/dharmascroll-icon.png');
                 if (ogUrl) ogUrl.setAttribute('content', baseUrl + window.location.pathname);
-                if (twitterImage) twitterImage.setAttribute('content', baseUrl + '/dharmascroll-logo.png');
+                if (twitterImage) twitterImage.setAttribute('content', baseUrl + '/dharmascroll-icon.png');
             }
         })();
     </script>

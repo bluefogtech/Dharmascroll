@@ -104,7 +104,7 @@ export const InstallGuide: React.FC = () => {
             <div className="install-instructions-header">
               <div className="install-instructions-icon">
                 <img 
-                  src="/dharmascroll-logo.png" 
+                  src="/dharmascroll-icon.png" 
                   alt="DharmaScroll Logo" 
                 />
               </div>
