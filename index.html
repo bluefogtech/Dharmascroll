@@ -515,9 +515,17 @@
             position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 0.3rem);
             left: 1rem; font-family: monospace; font-size: 8px;
             color: var(--text-gold-brilliant);
-            z-index: 50;
+            z-index: 100;
             font-weight: 500;
             text-shadow: 0 0 8px rgba(255, 193, 7, 0.4);
+            pointer-events: auto;
+        }
+
+        .version-tag a,
+        .version-tag button {
+            pointer-events: auto;
+            cursor: pointer;
+            touch-action: manipulation;
         }
 
         .overlay {
@@ -1022,6 +1030,203 @@
 
             .install-guide-text {
                 font-size: 0.8rem;
+            }
+        }
+
+        /* iOS Instructions Modal */
+        .install-instructions-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .install-instructions-content {
+            background: linear-gradient(135deg, rgba(26, 15, 10, 0.98) 0%, rgba(45, 26, 20, 0.98) 100%);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 24px;
+            padding: 2rem;
+            max-width: 420px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.2);
+            animation: slideUpModal 0.4s ease-out;
+        }
+
+        @keyframes slideUpModal {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .install-instructions-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .install-instructions-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            background: rgba(255, 215, 0, 0.2);
+            border-radius: 16px;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .install-instructions-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+
+        .install-instructions-header h2 {
+            color: var(--accent-gold);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+        }
+
+        .install-instructions-close {
+            position: absolute;
+            top: -0.5rem;
+            right: -0.5rem;
+            background: rgba(255, 215, 0, 0.2);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 50%;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-gold);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .install-instructions-close:hover {
+            background: rgba(255, 215, 0, 0.3);
+            transform: scale(1.1);
+        }
+
+        .install-instructions-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .install-step {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .install-step-number {
+            background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-saffron) 100%);
+            color: var(--bg-dark);
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+        }
+
+        .install-step-content {
+            flex: 1;
+        }
+
+        .install-step-content p {
+            color: var(--text-cream);
+            font-size: 1rem;
+            line-height: 1.6;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .install-step-content strong {
+            color: var(--accent-gold);
+            font-weight: 700;
+        }
+
+        .install-step-icon {
+            font-size: 1.5rem;
+            text-align: center;
+            margin-top: 0.25rem;
+        }
+
+        .install-instructions-footer {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .install-instructions-footer p {
+            color: var(--text-cream);
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 480px) {
+            .install-instructions-content {
+                padding: 1.5rem;
+                max-width: 100%;
+            }
+
+            .install-instructions-header h2 {
+                font-size: 1.25rem;
+            }
+
+            .install-instructions-icon {
+                width: 56px;
+                height: 56px;
+            }
+
+            .install-step-content p {
+                font-size: 0.9rem;
+            }
+
+            .install-step-number {
+                width: 1.75rem;
+                height: 1.75rem;
+                font-size: 0.9rem;
             }
         }
     </style>

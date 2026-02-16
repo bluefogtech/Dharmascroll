@@ -508,19 +508,34 @@ const App: React.FC = () => {
           paddingBottom: 'max(2rem, calc(env(safe-area-inset-bottom, 0px) + 80px))',
         }}>
           {/* First line: Developed by Blue Fog */}
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '0.5rem',
-            flexWrap: 'nowrap',
-          }}>
+          <a
+            href="https://www.bluefog.co.uk"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.5rem',
+              flexWrap: 'nowrap',
+              textDecoration: 'none',
+              color: 'inherit',
+              cursor: 'pointer',
+              transition: 'opacity 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.opacity = '0.8';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.opacity = '1';
+            }}
+          >
             <span>{BUILT_BY}</span>
             <img 
               src="/bluefog-logo.png" 
               alt="Blue Fog Technology" 
               style={{ height: '1rem', width: 'auto', objectFit: 'contain' }}
             />
-          </div>
+          </a>
           {/* Second line: Share and Get in Touch */}
           <div style={{ 
             display: 'flex', 
@@ -1137,13 +1152,36 @@ const App: React.FC = () => {
         justifyContent: 'flex-start',
         padding: '1rem',
         marginTop: '0',
+        zIndex: 100,
       }}>
-        <span>{BUILT_BY}</span>
-        <img 
-          src="/bluefog-logo.png" 
-          alt="Blue Fog Technology" 
-          style={{ height: '1rem', width: 'auto', objectFit: 'contain' }}
-        />
+        <a
+          href="https://www.bluefog.co.uk"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.5rem',
+            flexWrap: 'nowrap',
+            textDecoration: 'none',
+            color: 'inherit',
+            cursor: 'pointer',
+            transition: 'opacity 0.2s',
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.opacity = '0.8';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.opacity = '1';
+          }}
+        >
+          <span>{BUILT_BY}</span>
+          <img 
+            src="/bluefog-logo.png" 
+            alt="Blue Fog Technology" 
+            style={{ height: '1rem', width: 'auto', objectFit: 'contain' }}
+          />
+        </a>
         <button
           onClick={() => setContactFormOpen(true)}
           style={{
@@ -1160,6 +1198,10 @@ const App: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             gap: '0.25rem',
+            zIndex: 101,
+            position: 'relative',
+            pointerEvents: 'auto',
+            touchAction: 'manipulation',
           }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLElement).style.opacity = '0.8';

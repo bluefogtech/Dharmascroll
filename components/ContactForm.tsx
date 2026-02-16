@@ -106,9 +106,10 @@ export const ContactForm: React.FC<ContactFormProps> = ({ isOpen, onClose, recip
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 1000,
+        zIndex: 2000,
         padding: '1rem',
         backdropFilter: 'blur(4px)',
+        pointerEvents: 'auto',
       }}
       onClick={handleClose}
     >
