@@ -1,7 +1,7 @@
 
 {
   "name": "DharmaScroll",
-  "short_name": "Dharma",
+  "short_name": "DharmaScroll",
   "description": "Daily wisdom from Indian scriptures",
   "start_url": "/",
   "scope": "/",

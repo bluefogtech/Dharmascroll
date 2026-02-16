@@ -128,38 +128,38 @@ export const InstallGuide: React.FC = () => {
               <div className="install-step">
                 <div className="install-step-number">1</div>
                 <div className="install-step-content">
-                  <p>Make sure you're using <strong>Safari</strong> browser (not Chrome)</p>
-                  <div className="install-step-icon">🌐</div>
+                  <p>Tap the <strong>Share</strong> button in the address bar (top right in Chrome, bottom in Safari)</p>
+                  <div className="install-step-icon">📤</div>
                 </div>
               </div>
               
               <div className="install-step">
                 <div className="install-step-number">2</div>
                 <div className="install-step-content">
-                  <p>Tap the <strong>Share</strong> button at the bottom of your screen</p>
-                  <div className="install-step-icon">📤</div>
+                  <p>Look for <strong>"Add to Home Screen"</strong> in the share menu</p>
+                  <div className="install-step-icon">🔍</div>
                 </div>
               </div>
               
               <div className="install-step">
                 <div className="install-step-number">3</div>
                 <div className="install-step-content">
-                  <p><strong>Scroll down</strong> in the share menu and tap <strong>"Add to Home Screen"</strong></p>
-                  <div className="install-step-icon">➕</div>
+                  <p>If you don't see it, <strong>scroll down</strong> in the share menu - it may be below other options</p>
+                  <div className="install-step-icon">⬇️</div>
                 </div>
               </div>
               
               <div className="install-step">
                 <div className="install-step-number">4</div>
                 <div className="install-step-content">
-                  <p>Tap <strong>"Add"</strong> in the top right corner</p>
+                  <p>Tap <strong>"Add to Home Screen"</strong> and then tap <strong>"Add"</strong> to confirm</p>
                   <div className="install-step-icon">✓</div>
                 </div>
               </div>
             </div>
 
             <div className="install-instructions-footer">
-              <p><strong>Note:</strong> If you don't see "Add to Home Screen", make sure you're using Safari and scroll down in the share menu. The option may be hidden below other options.</p>
+              <p><strong>Tip:</strong> Works in both Safari and Chrome. The share button location varies by browser - look for it in the address bar area.</p>
             </div>
           </div>
         </div>
