@@ -3,7 +3,8 @@
   "name": "DharmaScroll",
   "short_name": "Dharma",
   "description": "Daily wisdom from Indian scriptures",
-  "start_url": "./index.html",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#1a0b04",
@@ -19,7 +20,14 @@
     {
       "src": "/dharmascroll-logo.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/dharmascroll-logo.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }

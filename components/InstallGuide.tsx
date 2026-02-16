@@ -128,21 +128,29 @@ export const InstallGuide: React.FC = () => {
               <div className="install-step">
                 <div className="install-step-number">1</div>
                 <div className="install-step-content">
-                  <p>Tap the <strong>Share</strong> button at the bottom of your screen</p>
-                  <div className="install-step-icon">📤</div>
+                  <p>Make sure you're using <strong>Safari</strong> browser (not Chrome)</p>
+                  <div className="install-step-icon">🌐</div>
                 </div>
               </div>
               
               <div className="install-step">
                 <div className="install-step-number">2</div>
                 <div className="install-step-content">
-                  <p>Scroll down and tap <strong>"Add to Home Screen"</strong></p>
-                  <div className="install-step-icon">➕</div>
+                  <p>Tap the <strong>Share</strong> button at the bottom of your screen</p>
+                  <div className="install-step-icon">📤</div>
                 </div>
               </div>
               
               <div className="install-step">
                 <div className="install-step-number">3</div>
+                <div className="install-step-content">
+                  <p><strong>Scroll down</strong> in the share menu and tap <strong>"Add to Home Screen"</strong></p>
+                  <div className="install-step-icon">➕</div>
+                </div>
+              </div>
+              
+              <div className="install-step">
+                <div className="install-step-number">4</div>
                 <div className="install-step-content">
                   <p>Tap <strong>"Add"</strong> in the top right corner</p>
                   <div className="install-step-icon">✓</div>
@@ -151,7 +159,7 @@ export const InstallGuide: React.FC = () => {
             </div>
 
             <div className="install-instructions-footer">
-              <p>DharmaScroll will appear on your home screen like a native app!</p>
+              <p><strong>Note:</strong> If you don't see "Add to Home Screen", make sure you're using Safari and scroll down in the share menu. The option may be hidden below other options.</p>
             </div>
           </div>
         </div>
