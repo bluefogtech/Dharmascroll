@@ -1004,6 +1004,7 @@ const App: React.FC = () => {
                 language={language}
                 onViewStart={() => {}} 
                 onViewEnd={handleViewEnd}
+                isGitaPage={isGitaRoute}
               />
             ))}
           </div>

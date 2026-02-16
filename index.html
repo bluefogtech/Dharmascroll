@@ -20,6 +20,42 @@
     <link rel="apple-touch-icon" sizes="512x512" href="/dharmascroll-logo.png">
     <link rel="apple-touch-icon" href="/dharmascroll-logo.png">
     
+    <!-- Open Graph / Facebook / Social Sharing Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="DharmaScroll - Daily Wisdom from Indian Scriptures">
+    <meta property="og:description" content="A serene, vertical scrolling experience for exploring profound wisdom from Indian scriptures. Features quotes from Bhagavad Gita and other spiritual texts.">
+    <meta property="og:image" id="og-image" content="">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:url" id="og-url" content="">
+    <meta property="og:site_name" content="DharmaScroll">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="DharmaScroll - Daily Wisdom from Indian Scriptures">
+    <meta name="twitter:description" content="A serene, vertical scrolling experience for exploring profound wisdom from Indian scriptures. Features quotes from Bhagavad Gita and other spiritual texts.">
+    <meta name="twitter:image" id="twitter-image" content="">
+    
+    <!-- Standard Meta Tags for Sharing -->
+    <meta name="description" content="A serene, vertical scrolling experience for exploring profound wisdom from Indian scriptures. Features quotes from Bhagavad Gita and other spiritual texts.">
+    
+    <!-- Set absolute URLs for sharing meta tags -->
+    <script>
+        (function() {
+            if (typeof window !== 'undefined') {
+                const baseUrl = window.location.origin;
+                const ogImage = document.getElementById('og-image');
+                const ogUrl = document.getElementById('og-url');
+                const twitterImage = document.getElementById('twitter-image');
+                
+                if (ogImage) ogImage.setAttribute('content', baseUrl + '/dharmascroll-logo.png');
+                if (ogUrl) ogUrl.setAttribute('content', baseUrl + window.location.pathname);
+                if (twitterImage) twitterImage.setAttribute('content', baseUrl + '/dharmascroll-logo.png');
+            }
+        })();
+    </script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -1011,30 +1047,55 @@
 
         @media (max-width: 768px) {
             .install-guide-btn {
-                bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
-                min-width: 180px;
-                padding: 0.65rem 1.25rem;
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
+                left: 0.75rem;
+                right: auto;
+                transform: none;
+                min-width: auto;
+                padding: 0.4rem 0.6rem;
+                border-radius: 20px;
+            }
+
+            .install-guide-btn:hover {
+                transform: translateY(-2px);
+            }
+
+            .install-guide-btn:active {
+                transform: translateY(0);
             }
 
             .install-guide-icon {
-                width: 28px;
-                height: 28px;
+                width: 20px;
+                height: 20px;
             }
 
             .install-guide-text {
-                font-size: 0.85rem;
+                font-size: 0.7rem;
+            }
+
+            .install-guide-btn-content {
+                gap: 0.4rem;
             }
         }
 
         @media (max-width: 480px) {
             .install-guide-btn {
-                bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
-                min-width: 160px;
-                padding: 0.6rem 1rem;
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
+                left: 0.5rem;
+                padding: 0.35rem 0.5rem;
+            }
+
+            .install-guide-icon {
+                width: 18px;
+                height: 18px;
             }
 
             .install-guide-text {
-                font-size: 0.8rem;
+                font-size: 0.65rem;
+            }
+
+            .install-guide-btn-content {
+                gap: 0.35rem;
             }
         }
 
@@ -1067,11 +1128,11 @@
         .install-instructions-content {
             background: linear-gradient(135deg, rgba(26, 15, 10, 0.98) 0%, rgba(45, 26, 20, 0.98) 100%);
             border: 1px solid rgba(255, 215, 0, 0.3);
-            border-radius: 24px;
-            padding: 2rem;
+            border-radius: 20px;
+            padding: 1.25rem;
             max-width: 420px;
             width: 100%;
-            max-height: 90vh;
+            max-height: 85vh;
             overflow-y: auto;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.2);
             animation: slideUpModal 0.4s ease-out;
@@ -1090,17 +1151,17 @@
 
         .install-instructions-header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
             position: relative;
         }
 
         .install-instructions-icon {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 1rem;
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 0.5rem;
             background: rgba(255, 215, 0, 0.2);
-            border-radius: 16px;
-            padding: 0.5rem;
+            border-radius: 12px;
+            padding: 0.35rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1111,12 +1172,12 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
-            border-radius: 12px;
+            border-radius: 10px;
         }
 
         .install-instructions-header h2 {
             color: var(--accent-gold);
-            font-size: 1.5rem;
+            font-size: 1.15rem;
             font-weight: 700;
             margin: 0;
             text-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
@@ -1124,20 +1185,21 @@
 
         .install-instructions-close {
             position: absolute;
-            top: -0.5rem;
-            right: -0.5rem;
+            top: 0;
+            right: 0;
             background: rgba(255, 215, 0, 0.2);
             border: 1px solid rgba(255, 215, 0, 0.3);
             border-radius: 50%;
-            width: 2.5rem;
-            height: 2.5rem;
+            width: 2rem;
+            height: 2rem;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--accent-gold);
-            font-size: 1.2rem;
+            font-size: 1rem;
             cursor: pointer;
             transition: all 0.2s;
+            z-index: 10;
         }
 
         .install-instructions-close:hover {
@@ -1148,29 +1210,29 @@
         .install-instructions-steps {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
         }
 
         .install-step {
             display: flex;
-            gap: 1rem;
+            gap: 0.75rem;
             align-items: flex-start;
         }
 
         .install-step-number {
             background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-saffron) 100%);
             color: var(--bg-dark);
-            width: 2rem;
-            height: 2rem;
+            width: 1.5rem;
+            height: 1.5rem;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 0.85rem;
             flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+            box-shadow: 0 3px 8px rgba(255, 215, 0, 0.4);
         }
 
         .install-step-content {
@@ -1179,9 +1241,9 @@
 
         .install-step-content p {
             color: var(--text-cream);
-            font-size: 1rem;
-            line-height: 1.6;
-            margin: 0 0 0.5rem 0;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            margin: 0 0 0.25rem 0;
         }
 
         .install-step-content strong {
@@ -1190,48 +1252,114 @@
         }
 
         .install-step-icon {
-            font-size: 1.5rem;
+            font-size: 1.1rem;
             text-align: center;
-            margin-top: 0.25rem;
+            margin-top: 0.15rem;
         }
 
         .install-instructions-footer {
             text-align: center;
-            padding-top: 1.5rem;
+            padding-top: 0.75rem;
             border-top: 1px solid rgba(255, 215, 0, 0.2);
         }
 
         .install-instructions-footer p {
             color: var(--text-cream);
-            font-size: 0.9rem;
+            font-size: 0.75rem;
             opacity: 0.9;
             margin: 0;
-            line-height: 1.5;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .install-instructions-modal {
+                padding: 0.5rem;
+                align-items: flex-start;
+                padding-top: calc(env(safe-area-inset-top, 0px) + 1rem);
+            }
+
+            .install-instructions-content {
+                padding: 1rem;
+                max-width: 100%;
+                max-height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 2rem);
+                border-radius: 16px;
+            }
+
+            .install-instructions-header {
+                margin-bottom: 0.75rem;
+            }
+
+            .install-instructions-header h2 {
+                font-size: 1rem;
+            }
+
+            .install-instructions-icon {
+                width: 40px;
+                height: 40px;
+                margin-bottom: 0.4rem;
+            }
+
+            .install-instructions-close {
+                width: 1.75rem;
+                height: 1.75rem;
+                font-size: 0.9rem;
+            }
+
+            .install-instructions-steps {
+                gap: 0.6rem;
+                margin-bottom: 0.6rem;
+            }
+
+            .install-step {
+                gap: 0.6rem;
+            }
+
+            .install-step-number {
+                width: 1.35rem;
+                height: 1.35rem;
+                font-size: 0.75rem;
+            }
+
+            .install-step-content p {
+                font-size: 0.8rem;
+                line-height: 1.35;
+            }
+
+            .install-step-icon {
+                font-size: 1rem;
+            }
+
+            .install-instructions-footer {
+                padding-top: 0.6rem;
+            }
+
+            .install-instructions-footer p {
+                font-size: 0.7rem;
+            }
         }
 
         @media (max-width: 480px) {
             .install-instructions-content {
-                padding: 1.5rem;
-                max-width: 100%;
+                padding: 0.85rem;
             }
 
             .install-instructions-header h2 {
-                font-size: 1.25rem;
+                font-size: 0.95rem;
             }
 
             .install-instructions-icon {
-                width: 56px;
-                height: 56px;
+                width: 36px;
+                height: 36px;
             }
 
             .install-step-content p {
-                font-size: 0.9rem;
+                font-size: 0.75rem;
             }
 
             .install-step-number {
-                width: 1.75rem;
-                height: 1.75rem;
-                font-size: 0.9rem;
+                width: 1.25rem;
+                height: 1.25rem;
+                font-size: 0.7rem;
             }
         }
     </style>

@@ -7,9 +7,10 @@ interface QuoteCardProps {
   language: 'en' | 'hi' | 'ta';
   onViewStart: (id: string) => void;
   onViewEnd: (id: string) => void;
+  isGitaPage?: boolean; // Optional prop to indicate if we're on the Gita page
 }
 
-export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language, onViewStart, onViewEnd }) => {
+export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language, onViewStart, onViewEnd, isGitaPage = false }) => {
   const startTimeRef = useRef<number | null>(null);
   const textRef = useRef<HTMLHeadingElement>(null);
   const [isLiked, setIsLiked] = useState(false);
@@ -294,9 +295,10 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
           <div className="quote-reference-top" style={{ flexShrink: 0, marginBottom: '0.75rem', width: '100%', textAlign: 'center' }}>
             <div className="quote-source">
               {(() => {
-                // On Gita page: remove "Bhagavad Gita •" prefix, keep "Chapter X, Verse Y"
+                // Only on Gita page: remove "Bhagavad Gita •" prefix, keep "Chapter X, Verse Y"
+                // On Random page and other pages, show full source including "Bhagavad Gita"
                 const isGitaQuote = quote.source.includes('Bhagavad Gita');
-                if (isGitaQuote) {
+                if (isGitaPage && isGitaQuote) {
                   // Extract reference part after "•" (keeps "Chapter X, Verse Y")
                   const parts = quote.source.split('•');
                   if (parts.length > 1) {
