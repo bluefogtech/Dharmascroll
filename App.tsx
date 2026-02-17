@@ -506,36 +506,7 @@ const App: React.FC = () => {
           padding: '1rem',
           paddingBottom: 'max(2rem, calc(env(safe-area-inset-bottom, 0px) + 80px))',
         }}>
-          {/* First line: Developed by Blue Fog */}
-          <a
-            href="https://www.bluefog.co.uk"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '0.5rem',
-              flexWrap: 'nowrap',
-              textDecoration: 'none',
-              color: 'inherit',
-              cursor: 'pointer',
-              transition: 'opacity 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.opacity = '0.8';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.opacity = '1';
-            }}
-          >
-            <span>{BUILT_BY}</span>
-            <img 
-              src="/bluefog-logo.png" 
-              alt="Blue Fog Technology" 
-              style={{ height: '1rem', width: 'auto', objectFit: 'contain' }}
-            />
-          </a>
-          {/* Second line: Share and Get in Touch */}
+          {/* First line: Share, Get in Touch, Join the Mission */}
           <div style={{ 
             display: 'flex', 
             alignItems: 'center', 
@@ -630,6 +601,36 @@ const App: React.FC = () => {
               Join the Mission
             </button>
           </div>
+          {/* Second line: Developed by Blue Fog – at bottom, smaller font */}
+          <a
+            href="https://www.bluefog.co.uk"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.5rem',
+              flexWrap: 'nowrap',
+              textDecoration: 'none',
+              color: 'inherit',
+              cursor: 'pointer',
+              transition: 'opacity 0.2s',
+              fontSize: '0.7rem',
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.opacity = '0.8';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.opacity = '1';
+            }}
+          >
+            <span>{BUILT_BY}</span>
+            <img 
+              src="/bluefog-logo.png" 
+              alt="Blue Fog Technology" 
+              style={{ height: '0.85rem', width: 'auto', objectFit: 'contain' }}
+            />
+          </a>
         </div>
         {/* Spacer so on mobile the footer stays visible when browser chrome (toolbar) reappears after scroll ends */}
         <div style={{ flexShrink: 0, minHeight: '120px' }} aria-hidden="true" />
@@ -1186,36 +1187,7 @@ const App: React.FC = () => {
         marginTop: '0',
         zIndex: 100,
       }}>
-        {/* Row 1 on mobile: Blue Fog only; on desktop: same line as buttons */}
-        <a
-          href="https://www.bluefog.co.uk"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '0.5rem',
-            flexWrap: 'nowrap',
-            textDecoration: 'none',
-            color: 'inherit',
-            cursor: 'pointer',
-            transition: 'opacity 0.2s',
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.opacity = '0.8';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.opacity = '1';
-          }}
-        >
-          <span>{BUILT_BY}</span>
-          <img 
-            src="/bluefog-logo.png" 
-            alt="Blue Fog Technology" 
-            style={{ height: '1rem', width: 'auto', objectFit: 'contain' }}
-          />
-        </a>
-        {/* Row 2 on mobile: Get in Touch + Join the Mission */}
+        {/* Row 1: Get in Touch + Join the Mission */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
         <button
           onClick={() => setContactFormOpen(true)}
@@ -1284,6 +1256,36 @@ const App: React.FC = () => {
           Join the Mission
         </button>
         </div>
+        {/* Row 2: Developed by Blue Fog – at bottom, smaller font */}
+        <a
+          href="https://www.bluefog.co.uk"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.5rem',
+            flexWrap: 'nowrap',
+            textDecoration: 'none',
+            color: 'inherit',
+            cursor: 'pointer',
+            transition: 'opacity 0.2s',
+            fontSize: '0.7rem',
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.opacity = '0.8';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.opacity = '1';
+          }}
+        >
+          <span>{BUILT_BY}</span>
+          <img 
+            src="/bluefog-logo.png" 
+            alt="Blue Fog Technology" 
+            style={{ height: '0.85rem', width: 'auto', objectFit: 'contain' }}
+          />
+        </a>
       </div>
       
       <ContactForm
