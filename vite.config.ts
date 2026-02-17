@@ -25,6 +25,34 @@ function generateEnvPlugin(donateLink: string, formspreeFormId: string) {
   };
 }
 
+/** Build-time base URL for og:image etc. (WhatsApp/crawlers need absolute URLs in initial HTML.) */
+function getSiteUrl(env: Record<string, string>): string {
+  const explicit = env.VITE_SITE_URL || process.env.VITE_SITE_URL || '';
+  if (explicit && (explicit.startsWith('https://') || explicit.startsWith('http://'))) {
+    return explicit.replace(/\/$/, '');
+  }
+  const vercelUrl = env.VERCEL_URL || process.env.VERCEL_URL || '';
+  if (vercelUrl) {
+    return `https://${vercelUrl}`;
+  }
+  return '';
+}
+
+/** Replaces __SITE_URL__ in index.html with absolute base URL so WhatsApp/link previews get a valid og:image. */
+function ogImagePlugin(env: Record<string, string>) {
+  const siteUrl = getSiteUrl(env);
+  return {
+    name: 'og-image-url',
+    transformIndexHtml: {
+      order: 'pre' as const,
+      handler(html: string) {
+        if (!siteUrl) return html;
+        return html.replace(/__SITE_URL__/g, siteUrl);
+      },
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode`. The third parameter '' loads all variables.
   const env = loadEnv(mode, process.cwd(), '');
@@ -36,7 +64,11 @@ export default defineConfig(({ mode }) => {
   const formspreeFormId = env.VITE_FORMSPREE_CONTACT_FORM_ID || process.env.VITE_FORMSPREE_CONTACT_FORM_ID || "";
 
   return {
-    plugins: [generateEnvPlugin(donateLink, formspreeFormId), react()],
+    plugins: [
+      generateEnvPlugin(donateLink, formspreeFormId),
+      ogImagePlugin(env),
+      react(),
+    ],
     envPrefix: ['VITE_', 'NEXT_PUBLIC_', 'API_'],
     define: {
       'process.env.API_KEY': JSON.stringify(apiKey),

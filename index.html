@@ -20,38 +20,43 @@
     <link rel="apple-touch-icon" sizes="512x512" href="/dharmascroll-icon.png">
     <link rel="apple-touch-icon" href="/dharmascroll-icon.png">
     
-    <!-- Open Graph / Facebook / Social Sharing Meta Tags -->
+    <!-- Open Graph / Facebook / Social Sharing Meta Tags (absolute URLs required for WhatsApp etc.) -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="DharmaScroll - Daily Wisdom from Indian Scriptures">
     <meta property="og:description" content="A serene, vertical scrolling experience for exploring profound wisdom from Indian scriptures. Features quotes from Bhagavad Gita and other spiritual texts.">
-    <meta property="og:image" id="og-image" content="">
-    <meta property="og:image:width" content="512">
-    <meta property="og:image:height" content="512">
+    <meta property="og:image" id="og-image" content="__SITE_URL__/dharmascroll-share-icon.png">
+    <meta property="og:image:width" content="1536">
+    <meta property="og:image:height" content="1024">
     <meta property="og:image:type" content="image/png">
-    <meta property="og:url" id="og-url" content="">
+    <meta property="og:image:alt" content="DharmaScroll - Daily Wisdom from Indian Scriptures">
+    <meta property="og:url" id="og-url" content="__SITE_URL__/">
     <meta property="og:site_name" content="DharmaScroll">
     
     <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary">
+    <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="DharmaScroll - Daily Wisdom from Indian Scriptures">
     <meta name="twitter:description" content="A serene, vertical scrolling experience for exploring profound wisdom from Indian scriptures. Features quotes from Bhagavad Gita and other spiritual texts.">
-    <meta name="twitter:image" id="twitter-image" content="">
+    <meta name="twitter:image" id="twitter-image" content="__SITE_URL__/dharmascroll-share-icon.png">
     
     <!-- Standard Meta Tags for Sharing -->
     <meta name="description" content="A serene, vertical scrolling experience for exploring profound wisdom from Indian scriptures. Features quotes from Bhagavad Gita and other spiritual texts.">
     
-    <!-- Set absolute URLs for sharing meta tags -->
+    <!-- Fallback: set absolute URLs in browser if __SITE_URL__ was not replaced at build (e.g. local dev) -->
     <script>
         (function() {
-            if (typeof window !== 'undefined') {
-                const baseUrl = window.location.origin;
-                const ogImage = document.getElementById('og-image');
-                const ogUrl = document.getElementById('og-url');
-                const twitterImage = document.getElementById('twitter-image');
-                
-                if (ogImage) ogImage.setAttribute('content', baseUrl + '/dharmascroll-share-icon.png');
-                if (ogUrl) ogUrl.setAttribute('content', baseUrl + window.location.pathname);
-                if (twitterImage) twitterImage.setAttribute('content', baseUrl + '/dharmascroll-share-icon.png');
+            if (typeof window === 'undefined') return;
+            var ogImage = document.getElementById('og-image');
+            var ogUrl = document.getElementById('og-url');
+            var twitterImage = document.getElementById('twitter-image');
+            var base = window.location.origin;
+            if (ogImage && ogImage.getAttribute('content').indexOf('__SITE_URL__') !== -1) {
+                ogImage.setAttribute('content', base + '/dharmascroll-share-icon.png');
+            }
+            if (ogUrl && ogUrl.getAttribute('content').indexOf('__SITE_URL__') !== -1) {
+                ogUrl.setAttribute('content', base + window.location.pathname);
+            }
+            if (twitterImage && twitterImage.getAttribute('content').indexOf('__SITE_URL__') !== -1) {
+                twitterImage.setAttribute('content', base + '/dharmascroll-share-icon.png');
             }
         })();
     </script>
