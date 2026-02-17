@@ -1177,14 +1177,16 @@ const App: React.FC = () => {
         position: 'relative',
         flexShrink: 0,
         display: 'flex', 
-        alignItems: 'center', 
-        gap: '0.75rem', 
-        flexWrap: 'nowrap', 
+        flexDirection: isMobile ? 'column' : 'row',
+        alignItems: isMobile ? 'flex-start' : 'center', 
+        gap: isMobile ? '0.5rem' : '0.75rem', 
+        flexWrap: 'wrap', 
         justifyContent: 'flex-start',
         padding: '1rem',
         marginTop: '0',
         zIndex: 100,
       }}>
+        {/* Row 1 on mobile: Blue Fog only; on desktop: same line as buttons */}
         <a
           href="https://www.bluefog.co.uk"
           target="_blank"
@@ -1213,6 +1215,8 @@ const App: React.FC = () => {
             style={{ height: '1rem', width: 'auto', objectFit: 'contain' }}
           />
         </a>
+        {/* Row 2 on mobile: Get in Touch + Join the Mission */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
         <button
           onClick={() => setContactFormOpen(true)}
           style={{
@@ -1279,6 +1283,7 @@ const App: React.FC = () => {
           </svg>
           Join the Mission
         </button>
+        </div>
       </div>
       
       <ContactForm
