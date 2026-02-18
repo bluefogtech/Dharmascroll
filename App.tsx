@@ -7,7 +7,6 @@ import { getQuotes, getGitaQuotes } from './services/wisdomService';
 import { openDonatePage, getDonateLink, getDonateLinkFromConfig } from './services/donationService';
 
 const VERSION_TAG = "v5.4.0-iphone-ux";
-const BUILT_BY = "Developed by Blue Fog Technology";
 
 const App: React.FC = () => {
   const path = typeof window !== 'undefined' ? window.location.pathname : '/';
@@ -506,7 +505,7 @@ const App: React.FC = () => {
           padding: '1rem',
           paddingBottom: 'max(2rem, calc(env(safe-area-inset-bottom, 0px) + 80px))',
         }}>
-          {/* First line: Share, Get in Touch, Join the Mission */}
+          {/* Share and Get in Touch */}
           <div style={{ 
             display: 'flex', 
             alignItems: 'center', 
@@ -571,66 +570,7 @@ const App: React.FC = () => {
               </svg>
               Get in Touch
             </button>
-            <button
-              onClick={() => openDonatePage(donateLink)}
-              style={{
-                color: 'var(--accent-gold)',
-                fontSize: '0.75rem',
-                fontWeight: 500,
-                cursor: 'pointer',
-                fontFamily: 'inherit',
-                textDecoration: 'none',
-                transition: 'opacity 0.2s',
-                background: 'none',
-                border: 'none',
-                padding: 0,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.25rem',
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.opacity = '0.8';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.opacity = '1';
-              }}
-            >
-              <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ width: '0.9rem', height: '0.9rem' }}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
-              </svg>
-              Join the Mission
-            </button>
           </div>
-          {/* Second line: Developed by Blue Fog – at bottom, smaller font */}
-          <a
-            href="https://www.bluefog.co.uk"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '0.5rem',
-              flexWrap: 'nowrap',
-              textDecoration: 'none',
-              color: 'inherit',
-              cursor: 'pointer',
-              transition: 'opacity 0.2s',
-              fontSize: '0.7rem',
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.opacity = '0.8';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.opacity = '1';
-            }}
-          >
-            <span>{BUILT_BY}</span>
-            <img 
-              src="/bluefog-logo.png" 
-              alt="Blue Fog Technology" 
-              style={{ height: '0.85rem', width: 'auto', objectFit: 'contain' }}
-            />
-          </a>
         </div>
         {/* Spacer so on mobile the footer stays visible when browser chrome (toolbar) reappears after scroll ends */}
         <div style={{ flexShrink: 0, minHeight: '120px' }} aria-hidden="true" />
@@ -1187,7 +1127,7 @@ const App: React.FC = () => {
         marginTop: '0',
         zIndex: 100,
       }}>
-        {/* Row 1: Get in Touch + Join the Mission */}
+        {/* Get in Touch */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
         <button
           onClick={() => setContactFormOpen(true)}
@@ -1222,70 +1162,7 @@ const App: React.FC = () => {
           </svg>
           Get in Touch
         </button>
-        <button
-          onClick={() => openDonatePage(donateLink)}
-          style={{
-            color: 'var(--accent-gold)',
-            fontSize: '0.75rem',
-            fontWeight: 500,
-            cursor: 'pointer',
-            fontFamily: 'inherit',
-            textDecoration: 'none',
-            transition: 'opacity 0.2s',
-            background: 'none',
-            border: 'none',
-            padding: 0,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.25rem',
-            zIndex: 101,
-            position: 'relative',
-            pointerEvents: 'auto',
-            touchAction: 'manipulation',
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.opacity = '0.8';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.opacity = '1';
-          }}
-        >
-          <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ width: '0.9rem', height: '0.9rem' }}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
-          </svg>
-          Join the Mission
-        </button>
         </div>
-        {/* Row 2: Developed by Blue Fog – at bottom, smaller font */}
-        <a
-          href="https://www.bluefog.co.uk"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '0.5rem',
-            flexWrap: 'nowrap',
-            textDecoration: 'none',
-            color: 'inherit',
-            cursor: 'pointer',
-            transition: 'opacity 0.2s',
-            fontSize: '0.7rem',
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.opacity = '0.8';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.opacity = '1';
-          }}
-        >
-          <span>{BUILT_BY}</span>
-          <img 
-            src="/bluefog-logo.png" 
-            alt="Blue Fog Technology" 
-            style={{ height: '0.85rem', width: 'auto', objectFit: 'contain' }}
-          />
-        </a>
       </div>
       
       <ContactForm
