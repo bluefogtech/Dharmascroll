@@ -482,7 +482,7 @@ const App: React.FC = () => {
           opacity: 0.7,
         }}>
           <p style={{ margin: 0 }}>
-            Quotes sourced from public spiritual sources. For spiritual learning only.
+            Verses sourced from public spiritual texts. Renderings generated for personal devotional use.
           </p>
         </div>
 
