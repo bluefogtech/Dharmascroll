@@ -389,17 +389,8 @@
                 flex-direction: row !important; /* Side by side */
                 gap: 0.75rem !important;
                 z-index: 70;
-                background: transparent !important; /* Remove any red hue background */
-                backdrop-filter: none !important; /* Remove any backdrop effects */
-            }
-            .action-bar::before {
-                content: '';
-                position: absolute;
-                inset: -0.5rem;
-                background: rgba(26, 15, 10, 0.95); /* Dark background to mask red hue from theme blobs */
-                border-radius: 50px;
-                z-index: -1;
-                pointer-events: none;
+                background: transparent !important;
+                backdrop-filter: none !important;
             }
             .quote-content-area {
                 padding: 1rem 1rem !important;
@@ -556,6 +547,11 @@
         .bg-blob {
             position: absolute; border-radius: 50%;
             filter: blur(80px); z-index: 0; opacity: 0.2; pointer-events: none;
+        }
+        @media (max-width: 768px) {
+            .bg-blob {
+                opacity: 0.03 !important; /* Reduced opacity on mobile to prevent visible hue behind action buttons */
+            }
         }
 
         .scroll-cue {
