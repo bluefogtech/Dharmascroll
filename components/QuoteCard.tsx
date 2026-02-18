@@ -259,6 +259,7 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
   };
 
   const themeColor = getThemeColor();
+  const isMobile = windowSize.width < 768;
 
   return (
     <div className="snap-item" style={{ background: 'transparent' }}>
@@ -271,19 +272,19 @@ export const QuoteCard: React.FC<QuoteCardProps> = ({ quote, isActive, language,
           width: '70%', 
           height: '40%', 
           backgroundColor: themeColor,
-          opacity: 0.12,
+          opacity: isMobile ? 0.02 : 0.12, // Much lower opacity on mobile to prevent visible hue
           filter: 'blur(120px)'
         }}
       ></div>
       <div 
         className="bg-blob" 
         style={{ 
-          bottom: '15%', 
-          right: '5%', 
+          bottom: isMobile ? '25%' : '15%', // Move blob higher on mobile to avoid action buttons area
+          right: isMobile ? '10%' : '5%', // Move blob more left on mobile
           width: '60%', 
           height: '50%', 
           backgroundColor: themeColor,
-          opacity: 0.08,
+          opacity: isMobile ? 0.01 : 0.08, // Much lower opacity on mobile to prevent visible hue
           filter: 'blur(100px)'
         }}
       ></div>
