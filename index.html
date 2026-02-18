@@ -391,6 +391,24 @@
                 z-index: 70;
                 background: transparent !important;
                 backdrop-filter: none !important;
+                border: none !important;
+                outline: none !important;
+            }
+            .action-btn {
+                border: none !important; /* Remove red/orange border on mobile */
+                box-shadow: none !important; /* Remove glow/shadow on mobile */
+            }
+            .action-btn.liked {
+                border: none !important; /* Remove red border even when liked */
+                box-shadow: none !important; /* Remove red glow */
+            }
+            .action-btn.shared {
+                border: none !important; /* Remove gold border even when shared */
+                box-shadow: none !important; /* Remove gold glow */
+            }
+            .action-btn:hover {
+                border: none !important; /* Remove border on hover on mobile */
+                box-shadow: none !important; /* Remove shadow on hover on mobile */
             }
             .quote-content-area {
                 padding: 1rem 1rem !important;
