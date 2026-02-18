@@ -393,22 +393,41 @@
                 backdrop-filter: none !important;
                 border: none !important;
                 outline: none !important;
+                box-shadow: none !important;
+                filter: none !important;
             }
             .action-btn {
                 border: none !important; /* Remove red/orange border on mobile */
                 box-shadow: none !important; /* Remove glow/shadow on mobile */
+                filter: none !important; /* Remove any filter effects */
+                text-shadow: none !important; /* Remove text shadow */
+                outline: none !important; /* Remove outline */
             }
             .action-btn.liked {
                 border: none !important; /* Remove red border even when liked */
                 box-shadow: none !important; /* Remove red glow */
+                filter: none !important;
+                text-shadow: none !important;
             }
             .action-btn.shared {
                 border: none !important; /* Remove gold border even when shared */
                 box-shadow: none !important; /* Remove gold glow */
+                filter: none !important;
+                text-shadow: none !important;
             }
-            .action-btn:hover {
-                border: none !important; /* Remove border on hover on mobile */
-                box-shadow: none !important; /* Remove shadow on hover on mobile */
+            .action-btn:hover,
+            .action-btn:active,
+            .action-btn:focus {
+                border: none !important; /* Remove border on hover/active/focus on mobile */
+                box-shadow: none !important; /* Remove shadow on hover/active/focus on mobile */
+                filter: none !important;
+                text-shadow: none !important;
+                outline: none !important;
+                transform: none !important; /* Remove scale transform */
+            }
+            .action-btn svg {
+                filter: none !important; /* Remove any filter on SVG icons */
+                text-shadow: none !important;
             }
             .quote-content-area {
                 padding: 1rem 1rem !important;
