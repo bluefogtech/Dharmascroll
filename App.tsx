@@ -482,7 +482,7 @@ const App: React.FC = () => {
           opacity: 0.7,
         }}>
           <p style={{ margin: 0 }}>
-            Quotes sourced from Bhagavad Gita translations and public spiritual sources. For spiritual learning only.
+            Quotes sourced from public spiritual sources. For spiritual learning only.
           </p>
         </div>
 
