@@ -381,9 +381,7 @@ const App: React.FC = () => {
                 Walk verse by verse through the Bhagavad Gita and absorb its depth.
               </p>
               <button
-                onClick={() => {
-                  window.location.href = '/gita';
-                }}
+                disabled
                 style={{
                   padding: '10px 24px',
                   border: 'none',
@@ -391,18 +389,13 @@ const App: React.FC = () => {
                   color: '#0b0f19',
                   borderRadius: '999px',
                   fontSize: '0.95rem',
-                  cursor: 'pointer',
+                  cursor: 'not-allowed',
                   marginTop: '20px',
                   fontWeight: 600,
                   letterSpacing: '0.08em',
                   textTransform: 'uppercase',
                   boxShadow: '0 0 18px rgba(250, 204, 21, 0.55)',
-                }}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLButtonElement).style.filter = 'brightness(1.08)';
-                }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLButtonElement).style.filter = 'brightness(1)';
+                  opacity: 0.6,
                 }}
               >
                 Begin Journey
