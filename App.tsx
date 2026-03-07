@@ -184,6 +184,29 @@ const App: React.FC = () => {
     }
   };
 
+  const parseChapterVerse = (source: string): { chapter: number; verse: number } | null => {
+    const parts = source.split('•');
+    const refPart = (parts[1] || source).trim();
+
+    const chapterVerseMatch = refPart.match(/Chapter\s+(\d+)\s*,\s*Verse\s+(\d+)/i);
+    if (chapterVerseMatch) {
+      return {
+        chapter: parseInt(chapterVerseMatch[1], 10),
+        verse: parseInt(chapterVerseMatch[2], 10),
+      };
+    }
+
+    const bgMatch = refPart.match(/\bBG\s*(\d+)\s*[.\-]\s*(\d+)\b/i);
+    if (bgMatch) {
+      return {
+        chapter: parseInt(bgMatch[1], 10),
+        verse: parseInt(bgMatch[2], 10),
+      };
+    }
+
+    return null;
+  };
+
 
   if (loading) {
     return (
@@ -855,12 +878,10 @@ const App: React.FC = () => {
                 const chapters: { chapter: number; verses: { verse: number; index: number }[] }[] = [];
                 const chapterMap = new Map<number, { verse: number; index: number }[]>();
                 quotes.forEach((q, idx) => {
-                  const parts = q.source.split('•');
-                  const refPart = parts[1]?.trim() || '';
-                  const match = refPart.match(/Chapter\s+(\d+)\s*,\s*Verse\s+(\d+)/i);
-                  if (!match) return;
-                  const chapterNum = parseInt(match[1], 10);
-                  const verseNum = parseInt(match[2], 10);
+                  const parsed = parseChapterVerse(q.source);
+                  if (!parsed) return;
+                  const chapterNum = parsed.chapter;
+                  const verseNum = parsed.verse;
                   if (!chapterMap.has(chapterNum)) chapterMap.set(chapterNum, []);
                   chapterMap.get(chapterNum)!.push({ verse: verseNum, index: idx });
                 });
@@ -1031,12 +1052,10 @@ const App: React.FC = () => {
                 const chapters: { chapter: number; verses: { verse: number; index: number }[] }[] = [];
                 const chapterMap = new Map<number, { verse: number; index: number }[]>();
                 quotes.forEach((q, idx) => {
-                  const parts = q.source.split('•');
-                  const refPart = parts[1]?.trim() || '';
-                  const match = refPart.match(/Chapter\s+(\d+)\s*,\s*Verse\s+(\d+)/i);
-                  if (!match) return;
-                  const chapterNum = parseInt(match[1], 10);
-                  const verseNum = parseInt(match[2], 10);
+                  const parsed = parseChapterVerse(q.source);
+                  if (!parsed) return;
+                  const chapterNum = parsed.chapter;
+                  const verseNum = parsed.verse;
                   if (!chapterMap.has(chapterNum)) chapterMap.set(chapterNum, []);
                   chapterMap.get(chapterNum)!.push({ verse: verseNum, index: idx });
                 });
