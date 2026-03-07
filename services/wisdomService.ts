@@ -56,7 +56,7 @@ export async function getGitaQuotes(): Promise<Quote[]> {
     const quotes = await supabaseService.fetchBhagavadGitaVerses();
 
     if (!quotes || quotes.length === 0) {
-      throw new Error("Bhagavad Gita table is empty: Connected to Supabase, but 'bhagavad_gita_verses' returned no results.");
+      throw new Error("Bhagavad Gita table is empty: Connected to Supabase, but 'bhagavad_gita_verses_ai_gen_gpt5_4' returned no results.");
     }
 
     return quotes;

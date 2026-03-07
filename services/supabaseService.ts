@@ -311,7 +311,7 @@ export async function fetchBhagavadGitaVerses(): Promise<Quote[]> {
     const supabase = getSupabase();
 
     const { data, error } = await supabase
-      .from('bhagavad_gita_verses')
+      .from('bhagavad_gita_verses_ai_gen_gpt5_4')
       .select('*')
       .order('chapter_number', { ascending: true })
       .order('verse_number', { ascending: true });
