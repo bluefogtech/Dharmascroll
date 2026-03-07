@@ -490,7 +490,7 @@ const App: React.FC = () => {
           opacity: 0.7,
         }}>
           <p style={{ margin: 0 }}>
-            Verses sourced from public spiritual texts. Renderings generated for personal devotional use.
+            Verses sourced from public spiritual texts; translations generated using AI model GPT-5.4. Renderings are provided for personal devotional use.
           </p>
         </div>
 
